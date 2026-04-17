@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom HDI — all countries</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <h1>Custom HDI tracker</h1>
+        <p class="lede">
+          Health + income only (no education), same UNDP goalposts and geometric mean as your Python script.
+          Life expectancy and GNI per capita (PPP) are loaded from the
+          <a href="https://data.worldbank.org/" target="_blank" rel="noreferrer">World Bank</a> API each time you refresh.
+        </p>
+        <div class="toolbar">
+          <button type="button" id="btn-refresh" class="btn primary">Refresh data</button>
+          <label class="file-btn">
+            Or load CSV
+            <input id="file-csv" type="file" accept=".csv,text/csv" hidden />
+          </label>
+          <input
+            id="filter"
+            type="search"
+            class="search"
+            placeholder="Filter countries…"
+            autocomplete="off"
+          />
+        </div>
+        <p id="status" class="status" aria-live="polite"></p>
+      </header>
+
+      <main>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Country</th>
+                <th scope="col">LE year</th>
+                <th scope="col">Life exp.</th>
+                <th scope="col">GNI year</th>
+                <th scope="col">GNI pc (PPP)</th>
+                <th scope="col">Custom HDI</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </main>
+
+      <footer class="foot">
+        <small>
+          Indicators: <code>SP.DYN.LE00.IN</code> (life expectancy at birth),
+          <code>NY.GNP.PCAP.PP.KD</code> (GNI per capita, PPP constant 2021 intl $). Rows use the latest available year per series (years may differ).
+        </small>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

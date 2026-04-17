@@ -1,0 +1,6 @@
+# Same-origin proxy so production builds can reach the World Bank API without CORS errors.
+[[redirects]]
+  from = "/worldbank/*"
+  to = "https://api.worldbank.org/:splat"
+  status = 200
+  force = true
