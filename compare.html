@@ -9,8 +9,9 @@
   <body>
     <div id="app">
       <header class="hero compare-page-header">
-        <nav class="compare-nav" aria-label="Breadcrumb">
-          <a href="./index.html" class="link-back">← Leaderboard</a>
+        <nav class="site-nav" aria-label="Main">
+          <a href="./index.html" class="site-nav-link">Leaderboard</a>
+          <a href="./compare.html" class="site-nav-link" aria-current="page">Compare</a>
         </nav>
         <p class="kicker">Tomer index</p>
         <h1>Compare countries</h1>
@@ -23,7 +24,7 @@
           <h2 id="compare-heading" class="visually-hidden">Side-by-side comparison</h2>
           <div id="compare-picks" class="compare-picks" role="group" aria-label="Countries to compare"></div>
           <div class="compare-actions">
-            <button type="button" id="btn-add" class="btn">+ Add country</button>
+            <button type="button" id="btn-add" class="btn primary">+ Add country</button>
           </div>
           <div id="compare-out" class="compare-out" aria-live="polite"></div>
         </section>
