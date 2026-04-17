@@ -83,21 +83,6 @@ a {
   border-color: var(--accent-dim);
 }
 
-.file-btn {
-  font: inherit;
-  cursor: pointer;
-  border: 1px dashed var(--border);
-  background: transparent;
-  color: var(--muted);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-
-.file-btn:hover {
-  color: var(--text);
-  border-color: #3d4a63;
-}
-
 .search {
   flex: 1 1 200px;
   min-width: 160px;

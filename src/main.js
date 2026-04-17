@@ -1,9 +1,6 @@
-import { customIndexHealthIncomeSafety } from "./hdi-core.js";
-
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
 const $filter = document.getElementById("filter");
-const $fileCsv = document.getElementById("file-csv");
 
 const COLS = 7;
 
@@ -79,7 +76,7 @@ async function loadLocalData() {
     : "";
   setStatus(
     n
-      ? `${n} countries from bundled data.${when}`
+      ? `${n} countries.${when}`
       : "No countries in data file."
   );
   renderTable(cache, $filter.value);
@@ -90,93 +87,7 @@ function setStatus(msg, isError = false) {
   $status.classList.toggle("error", isError);
 }
 
-function parseCsv(text) {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
-  if (lines.length < 2) throw new Error("CSV needs a header and at least one row.");
-
-  const header = lines[0].split(",").map((h) => h.trim());
-  const iCountry = header.indexOf("Country");
-  const iLe = header.indexOf("Life_Expectancy");
-  const iHale = header.indexOf("HALE");
-  const iGni = header.indexOf("GNI_per_capita");
-  const iHom = header.indexOf("Homicides_per_100k");
-  if (iCountry < 0 || iLe < 0 || iHale < 0 || iGni < 0 || iHom < 0) {
-    throw new Error(
-      "Expected columns: Country, Life_Expectancy, HALE, GNI_per_capita, Homicides_per_100k"
-    );
-  }
-
-  const out = [];
-  for (let li = 1; li < lines.length; li++) {
-    const cols = splitCsvLine(lines[li]);
-    if (cols.length < header.length) continue;
-    const name = cols[iCountry]?.trim();
-    const le = parseFloat(cols[iLe]);
-    const hale = parseFloat(cols[iHale]);
-    const gni = parseFloat(cols[iGni]);
-    const hom = parseFloat(cols[iHom]);
-    if (
-      !name ||
-      Number.isNaN(le) ||
-      Number.isNaN(hale) ||
-      Number.isNaN(gni) ||
-      Number.isNaN(hom)
-    ) {
-      continue;
-    }
-    out.push({
-      iso: "---",
-      name,
-      leYear: "—",
-      le,
-      haleYear: "—",
-      hale,
-      gniYear: "—",
-      gni,
-      homicideYear: "—",
-      homicidesPer100k: hom,
-      customIndex: customIndexHealthIncomeSafety(le, gni, hom, hale),
-    });
-  }
-  out.sort((a, b) => b.customIndex - a.customIndex);
-  return out;
-}
-
-function splitCsvLine(line) {
-  const result = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      inQuotes = !inQuotes;
-    } else if ((c === "," && !inQuotes) || (c === "\r" && !inQuotes)) {
-      result.push(cur);
-      cur = "";
-    } else if (c !== "\r") {
-      cur += c;
-    }
-  }
-  result.push(cur);
-  return result;
-}
-
 $filter.addEventListener("input", () => renderTable(cache, $filter.value));
-
-$fileCsv.addEventListener("change", async (ev) => {
-  const file = ev.target.files?.[0];
-  ev.target.value = "";
-  if (!file) return;
-  try {
-    const text = await file.text();
-    cache = parseCsv(text);
-    setStatus(`Loaded ${cache.length} rows from ${file.name}.`);
-    renderTable(cache, $filter.value);
-  } catch (e) {
-    console.error(e);
-    setStatus(e instanceof Error ? e.message : "Invalid CSV", true);
-  }
-});
 
 loadLocalData().catch((e) => {
   console.error(e);
