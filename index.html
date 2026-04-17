@@ -9,22 +9,19 @@
   <body>
     <div id="app">
       <header class="hero">
-        <h1>Tomer index</h1>
+        <div class="hero-row">
+          <div class="hero-titles">
+            <p class="kicker">Leaderboard</p>
+            <h1>Tomer index</h1>
+          </div>
+          <a class="btn primary" href="./compare.html">Compare</a>
+        </div>
         <p class="lede">
           The <strong>Tomer index</strong> uses a <strong>health</strong> pillar that is <strong>½ lifespan</strong> (life expectancy at birth) and <strong>½ healthspan</strong>
           (WHO HALE—healthy life expectancy), each turned into a 0–1 index with the same 20–85 goalposts, then averaged.
           Other pillars: GNI per capita (PPP) and safety from <strong>intentional homicides /100k</strong>.
           Overall Tomer index: LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </p>
-        <div class="toolbar">
-          <input
-            id="filter"
-            type="search"
-            class="search"
-            placeholder="Filter countries…"
-            autocomplete="off"
-          />
-        </div>
         <p id="status" class="status" aria-live="polite"></p>
       </header>
 

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compare — Tomer index</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero compare-page-header">
+        <nav class="compare-nav" aria-label="Breadcrumb">
+          <a href="./index.html" class="link-back">← Leaderboard</a>
+        </nav>
+        <p class="kicker">Tomer index</p>
+        <h1>Compare countries</h1>
+        <p class="compare-sub">
+          Pick a country, then use <strong>+ Add country</strong> to compare more. Metrics update instantly.
+        </p>
+        <p id="status" class="status" aria-live="polite"></p>
+
+        <section class="compare-panel compare-panel-page" aria-labelledby="compare-heading">
+          <h2 id="compare-heading" class="visually-hidden">Side-by-side comparison</h2>
+          <div id="compare-picks" class="compare-picks" role="group" aria-label="Countries to compare"></div>
+          <div class="compare-actions">
+            <button type="button" id="btn-add" class="btn">+ Add country</button>
+          </div>
+          <div id="compare-out" class="compare-out" aria-live="polite"></div>
+        </section>
+      </header>
+    </div>
+    <script type="module" src="/src/compare.js"></script>
+  </body>
+</html>

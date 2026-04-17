@@ -37,6 +37,24 @@ a {
   padding: 2rem 1.25rem 3rem;
 }
 
+.hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.hero-titles .kicker {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  margin: 0 0 0.35rem;
+}
+
 .hero h1 {
   margin: 0 0 0.5rem;
   font-size: clamp(1.5rem, 4vw, 2rem);
@@ -48,14 +66,6 @@ a {
   margin: 0 0 1.25rem;
   color: var(--muted);
   max-width: 65ch;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
 }
 
 .btn {
@@ -83,21 +93,6 @@ a {
   border-color: var(--accent-dim);
 }
 
-.search {
-  flex: 1 1 200px;
-  min-width: 160px;
-  font: inherit;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text);
-}
-
-.search::placeholder {
-  color: #5c667a;
-}
-
 .status {
   margin: 0;
   min-height: 1.5rem;
@@ -107,6 +102,179 @@ a {
 
 .status.error {
   color: var(--danger);
+}
+
+.compare-nav {
+  margin-bottom: 1rem;
+}
+
+.link-back {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent-dim);
+  text-decoration: none;
+}
+
+.link-back:hover {
+  text-decoration: underline;
+}
+
+.compare-page-header .kicker {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  margin: 0 0 0.35rem;
+}
+
+.compare-page-header h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.compare-panel {
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #12161c;
+}
+
+.compare-panel-page {
+  margin-top: 0.75rem;
+}
+
+.compare-heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.compare-sub {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.compare-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.compare-pick {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.compare-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  flex: 1 1 auto;
+}
+
+.compare-select {
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.compare-remove {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  padding: 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.compare-remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.compare-actions {
+  margin-bottom: 1rem;
+}
+
+.compare-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.compare-table-wrap {
+  overflow: auto;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #222938;
+  text-align: left;
+}
+
+.compare-table thead th {
+  background: #0e1118;
+  font-weight: 600;
+}
+
+.compare-table tbody th {
+  font-weight: 500;
+  color: var(--muted);
+  width: 38%;
+}
+
+.compare-table tbody td {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-table td.compare-best {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* One country: keep Tomer row highlighted; no per-metric “best” styling. */
+.compare-table.compare-single tbody tr:last-child td {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .table-wrap {
@@ -123,7 +291,8 @@ table {
   font-size: 0.92rem;
 }
 
-thead th {
+/* Leaderboard table only — avoid styling .compare-table (last column ≠ “Tomer” column). */
+.table-wrap thead th {
   text-align: left;
   padding: 0.75rem 1rem;
   background: #12161f;
@@ -132,35 +301,35 @@ thead th {
   white-space: nowrap;
 }
 
-thead th:nth-child(n + 3) {
+.table-wrap thead th:nth-child(n + 3) {
   text-align: right;
 }
 
-tbody td {
+.table-wrap tbody td {
   padding: 0.55rem 1rem;
   border-bottom: 1px solid #222938;
 }
 
-tbody tr:nth-child(even) td {
+.table-wrap tbody tr:nth-child(even) td {
   background: rgba(255, 255, 255, 0.02);
 }
 
-tbody td:nth-child(n + 3) {
+.table-wrap tbody td:nth-child(n + 3) {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-family: var(--mono);
 }
 
-tbody td:nth-child(2) {
+.table-wrap tbody td:nth-child(2) {
   font-weight: 500;
 }
 
-tbody td:last-child {
+.table-wrap tbody td:last-child {
   color: var(--accent);
   font-weight: 600;
 }
 
-tbody tr:hover td {
+.table-wrap tbody tr:hover td {
   background: rgba(110, 231, 183, 0.06);
 }
 
