@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Custom HDI — all countries</title>
+    <title>Tomer index</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <div id="app">
       <header class="hero">
-        <h1>Custom HDI tracker</h1>
+        <h1>Tomer index</h1>
         <p class="lede">
-          Health + income only (no education), same UNDP goalposts and geometric mean as your Python script.
-          Life expectancy and GNI per capita (PPP) are loaded from the
-          <a href="https://data.worldbank.org/" target="_blank" rel="noreferrer">World Bank</a> API each time you refresh.
+          The <strong>Tomer index</strong> uses a <strong>health</strong> pillar that is <strong>½ lifespan</strong> (life expectancy at birth) and <strong>½ healthspan</strong>
+          (WHO HALE—healthy life expectancy), each turned into a 0–1 index with the same 20–85 goalposts, then averaged.
+          Other pillars: GNI per capita (PPP) and safety from <strong>intentional homicides /100k</strong>.
+          Overall Tomer index: LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>. Bundled data; CSV can override.
         </p>
         <div class="toolbar">
-          <button type="button" id="btn-refresh" class="btn primary">Refresh data</button>
           <label class="file-btn">
             Or load CSV
             <input id="file-csv" type="file" accept=".csv,text/csv" hidden />
@@ -39,11 +39,11 @@
               <tr>
                 <th scope="col">Rank</th>
                 <th scope="col">Country</th>
-                <th scope="col">LE year</th>
                 <th scope="col">Life exp.</th>
-                <th scope="col">GNI year</th>
+                <th scope="col">HALE</th>
                 <th scope="col">GNI pc (PPP)</th>
-                <th scope="col">Custom HDI</th>
+                <th scope="col">Homicides /100k</th>
+                <th scope="col">Tomer index</th>
               </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -53,8 +53,9 @@
 
       <footer class="foot">
         <small>
-          Indicators: <code>SP.DYN.LE00.IN</code> (life expectancy at birth),
-          <code>NY.GNP.PCAP.PP.KD</code> (GNI per capita, PPP constant 2021 intl $). Rows use the latest available year per series (years may differ).
+          Life expectancy &amp; GNI: World Bank (<code>SP.DYN.LE00.IN</code>, <code>NY.GNP.PCAP.PP.KD</code>).
+          HALE: WHO GHO <code>WHOSIS_000002</code> (both sexes). Homicides: <code>VC.IHR.PSRC.P5</code>.
+          LEI = ½·LEI(LE)+½·LEI(HALE). Safety = linear 0–60 homicides/100k → 1–0. Tomer index = LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </small>
       </footer>
     </div>

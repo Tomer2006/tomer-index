@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/worldbank/:path*",
-      "destination": "https://api.worldbank.org/:path*"
-    }
-  ]
-}
