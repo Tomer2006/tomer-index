@@ -30,16 +30,44 @@
 
       <main>
         <div class="table-wrap">
-          <table>
+          <table class="leaderboard-table">
             <thead>
               <tr>
-                <th scope="col">Rank</th>
-                <th scope="col">Country</th>
-                <th scope="col">Life exp.</th>
-                <th scope="col">HALE</th>
-                <th scope="col">GNI pc (PPP)</th>
-                <th scope="col">Homicides /100k</th>
-                <th scope="col">Tomer index</th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="tomer">
+                    <span class="th-sort-label">Rank</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="name">
+                    <span class="th-sort-label">Country</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="le">
+                    <span class="th-sort-label">Life exp.</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="hale">
+                    <span class="th-sort-label">HALE</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="gni">
+                    <span class="th-sort-label">GNI pc (PPP)</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="homicides">
+                    <span class="th-sort-label">Homicides /100k</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="tomer">
+                    <span class="th-sort-label">Tomer index</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody id="tbody"></tbody>

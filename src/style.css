@@ -302,6 +302,60 @@ a {
   font-weight: 600;
 }
 
+.leaderboard-table thead th {
+  padding: 0;
+  vertical-align: bottom;
+}
+
+.leaderboard-table .th-sort {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: inherit;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.table-wrap thead th:nth-child(n + 3) .th-sort {
+  justify-content: flex-end;
+}
+
+.leaderboard-table .th-sort:hover {
+  background: rgba(110, 231, 183, 0.08);
+  color: var(--text);
+}
+
+.leaderboard-table .th-sort:focus-visible {
+  outline: 2px solid rgba(52, 211, 153, 0.5);
+  outline-offset: -2px;
+}
+
+.leaderboard-table .th-sort.is-active {
+  color: var(--accent);
+}
+
+.leaderboard-table .th-sort-icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  min-width: 0.75rem;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
 .table-wrap {
   overflow: auto;
   border: 1px solid var(--border);
@@ -324,6 +378,10 @@ table {
   border-bottom: 1px solid var(--border);
   font-weight: 600;
   white-space: nowrap;
+}
+
+.table-wrap .leaderboard-table > thead > tr > th {
+  padding: 0;
 }
 
 .table-wrap thead th:nth-child(n + 3) {
