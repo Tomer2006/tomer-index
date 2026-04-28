@@ -51,10 +51,10 @@ export function customHdiNoEducation(lifeExpectancy, gniPerCapita) {
 }
 
 /**
- * 3-pillar weighted geometric index: LEI_combined^(4/9) × Income^(4/9) × Safety^(1/9)
- * LEI_combined = ½·LEI(lifespan) + ½·LEI(HALE healthspan).
+ * Same formula as `customIndexHealthIncomeSafety` but full float precision (no rounding).
+ * Use when aggregating or charting a time series so small year-to-year moves are not lost.
  */
-export function customIndexHealthIncomeSafety(
+export function customIndexHealthIncomeSafetyFull(
   lifeExpectancy,
   gniPerCapita,
   homicidesPer100k,
@@ -65,11 +65,33 @@ export function customIndexHealthIncomeSafety(
   const incomeIndex =
     (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
   const si = safetyIndexFromHomicidesPer100k(homicidesPer100k);
-  const customIndex =
+  return (
     Math.pow(lei, W_LEI) *
     Math.pow(incomeIndex, W_INCOME) *
-    Math.pow(si, W_SAFETY);
-  return Math.round(customIndex * 1000) / 1000;
+    Math.pow(si, W_SAFETY)
+  );
+}
+
+/**
+ * 3-pillar weighted geometric index: LEI_combined^(4/9) × Income^(4/9) × Safety^(1/9)
+ * LEI_combined = ½·LEI(lifespan) + ½·LEI(HALE healthspan).
+ */
+export function customIndexHealthIncomeSafety(
+  lifeExpectancy,
+  gniPerCapita,
+  homicidesPer100k,
+  healthyLifeExpectancy
+) {
+  return (
+    Math.round(
+      customIndexHealthIncomeSafetyFull(
+        lifeExpectancy,
+        gniPerCapita,
+        homicidesPer100k,
+        healthyLifeExpectancy
+      ) * 1000
+    ) / 1000
+  );
 }
 
 export function isCountryRow(row) {
@@ -93,6 +115,75 @@ export function latestByCountry(rows) {
     }
   }
   return map;
+}
+
+/**
+ * World Bank rows → map of ISO → (year → { value, name }).
+ * @param {object[]} rows
+ * @returns {Map<string, Map<number, { value: number, name: string }>>}
+ */
+export function byCountryYear(rows) {
+  const map = new Map();
+  for (const r of rows) {
+    if (!isCountryRow(r) || r.value == null) continue;
+    const iso = r.countryiso3code;
+    const year = parseInt(String(r.date), 10);
+    if (Number.isNaN(year)) continue;
+    const value = Number(r.value);
+    const name = r.country?.value ?? iso;
+    if (!map.has(iso)) map.set(iso, new Map());
+    map.get(iso).set(year, { value, name });
+  }
+  return map;
+}
+
+/**
+ * WHO HALE rows → map of ISO → sorted [{ year, value }, …] (one entry per year).
+ * @param {object[]} rows — GHO WHOSIS_000002 style
+ * @returns {Map<string, { year: number, value: number }[]>}
+ */
+export function haleHistoryByIso(rows) {
+  const map = new Map();
+  for (const r of rows) {
+    if (r.SpatialDimType !== "COUNTRY" || r.Dim1 !== "SEX_BTSX") continue;
+    if (r.NumericValue == null || Number.isNaN(Number(r.NumericValue))) continue;
+    const iso = r.SpatialDim;
+    if (typeof iso !== "string" || !/^[A-Z]{3}$/.test(iso)) continue;
+    const year = r.TimeDim;
+    const y = typeof year === "number" ? year : parseInt(String(year), 10);
+    if (Number.isNaN(y)) continue;
+    const value = Number(r.NumericValue);
+    if (!map.has(iso)) map.set(iso, []);
+    map.get(iso).push({ year: y, value });
+  }
+  for (const [iso, arr] of map) {
+    arr.sort((a, b) => a.year - b.year);
+    const deduped = [];
+    for (const row of arr) {
+      const last = deduped[deduped.length - 1];
+      if (last && last.year === row.year) deduped[deduped.length - 1] = row;
+      else deduped.push(row);
+    }
+    map.set(iso, deduped);
+  }
+  return map;
+}
+
+/**
+ * Latest HALE value on or before `year` (inclusive).
+ * @param {Map<string, { year: number, value: number }[]>} haleHistory
+ * @param {string} iso
+ * @param {number} year
+ * @returns {{ year: number, value: number } | null}
+ */
+export function haleAsOfYear(haleHistory, iso, year) {
+  const arr = haleHistory.get(iso);
+  if (!arr?.length) return null;
+  let best = null;
+  for (const row of arr) {
+    if (row.year <= year && (!best || row.year > best.year)) best = row;
+  }
+  return best;
 }
 
 /**

@@ -1,18 +1,171 @@
 {
-  "generatedAt": "2026-04-17T11:45:52.781Z",
-  "yearWindow": "2000:2025",
+  "generatedAt": "2026-04-23T16:51:41.504Z",
+  "yearWindow": "1990:2027",
   "indicators": {
     "lifeExpectancy": "SP.DYN.LE00.IN",
     "healthyLifeExpectancyHale": "WHO WHOSIS_000002 (HALE at birth, both sexes)",
     "gniPerCapita": "NY.GNP.PCAP.PP.KD",
-    "intentionalHomicidesPer100k": "VC.IHR.PSRC.P5"
+    "intentionalHomicidesPer100k": "VC.IHR.PSRC.P5",
+    "population": "SP.POP.TOTL"
   },
+  "derivedRows": "Derived rows are population-weighted aggregates computed from the country rows in this file using the same LE, HALE, GNI, and homicide data. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total. No alternate metrics are substituted.",
   "healthPillar": "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
   "safetyNote": "Safety uses intentional homicides/100k only (comparable worldwide). Theft, assault, and sexual violence are not mixed in because definitions and reporting differ by country.",
   "indexWeights": {
     "lei": 0.4444444444444444,
     "income": 0.4444444444444444,
     "safety": 0.1111111111111111
+  },
+  "globalAverageSeries": {
+    "definition": "Worldwide published time series, not a sample of individual countries. For each calendar year, the index uses World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL in that same year (if any of the four is missing, the year is skipped — no imputation from earlier years). WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes) uses the latest observation on or before that calendar year. population is WLD world population for that year. n is always 1 (one global aggregate). Series values are stored to four decimal places (full index formula, no premature rounding).",
+    "chartTitle": "Worldwide aggregate (WLD + global HALE)",
+    "footNote": "2000 0.7194 → 2023 0.7777. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population (all same calendar year). WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Pop. = WLD world total.",
+    "points": [
+      {
+        "year": 2000,
+        "value": 0.7194,
+        "n": 1,
+        "population": 6161884811
+      },
+      {
+        "year": 2001,
+        "value": 0.7217,
+        "n": 1,
+        "population": 6245112906
+      },
+      {
+        "year": 2002,
+        "value": 0.7242,
+        "n": 1,
+        "population": 6327557399
+      },
+      {
+        "year": 2003,
+        "value": 0.7274,
+        "n": 1,
+        "population": 6409750441
+      },
+      {
+        "year": 2004,
+        "value": 0.7316,
+        "n": 1,
+        "population": 6492769815
+      },
+      {
+        "year": 2005,
+        "value": 0.7364,
+        "n": 1,
+        "population": 6575841506
+      },
+      {
+        "year": 2006,
+        "value": 0.7418,
+        "n": 1,
+        "population": 6659977025
+      },
+      {
+        "year": 2007,
+        "value": 0.7462,
+        "n": 1,
+        "population": 6744489399
+      },
+      {
+        "year": 2008,
+        "value": 0.7478,
+        "n": 1,
+        "population": 6830513541
+      },
+      {
+        "year": 2009,
+        "value": 0.7484,
+        "n": 1,
+        "population": 6916589116
+      },
+      {
+        "year": 2010,
+        "value": 0.7526,
+        "n": 1,
+        "population": 7001266876
+      },
+      {
+        "year": 2011,
+        "value": 0.7561,
+        "n": 1,
+        "population": 7087120034
+      },
+      {
+        "year": 2012,
+        "value": 0.7589,
+        "n": 1,
+        "population": 7176929184
+      },
+      {
+        "year": 2013,
+        "value": 0.7616,
+        "n": 1,
+        "population": 7265892332
+      },
+      {
+        "year": 2014,
+        "value": 0.7642,
+        "n": 1,
+        "population": 7354068030
+      },
+      {
+        "year": 2015,
+        "value": 0.7663,
+        "n": 1,
+        "population": 7441677465
+      },
+      {
+        "year": 2016,
+        "value": 0.7689,
+        "n": 1,
+        "population": 7528879985
+      },
+      {
+        "year": 2017,
+        "value": 0.772,
+        "n": 1,
+        "population": 7614523410
+      },
+      {
+        "year": 2018,
+        "value": 0.7752,
+        "n": 1,
+        "population": 7697233736
+      },
+      {
+        "year": 2019,
+        "value": 0.7779,
+        "n": 1,
+        "population": 7778008621
+      },
+      {
+        "year": 2020,
+        "value": 0.7698,
+        "n": 1,
+        "population": 7854748424
+      },
+      {
+        "year": 2021,
+        "value": 0.7665,
+        "n": 1,
+        "population": 7920514854
+      },
+      {
+        "year": 2022,
+        "value": 0.7751,
+        "n": 1,
+        "population": 7989545217
+      },
+      {
+        "year": 2023,
+        "value": 0.7777,
+        "n": 1,
+        "population": 8064057930
+      }
+    ]
   },
   "countries": [
     {
@@ -341,6 +494,21 @@
       "customIndex": 0.91
     },
     {
+      "iso": "LNX",
+      "name": "Not classified",
+      "leYear": "mixed",
+      "le": 81.3400429783819,
+      "haleYear": "mixed",
+      "hale": 68.24122167425512,
+      "gniYear": "mixed",
+      "gni": 61263.282473991465,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.347459649171306,
+      "derivedKind": "lendingType",
+      "memberCount": 45,
+      "customIndex": 0.91
+    },
+    {
       "iso": "CYP",
       "name": "Cyprus",
       "leYear": 2024,
@@ -432,6 +600,21 @@
       "customIndex": 0.898
     },
     {
+      "iso": "HIC",
+      "name": "High income",
+      "leYear": "mixed",
+      "le": 80.36031780462827,
+      "haleYear": "mixed",
+      "hale": 67.30331364545792,
+      "gniYear": "mixed",
+      "gni": 57383.75045817548,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.960125098007055,
+      "derivedKind": "incomeLevel",
+      "memberCount": 58,
+      "customIndex": 0.898
+    },
+    {
       "iso": "SAU",
       "name": "Saudi Arabia",
       "leYear": 2024,
@@ -443,6 +626,21 @@
       "homicideYear": 2019,
       "homicidesPer100k": 0.935259944754359,
       "customIndex": 0.895
+    },
+    {
+      "iso": "NAC",
+      "name": "North America",
+      "leYear": "mixed",
+      "le": 79.2385889447476,
+      "haleYear": "mixed",
+      "hale": 64.55026978657752,
+      "gniYear": "mixed",
+      "gni": 72107.3606571032,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 5.353799581064255,
+      "derivedKind": "region",
+      "memberCount": 2,
+      "customIndex": 0.893
     },
     {
       "iso": "USA",
@@ -508,6 +706,21 @@
       "homicideYear": 2023,
       "homicidesPer100k": 1.53599045052794,
       "customIndex": 0.873
+    },
+    {
+      "iso": "ECS",
+      "name": "Europe & Central Asia",
+      "leYear": "mixed",
+      "le": 78.59733382554651,
+      "haleYear": "mixed",
+      "hale": 66.24919648802192,
+      "gniYear": "mixed",
+      "gni": 43793.69691592893,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.271513843745999,
+      "derivedKind": "region",
+      "memberCount": 48,
+      "customIndex": 0.872
     },
     {
       "iso": "POL",
@@ -770,6 +983,21 @@
       "customIndex": 0.823
     },
     {
+      "iso": "EAS",
+      "name": "East Asia & Pacific",
+      "leYear": "mixed",
+      "le": 76.72562695352354,
+      "haleYear": "mixed",
+      "hale": 66.86506913334884,
+      "gniYear": "mixed",
+      "gni": 21667.836435375706,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 0.9526311024822397,
+      "derivedKind": "region",
+      "memberCount": 24,
+      "customIndex": 0.823
+    },
+    {
       "iso": "SYC",
       "name": "Seychelles",
       "leYear": 2024,
@@ -887,6 +1115,21 @@
       "customIndex": 0.814
     },
     {
+      "iso": "EAP",
+      "name": "East Asia & Pacific (excluding high income)",
+      "leYear": "mixed",
+      "le": 76.01222643885497,
+      "haleYear": "mixed",
+      "hale": 66.26799490440516,
+      "gniYear": "mixed",
+      "gni": 18495.667739210112,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 1.0095050160393395,
+      "derivedKind": "adminregion",
+      "memberCount": 18,
+      "customIndex": 0.807
+    },
+    {
       "iso": "ARM",
       "name": "Armenia",
       "leYear": 2024,
@@ -897,6 +1140,21 @@
       "gni": 18666.1442125454,
       "homicideYear": 2023,
       "homicidesPer100k": 2.20833575400906,
+      "customIndex": 0.806
+    },
+    {
+      "iso": "ECA",
+      "name": "Europe & Central Asia (excluding high income)",
+      "leYear": "mixed",
+      "le": 75.12275509876484,
+      "haleYear": "mixed",
+      "hale": 63.57132047093558,
+      "gniYear": "mixed",
+      "gni": 22708.179615102017,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.554731377856404,
+      "derivedKind": "adminregion",
+      "memberCount": 17,
       "customIndex": 0.806
     },
     {
@@ -924,6 +1182,21 @@
       "homicideYear": 2019,
       "homicidesPer100k": 2.02806499553233,
       "customIndex": 0.804
+    },
+    {
+      "iso": "UMC",
+      "name": "Upper middle income",
+      "leYear": "mixed",
+      "le": 76.34340543074657,
+      "haleYear": "mixed",
+      "hale": 65.38574881630342,
+      "gniYear": "mixed",
+      "gni": 19762.584698273182,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 5.763091654147554,
+      "derivedKind": "incomeLevel",
+      "memberCount": 46,
+      "customIndex": 0.802
     },
     {
       "iso": "AZE",
@@ -991,6 +1264,21 @@
       "customIndex": 0.79
     },
     {
+      "iso": "WLD",
+      "name": "World",
+      "leYear": "mixed",
+      "le": 73.91852506051286,
+      "haleYear": "mixed",
+      "hale": 62.46809204593106,
+      "gniYear": "mixed",
+      "gni": 21201.40386220419,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.6581436285661635,
+      "derivedKind": "world",
+      "memberCount": 163,
+      "customIndex": 0.79
+    },
+    {
       "iso": "LKA",
       "name": "Sri Lanka",
       "leYear": 2024,
@@ -1015,6 +1303,21 @@
       "homicideYear": 2011,
       "homicidesPer100k": 1.53501286347562,
       "customIndex": 0.78
+    },
+    {
+      "iso": "IBD",
+      "name": "IBRD only",
+      "leYear": "mixed",
+      "le": 74.69708297748052,
+      "haleYear": "mixed",
+      "hale": 62.713866245949845,
+      "gniYear": "mixed",
+      "gni": 17065.48884449327,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.6054782544574095,
+      "derivedKind": "lendingType",
+      "memberCount": 60,
+      "customIndex": 0.779
     },
     {
       "iso": "PER",
@@ -1105,6 +1408,21 @@
       "gni": 11725.6298266475,
       "homicideYear": 2020,
       "homicidesPer100k": 4.69348024650292,
+      "customIndex": 0.763
+    },
+    {
+      "iso": "LCN",
+      "name": "Latin America & Caribbean",
+      "leYear": "mixed",
+      "le": 75.91676266786259,
+      "haleYear": "mixed",
+      "hale": 62.400655637888676,
+      "gniYear": "mixed",
+      "gni": 19305.999387959175,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 19.623240880761514,
+      "derivedKind": "region",
+      "memberCount": 30,
       "customIndex": 0.763
     },
     {
@@ -1212,6 +1530,21 @@
       "customIndex": 0.758
     },
     {
+      "iso": "LAC",
+      "name": "Latin America & Caribbean (excluding high income)",
+      "leYear": "mixed",
+      "le": 75.62479567638432,
+      "haleYear": "mixed",
+      "hale": 62.099628760066565,
+      "gniYear": "mixed",
+      "gni": 18679.998221561425,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 20.17786996252917,
+      "derivedKind": "adminregion",
+      "memberCount": 20,
+      "customIndex": 0.758
+    },
+    {
       "iso": "MEX",
       "name": "Mexico",
       "leYear": 2024,
@@ -1222,6 +1555,36 @@
       "gni": 22498.3070339502,
       "homicideYear": 2023,
       "homicidesPer100k": 24.8589948436701,
+      "customIndex": 0.756
+    },
+    {
+      "iso": "MEA",
+      "name": "Middle East, North Africa, Afghanistan & Pakistan",
+      "leYear": "mixed",
+      "le": 72.48827206831744,
+      "haleYear": "mixed",
+      "hale": 60.363576508161685,
+      "gniYear": "mixed",
+      "gni": 14979.837738745784,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 3.1182188434057374,
+      "derivedKind": "region",
+      "memberCount": 20,
+      "customIndex": 0.756
+    },
+    {
+      "iso": "MIC",
+      "name": "Middle income",
+      "leYear": "mixed",
+      "le": 72.98670449669915,
+      "haleYear": "mixed",
+      "hale": 61.82210661579351,
+      "gniYear": "mixed",
+      "gni": 14107.323524880694,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.971565361952654,
+      "derivedKind": "incomeLevel",
+      "memberCount": 90,
       "customIndex": 0.756
     },
     {
@@ -1238,6 +1601,21 @@
       "customIndex": 0.754
     },
     {
+      "iso": "IDA_IBRD_TOTAL",
+      "name": "IDA & IBRD total",
+      "leYear": "mixed",
+      "le": 72.62147634693297,
+      "haleYear": "mixed",
+      "hale": 61.45912993863511,
+      "gniYear": "mixed",
+      "gni": 14199.843171782379,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 5.061978762582029,
+      "derivedKind": "lendingType",
+      "memberCount": 118,
+      "customIndex": 0.754
+    },
+    {
       "iso": "IDN",
       "name": "Indonesia",
       "leYear": 2024,
@@ -1249,6 +1627,21 @@
       "homicideYear": 2022,
       "homicidesPer100k": 0.303768746039586,
       "customIndex": 0.752
+    },
+    {
+      "iso": "LMY",
+      "name": "Low & middle income",
+      "leYear": "mixed",
+      "le": 72.61002245781901,
+      "haleYear": "mixed",
+      "hale": 61.46241488472985,
+      "gniYear": "mixed",
+      "gni": 13482.397815756793,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.9562811885797915,
+      "derivedKind": "incomeLevel",
+      "memberCount": 104,
+      "customIndex": 0.751
     },
     {
       "iso": "CPV",
@@ -1368,6 +1761,21 @@
       "customIndex": 0.722
     },
     {
+      "iso": "MNA",
+      "name": "Middle East, North Africa, Afghanistan & Pakistan (excluding high income)",
+      "leYear": "mixed",
+      "le": 71.62002958445906,
+      "haleYear": "mixed",
+      "hale": 59.719549135080996,
+      "gniYear": "mixed",
+      "gni": 9948.685362195969,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 3.3538388648092656,
+      "derivedKind": "adminregion",
+      "memberCount": 12,
+      "customIndex": 0.722
+    },
+    {
       "iso": "GUY",
       "name": "Guyana",
       "leYear": 2024,
@@ -1404,6 +1812,21 @@
       "gni": 29989.2079968468,
       "homicideYear": 2022,
       "homicidesPer100k": 40.4432986623964,
+      "customIndex": 0.721
+    },
+    {
+      "iso": "SAS",
+      "name": "South Asia",
+      "leYear": "mixed",
+      "le": 72.5599614464264,
+      "haleYear": "mixed",
+      "hale": 58.80853211842554,
+      "gniYear": "mixed",
+      "gni": 9571.812078784858,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.7598547526108175,
+      "derivedKind": "region",
+      "memberCount": 6,
       "customIndex": 0.721
     },
     {
@@ -1496,6 +1919,21 @@
       "homicideYear": 2023,
       "homicidesPer100k": 23.3657267272051,
       "customIndex": 0.707
+    },
+    {
+      "iso": "LMC",
+      "name": "Lower middle income",
+      "leYear": "mixed",
+      "le": 69.92058956602948,
+      "haleYear": "mixed",
+      "hale": 58.566965102375114,
+      "gniYear": "mixed",
+      "gni": 8941.632252031048,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.248560652805074,
+      "derivedKind": "incomeLevel",
+      "memberCount": 44,
+      "customIndex": 0.704
     },
     {
       "iso": "FJI",
@@ -1693,6 +2131,21 @@
       "customIndex": 0.656
     },
     {
+      "iso": "IDX",
+      "name": "IDA only",
+      "leYear": "mixed",
+      "le": 68.64450461814621,
+      "haleYear": "mixed",
+      "hale": 58.39802310351648,
+      "gniYear": "mixed",
+      "gni": 4705.552431631997,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 5.004204291968659,
+      "derivedKind": "lendingType",
+      "memberCount": 42,
+      "customIndex": 0.651
+    },
+    {
       "iso": "KEN",
       "name": "Kenya",
       "leYear": 2024,
@@ -1703,6 +2156,21 @@
       "gni": 5704.47352566129,
       "homicideYear": 2022,
       "homicidesPer100k": 4.87166844718499,
+      "customIndex": 0.649
+    },
+    {
+      "iso": "IDA_TOTAL",
+      "name": "IDA total",
+      "leYear": "mixed",
+      "le": 66.24961741294352,
+      "haleYear": "mixed",
+      "hale": 57.6072426725709,
+      "gniYear": "mixed",
+      "gni": 5402.660838396748,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 6.4633795859631125,
+      "derivedKind": "lendingType",
+      "memberCount": 58,
       "customIndex": 0.649
     },
     {
@@ -1743,6 +2211,21 @@
       "homicideYear": 2023,
       "homicidesPer100k": 31.4424316507577,
       "customIndex": 0.642
+    },
+    {
+      "iso": "IDB",
+      "name": "IDA blend",
+      "leYear": "mixed",
+      "le": 62.6110125058905,
+      "haleYear": "mixed",
+      "hale": 56.40579253738732,
+      "gniYear": "mixed",
+      "gni": 6461.793002989635,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 8.680336766010921,
+      "derivedKind": "lendingType",
+      "memberCount": 16,
+      "customIndex": 0.641
     },
     {
       "iso": "SWZ",
@@ -1810,6 +2293,36 @@
       "customIndex": 0.624
     },
     {
+      "iso": "SSF",
+      "name": "Sub-Saharan Africa",
+      "leYear": "mixed",
+      "le": 63.16767823432314,
+      "haleYear": "mixed",
+      "hale": 55.75265694693136,
+      "gniYear": "mixed",
+      "gni": 5219.850656824477,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 10.256789611182054,
+      "derivedKind": "region",
+      "memberCount": 33,
+      "customIndex": 0.624
+    },
+    {
+      "iso": "SSA",
+      "name": "Sub-Saharan Africa (excluding high income)",
+      "leYear": "mixed",
+      "le": 62.490855555166995,
+      "haleYear": "mixed",
+      "hale": 55.28348798161128,
+      "gniYear": "mixed",
+      "gni": 5553.6605852713255,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 10.522860637662479,
+      "derivedKind": "adminregion",
+      "memberCount": 31,
+      "customIndex": 0.624
+    },
+    {
       "iso": "CMR",
       "name": "Cameroon",
       "leYear": 2024,
@@ -1872,6 +2385,21 @@
       "gni": 3004.36233877028,
       "homicideYear": 2012,
       "homicidesPer100k": 8.51054794891045,
+      "customIndex": 0.61
+    },
+    {
+      "iso": "INX",
+      "name": "Not classified",
+      "leYear": "mixed",
+      "le": 67.603,
+      "haleYear": "mixed",
+      "hale": 58.82731284,
+      "gniYear": "mixed",
+      "gni": 3004.36233877028,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 8.51054794891045,
+      "derivedKind": "incomeLevel",
+      "memberCount": 1,
       "customIndex": 0.61
     },
     {
@@ -1990,6 +2518,21 @@
       "homicideYear": 2017,
       "homicidesPer100k": 1.11876398954435,
       "customIndex": 0.578
+    },
+    {
+      "iso": "LIC",
+      "name": "Low income",
+      "leYear": "mixed",
+      "le": 65.82257933524247,
+      "haleYear": "mixed",
+      "hale": 54.9811205455741,
+      "gniYear": "mixed",
+      "gni": 2221.845762028891,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.680875284565069,
+      "derivedKind": "incomeLevel",
+      "memberCount": 14,
+      "customIndex": 0.573
     },
     {
       "iso": "SDN",

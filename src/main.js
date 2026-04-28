@@ -2,6 +2,9 @@ import { escapeHtml, formatInt } from "./format.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
+const $globalDef = document.getElementById("global-series-def");
+const $globalChart = document.getElementById("global-series-chart");
+const $globalFoot = document.getElementById("global-series-foot");
 
 const COLS = 7;
 
@@ -128,6 +131,152 @@ function renderTable(rows) {
 
 let cache = [];
 
+/**
+ * @param {HTMLElement} container
+ * @param {{ definition?: string, chartTitle?: string, footNote?: string, points: { year: number, value: number, n: number, population?: number }[] }} series
+ */
+function renderGlobalAverageChart(container, series) {
+  container.replaceChildren();
+  if ($globalDef) {
+    $globalDef.textContent = series?.definition?.trim() ?? "";
+  }
+  if ($globalFoot) {
+    $globalFoot.hidden = true;
+    $globalFoot.textContent = "";
+  }
+
+  const pts = series?.points;
+  if (!Array.isArray(pts) || !pts.length) {
+    const p = document.createElement("p");
+    p.className = "global-series-empty muted";
+    p.textContent =
+      "No time series in data. Run npm run build-data to refresh public/data/countries.json.";
+    container.appendChild(p);
+    return;
+  }
+
+  const w = 880;
+  const h = 300;
+  const padL = 52;
+  const padR = 28;
+  const padT = 20;
+  const padB = 48;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+
+  const yearLo = Math.min(...pts.map((p) => p.year));
+  const yearHi = Math.max(...pts.map((p) => p.year));
+  const valLo = Math.min(...pts.map((p) => p.value));
+  const valHi = Math.max(...pts.map((p) => p.value));
+  const padV = (valHi - valLo) * 0.08 || 0.02;
+  const y0 = valLo - padV;
+  const y1 = valHi + padV;
+
+  const xAt = (year) => {
+    const span = yearHi - yearLo || 1;
+    return padL + ((year - yearLo) / span) * innerW;
+  };
+  const yAt = (v) => padT + innerH - ((v - y0) / (y1 - y0 || 1)) * innerH;
+
+  const d = pts
+    .map((p, i) => {
+      const x = xAt(p.year);
+      const y = yAt(p.value);
+      return `${i === 0 ? "M" : "L"}${x},${y}`;
+    })
+    .join(" ");
+
+  const last = pts[pts.length - 1];
+  const first = pts[0];
+  const fmt = (v) => v.toFixed(4);
+
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("class", "global-series-svg");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+  const gridTicks = 4;
+  for (let i = 0; i <= gridTicks; i++) {
+    const t = i / gridTicks;
+    const v = y0 + (1 - t) * (y1 - y0);
+    const gy = padT + t * innerH;
+    const line = document.createElementNS(ns, "line");
+    line.setAttribute("x1", String(padL));
+    line.setAttribute("x2", String(padL + innerW));
+    line.setAttribute("y1", String(gy));
+    line.setAttribute("y2", String(gy));
+    line.setAttribute("class", "global-series-grid");
+    svg.appendChild(line);
+    const lab = document.createElementNS(ns, "text");
+    lab.setAttribute("x", String(padL - 8));
+    lab.setAttribute("y", String(gy + 4));
+    lab.setAttribute("text-anchor", "end");
+    lab.setAttribute("class", "global-series-axis");
+    const span0 = y1 - y0 || 1;
+    lab.textContent = span0 < 0.05 ? v.toFixed(4) : v.toFixed(2);
+    svg.appendChild(lab);
+  }
+
+  for (let i = 0; i <= 2; i++) {
+    const t = i / 2;
+    const yr = Math.round(yearLo + t * (yearHi - yearLo));
+    const gx = xAt(yr);
+    const lab = document.createElementNS(ns, "text");
+    lab.setAttribute("x", String(gx));
+    lab.setAttribute("y", String(h - 12));
+    lab.setAttribute("text-anchor", "middle");
+    lab.setAttribute("class", "global-series-axis");
+    lab.textContent = String(yr);
+    svg.appendChild(lab);
+  }
+
+  const path = document.createElementNS(ns, "path");
+  path.setAttribute("d", d);
+  path.setAttribute("class", "global-series-line");
+  path.setAttribute("fill", "none");
+  svg.appendChild(path);
+
+  const cLast = document.createElementNS(ns, "circle");
+  cLast.setAttribute("cx", String(xAt(last.year)));
+  cLast.setAttribute("cy", String(yAt(last.value)));
+  cLast.setAttribute("r", "4");
+  cLast.setAttribute("class", "global-series-dot");
+  svg.appendChild(cLast);
+
+  const cFirst = document.createElementNS(ns, "circle");
+  cFirst.setAttribute("cx", String(xAt(first.year)));
+  cFirst.setAttribute("cy", String(yAt(first.value)));
+  cFirst.setAttribute("r", "3");
+  cFirst.setAttribute("class", "global-series-dot global-series-dot-start");
+  svg.appendChild(cFirst);
+
+  const title = document.createElementNS(ns, "text");
+  title.setAttribute("x", String(padL + innerW * 0.5));
+  title.setAttribute("y", String(padT - 2));
+  title.setAttribute("text-anchor", "middle");
+  title.setAttribute("class", "global-series-heading");
+  title.textContent = series?.chartTitle?.trim() || "Global average (time series)";
+  svg.appendChild(title);
+
+  container.appendChild(svg);
+
+  if ($globalFoot) {
+    $globalFoot.hidden = false;
+    if (typeof series?.footNote === "string" && series.footNote.trim()) {
+      $globalFoot.textContent = series.footNote.trim();
+    } else {
+      const popBit =
+        typeof last.population === "number" && Number.isFinite(last.population)
+          ? `; pop. sum (included) ≈${last.population.toLocaleString()}`
+          : "";
+      $globalFoot.textContent = `${first.year} ${fmt(first.value)} → ${last.year} ${fmt(
+        last.value
+      )} (${last.n} countries${popBit} in ${last.year}).`;
+    }
+  }
+}
+
 async function loadLocalData() {
   setStatus("");
   const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
@@ -144,11 +293,15 @@ async function loadLocalData() {
     : "";
   setStatus(
     n
-      ? `${n} countries.${when}`
-      : "No countries in data file."
+      ? `${n} leaderboard rows.${when}`
+      : "No rows in data file."
   );
   updateHeaderSortUI();
   renderTable(getSortedCache());
+  renderGlobalAverageChart(
+    $globalChart,
+    payload.globalAverageSeries ?? { points: [] }
+  );
 }
 
 function refreshLeaderboard() {
@@ -179,4 +332,4 @@ loadLocalData().catch((e) => {
   setStatus(e instanceof Error ? e.message : "Could not load data.", true);
 });
 
-/** @typedef {{ iso: string, name: string, leYear: number|string, le: number, haleYear?: number|string, hale?: number, gniYear: number|string, gni: number, homicideYear: number|string, homicidesPer100k: number, customIndex: number }} CountryRow */
+/** @typedef {{ iso: string, name: string, leYear: number|string, le: number, haleYear?: number|string, hale?: number, gniYear: number|string, gni: number, homicideYear: number|string, homicidesPer100k: number, customIndex: number, derivedKind?: string, memberCount?: number }} CountryRow */

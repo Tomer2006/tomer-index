@@ -23,10 +23,18 @@
           The <strong>Tomer index</strong> uses a <strong>health</strong> pillar that is <strong>½ lifespan</strong> (life expectancy at birth) and <strong>½ healthspan</strong>
           (WHO HALE—healthy life expectancy), each turned into a 0–1 index with the same 20–85 goalposts, then averaged.
           Other pillars: GNI per capita (PPP) and safety from <strong>intentional homicides /100k</strong>.
+          The table lists economies that have <strong>all four</strong> inputs (no substitute series). It also includes <strong>derived</strong> World Bank group rows computed from the same country-level data with population weights: <strong>World</strong>, regions, admin regions, income levels, lending types, and a few obvious unions such as <strong>Low &amp; middle income</strong> and <strong>IDA &amp; IBRD total</strong>.
           Overall Tomer index: LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </p>
         <p id="status" class="status" aria-live="polite"></p>
       </header>
+
+      <section class="global-series" aria-labelledby="global-series-h">
+        <h2 id="global-series-h" class="global-series-title">Global average Tomer index over time</h2>
+        <p id="global-series-def" class="global-series-def muted"></p>
+        <div id="global-series-chart" class="global-series-chart" role="img" aria-label="Line chart of global average Tomer index by year"></div>
+        <p id="global-series-foot" class="global-series-foot muted" hidden></p>
+      </section>
 
       <main>
         <div class="table-wrap">
@@ -40,7 +48,7 @@
                 </th>
                 <th scope="col">
                   <button type="button" class="th-sort" data-sort="name">
-                    <span class="th-sort-label">Country</span><span class="th-sort-icon" aria-hidden="true"></span>
+                    <span class="th-sort-label">Place</span><span class="th-sort-icon" aria-hidden="true"></span>
                   </button>
                 </th>
                 <th scope="col">
@@ -78,6 +86,7 @@
       <footer class="foot">
         <small>
           Life expectancy &amp; GNI: World Bank (<code>SP.DYN.LE00.IN</code>, <code>NY.GNP.PCAP.PP.KD</code>).
+          Global series and derived group rows use population weights from <code>SP.POP.TOTL</code>.
           HALE: WHO GHO <code>WHOSIS_000002</code> (both sexes). Homicides: <code>VC.IHR.PSRC.P5</code>.
           LEI = ½·LEI(LE)+½·LEI(HALE). Safety = linear 0–60 homicides/100k → 1–0. Tomer index = LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </small>

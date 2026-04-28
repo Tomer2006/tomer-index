@@ -48,7 +48,7 @@ function renderPicks() {
     const label = document.createElement("label");
     label.className = "compare-label";
     label.setAttribute("for", id);
-    label.textContent = `Country ${i + 1}`;
+    label.textContent = `Entry ${i + 1}`;
 
     const select = document.createElement("select");
     select.className = "compare-select";
@@ -63,7 +63,7 @@ function renderPicks() {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "compare-remove";
-      remove.setAttribute("aria-label", `Remove country ${i + 1}`);
+      remove.setAttribute("aria-label", `Remove entry ${i + 1}`);
       remove.textContent = "✕";
       remove.addEventListener("click", () => {
         selections.splice(i, 1);
@@ -108,13 +108,13 @@ function renderCompareOut() {
 
   if (!filled.length) {
     $compareOut.innerHTML =
-      '<p class="compare-hint">Pick a country to begin.</p>';
+      '<p class="compare-hint">Pick an entry to begin.</p>';
     return;
   }
 
   if (hasDuplicateIsos(selections)) {
     $compareOut.innerHTML =
-      '<p class="compare-hint">Duplicate country selected—pick different countries in each slot.</p>';
+      '<p class="compare-hint">Duplicate entry selected—pick different entries in each slot.</p>';
     return;
   }
 

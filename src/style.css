@@ -438,3 +438,92 @@ table {
   text-align: center;
   color: var(--muted);
 }
+
+.muted {
+  color: var(--muted);
+}
+
+.global-series {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.global-series-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.global-series-def {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+.global-series-chart {
+  width: 100%;
+  min-height: 200px;
+}
+
+.global-series-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+}
+
+.global-series-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 4 6;
+  opacity: 0.85;
+}
+
+.global-series-line {
+  stroke: var(--accent);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.global-series-axis {
+  fill: var(--muted);
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.global-series-dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.global-series-dot-start {
+  fill: #34d399;
+  opacity: 0.7;
+}
+
+.global-series-heading {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.global-series-foot {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  font-family: var(--mono);
+}
+
+.global-series-empty {
+  margin: 0;
+  font-size: 0.9rem;
+}
