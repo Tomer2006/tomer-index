@@ -197,8 +197,8 @@ a {
 }
 
 .compare-picks {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 1rem;
   margin-bottom: 0.75rem;
 }
@@ -207,8 +207,7 @@ a {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
-  min-width: 220px;
-  flex: 1 1 220px;
+  min-width: 0;
 }
 
 .compare-label {
@@ -218,9 +217,12 @@ a {
   font-size: 0.85rem;
   color: var(--muted);
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 .compare-select {
+  width: 100%;
+  min-width: 0;
   font: inherit;
   padding: 0.5rem 0.65rem;
   border-radius: 8px;
@@ -230,6 +232,7 @@ a {
 }
 
 .compare-remove {
+  flex: 0 0 2.25rem;
   font: inherit;
   cursor: pointer;
   border: 1px solid var(--border);
