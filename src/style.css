@@ -571,6 +571,10 @@ table {
   background: var(--panel);
 }
 
+.entry-latest {
+  min-width: 0;
+}
+
 .entry-summary-title {
   margin: 0 0 0.2rem;
   font-size: 1rem;

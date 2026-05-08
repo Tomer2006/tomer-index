@@ -1,5 +1,5 @@
 /**
- * Fetches World Bank + WHO GHO indicators and writes public/data/countries.json.
+ * Fetches World Bank indicators plus WHO GHO HALE and writes public/data/countries.json.
  * Run: npm run build-data (needs network once; commit the JSON for offline builds).
  */
 import { writeFile, mkdir } from "node:fs/promises";
@@ -29,17 +29,21 @@ const WB_HOMICIDE = "VC.IHR.PSRC.P5";
 const WB_POP = "SP.POP.TOTL";
 const WB_PER_PAGE = "500";
 
-/** WHO GHO: Healthy life expectancy (HALE) at birth, both sexes. */
+/** WHO GHO: Healthy life expectancy (HALE) at birth, both sexes. This is the only non-World Bank source. */
 const WHO_HALE_URL = "https://ghoapi.azureedge.net/api/WHOSIS_000002";
 const WHO_HALE_FILTER = "SpatialDimType eq 'COUNTRY' and Dim1 eq 'SEX_BTSX'";
 
 async function fetchWorldBankJson(urlString, indicator) {
-  const maxAttempts = 4;
+  const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const res = await fetch(urlString);
     if (res.ok) return res.json();
     const retry =
-      res.status === 502 || res.status === 503 || res.status === 504 || res.status === 429;
+      res.status === 400 ||
+      res.status === 429 ||
+      res.status === 502 ||
+      res.status === 503 ||
+      res.status === 504;
     if (retry && attempt < maxAttempts - 1) {
       await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
       continue;
@@ -52,13 +56,12 @@ async function fetchWorldBankJson(urlString, indicator) {
 /**
  * WDI `date=` upper bound (inclusive). Use current calendar year + 1 so each `npm run build-data`
  * requests the newest country-years the API has (leaderboard uses `latestByCountry` / `latestHaleByIso`
- * per series). The **Global average Tomer index over time** is still built only by
- * `worldAggregateTomerSeries` (WLD + global HALE, same calendar year for all inputs);
- * widening the fetch does not change that definition—only supplies more raw years if present.
+ * per series). Entry history pages are rendered on a fixed 2000-2023 timeline and keep source-year
+ * metadata for each metric when the displayed year uses an observation from a nearby source year.
  */
 const WDI_END_YEAR = new Date().getUTCFullYear() + 1;
-const DATE_RANGE = `1990:${WDI_END_YEAR}`;
-const DATE_RANGE_POP = `2000:${WDI_END_YEAR}`;
+const DATE_RANGE = `1960:${WDI_END_YEAR}`;
+const DATE_RANGE_POP = `1960:${WDI_END_YEAR}`;
 const SERIES_YEAR_MIN = 2000;
 const SERIES_YEAR_MAX = 2023;
 
@@ -74,10 +77,8 @@ const WHO_HALE_GLOBAL_FILTER =
   "SpatialDimType eq 'GLOBAL' and SpatialDim eq 'GLOBAL' and Dim1 eq 'SEX_BTSX'";
 
 /**
- * Worldwide Tomer index by calendar year using published world aggregates, not a sample of
- * countries. World Bank **WLD** LE, GNI, homicides, and population must each have a **same-year**
- * observation (no carrying forward older WDI years into 2024/2025 placeholders). HALE is **WHO GHO**
- * global (SpatialDimType GLOBAL) — latest on or before that calendar year, same as for countries.
+ * Worldwide Tomer index by displayed year using published world aggregates, not a sample of
+ * countries. World Bank supplies every input except HALE; WHO GHO supplies HALE.
  * @param {ReturnType<typeof byCountryYear>} leByCY
  * @param {ReturnType<typeof byCountryYear>} gniByCY
  * @param {ReturnType<typeof byCountryYear>} homByCY
@@ -557,7 +558,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+            "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
           points: [],
         });
       }
@@ -638,7 +639,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+          "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
         points,
       };
     }
@@ -675,8 +676,14 @@ async function main() {
       intentionalHomicidesPer100k: WB_HOMICIDE,
       population: WB_POP,
     },
+    sourcePolicy: {
+      worldBank:
+        "All non-HALE inputs come from World Bank: life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and country/group metadata.",
+      whoGho:
+        "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes.",
+    },
     derivedRows:
-      "Derived rows are population-weighted aggregates computed from the country rows in this file using the same LE, HALE, GNI, and homicide data. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total. No alternate metrics are substituted.",
+      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for all non-HALE metrics and WHO GHO for HALE only. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total. No alternate metrics are substituted.",
     healthPillar:
       "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
     safetyNote:
@@ -684,7 +691,7 @@ async function main() {
     indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
     globalAverageSeries: {
       definition:
-        "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
+        "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only. When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
       chartTitle: "Worldwide aggregate (WLD + global HALE)",
       footNote,
       points: worldSeries,

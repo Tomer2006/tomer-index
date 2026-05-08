@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-08T08:43:50.427Z",
-  "yearWindow": "1990:2027",
+  "generatedAt": "2026-05-08T09:31:16.163Z",
+  "yearWindow": "1960:2027",
   "indicators": {
     "lifeExpectancy": "SP.DYN.LE00.IN",
     "healthyLifeExpectancyHale": "WHO WHOSIS_000002 (HALE at birth, both sexes)",
@@ -8,7 +8,11 @@
     "intentionalHomicidesPer100k": "VC.IHR.PSRC.P5",
     "population": "SP.POP.TOTL"
   },
-  "derivedRows": "Derived rows are population-weighted aggregates computed from the country rows in this file using the same LE, HALE, GNI, and homicide data. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total. No alternate metrics are substituted.",
+  "sourcePolicy": {
+    "worldBank": "All non-HALE inputs come from World Bank: life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and country/group metadata.",
+    "whoGho": "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes."
+  },
+  "derivedRows": "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for all non-HALE metrics and WHO GHO for HALE only. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total. No alternate metrics are substituted.",
   "healthPillar": "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
   "safetyNote": "Safety uses intentional homicides/100k only (comparable worldwide). Theft, assault, and sexual violence are not mixed in because definitions and reporting differ by country.",
   "indexWeights": {
@@ -17,7 +21,7 @@
     "safety": 0.1111111111111111
   },
   "globalAverageSeries": {
-    "definition": "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
+    "definition": "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only. When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
     "chartTitle": "Worldwide aggregate (WLD + global HALE)",
     "footNote": "2000 0.7194 → 2023 0.7777. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each displayed year uses the latest available observation on or before that year, or the earliest later observation when no prior value exists. Pop. = WLD world total.",
     "points": [
@@ -289,7 +293,7 @@
   },
   "entrySeries": {
     "SGP": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -606,7 +610,7 @@
       ]
     },
     "CHE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -923,7 +927,7 @@
       ]
     },
     "NOR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -1240,7 +1244,7 @@
       ]
     },
     "LUX": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -1557,7 +1561,7 @@
       ]
     },
     "IRL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -1874,7 +1878,7 @@
       ]
     },
     "SWE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -2191,7 +2195,7 @@
       ]
     },
     "DNK": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -2508,7 +2512,7 @@
       ]
     },
     "KOR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -2825,7 +2829,7 @@
       ]
     },
     "NLD": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -3142,7 +3146,7 @@
       ]
     },
     "ISL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -3459,7 +3463,7 @@
       ]
     },
     "ARE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -3776,7 +3780,7 @@
       ]
     },
     "JPN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -4093,7 +4097,7 @@
       ]
     },
     "AUS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -4410,7 +4414,7 @@
       ]
     },
     "QAT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -4727,7 +4731,7 @@
       ]
     },
     "BEL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -5044,7 +5048,7 @@
       ]
     },
     "AUT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -5361,7 +5365,7 @@
       ]
     },
     "ITA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -5678,7 +5682,7 @@
       ]
     },
     "KWT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -5995,7 +5999,7 @@
       ]
     },
     "MLT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -6312,7 +6316,7 @@
       ]
     },
     "FRA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -6629,7 +6633,7 @@
       ]
     },
     "DEU": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -6946,7 +6950,7 @@
       ]
     },
     "ESP": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -7263,7 +7267,7 @@
       ]
     },
     "FIN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -7580,7 +7584,7 @@
       ]
     },
     "CAN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -7897,7 +7901,7 @@
       ]
     },
     "ISR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -8214,7 +8218,7 @@
       ]
     },
     "CYP": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -8531,7 +8535,7 @@
       ]
     },
     "SVN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -8848,7 +8852,7 @@
       ]
     },
     "GBR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -9165,7 +9169,7 @@
       ]
     },
     "NZL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -9482,7 +9486,7 @@
       ]
     },
     "BHR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -9799,7 +9803,7 @@
       ]
     },
     "BRN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -10116,7 +10120,7 @@
       ]
     },
     "PRT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -10433,7 +10437,7 @@
       ]
     },
     "SAU": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -10750,7 +10754,7 @@
       ]
     },
     "USA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -11067,7 +11071,7 @@
       ]
     },
     "GRC": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -11384,7 +11388,7 @@
       ]
     },
     "CZE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -11701,7 +11705,7 @@
       ]
     },
     "HRV": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -12018,7 +12022,7 @@
       ]
     },
     "EST": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -12335,7 +12339,7 @@
       ]
     },
     "POL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -12652,7 +12656,7 @@
       ]
     },
     "LTU": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -12969,7 +12973,7 @@
       ]
     },
     "OMN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -13286,7 +13290,7 @@
       ]
     },
     "SVK": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -13603,7 +13607,7 @@
       ]
     },
     "HUN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -13920,7 +13924,7 @@
       ]
     },
     "CHL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -14237,7 +14241,7 @@
       ]
     },
     "ROU": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -14554,7 +14558,7 @@
       ]
     },
     "PAN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -14871,7 +14875,7 @@
       ]
     },
     "LVA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -15188,7 +15192,7 @@
       ]
     },
     "MNE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -15505,7 +15509,7 @@
       ]
     },
     "MYS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -15822,7 +15826,7 @@
       ]
     },
     "TUR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -16139,7 +16143,7 @@
       ]
     },
     "PRI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -16456,7 +16460,7 @@
       ]
     },
     "MDV": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -16773,7 +16777,7 @@
       ]
     },
     "ALB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -17090,7 +17094,7 @@
       ]
     },
     "CHN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -17407,7 +17411,7 @@
       ]
     },
     "BGR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -17724,7 +17728,7 @@
       ]
     },
     "ARG": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -18041,7 +18045,7 @@
       ]
     },
     "KAZ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -18358,7 +18362,7 @@
       ]
     },
     "URY": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -18675,7 +18679,7 @@
       ]
     },
     "SYC": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -18992,7 +18996,7 @@
       ]
     },
     "SRB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -19309,7 +19313,7 @@
       ]
     },
     "ATG": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -19626,7 +19630,7 @@
       ]
     },
     "BLR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -19943,7 +19947,7 @@
       ]
     },
     "CRI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -20260,7 +20264,7 @@
       ]
     },
     "RUS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -20577,7 +20581,7 @@
       ]
     },
     "BIH": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -20894,7 +20898,7 @@
       ]
     },
     "MUS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -21211,7 +21215,7 @@
       ]
     },
     "MKD": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -21528,7 +21532,7 @@
       ]
     },
     "ARM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -21845,7 +21849,7 @@
       ]
     },
     "THA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -22162,7 +22166,7 @@
       ]
     },
     "GEO": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -22479,7 +22483,7 @@
       ]
     },
     "AZE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -22796,7 +22800,7 @@
       ]
     },
     "DZA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -23113,7 +23117,7 @@
       ]
     },
     "BRB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -23430,7 +23434,7 @@
       ]
     },
     "IRN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -23747,7 +23751,7 @@
       ]
     },
     "DOM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -24064,7 +24068,7 @@
       ]
     },
     "LKA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -24381,7 +24385,7 @@
       ]
     },
     "VNM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -24698,7 +24702,7 @@
       ]
     },
     "PER": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -25015,7 +25019,7 @@
       ]
     },
     "UKR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -25332,7 +25336,7 @@
       ]
     },
     "BTN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -25649,7 +25653,7 @@
       ]
     },
     "COL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -25966,7 +25970,7 @@
       ]
     },
     "MDA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -26283,7 +26287,7 @@
       ]
     },
     "MNG": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -26600,7 +26604,7 @@
       ]
     },
     "TUN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -26917,7 +26921,7 @@
       ]
     },
     "BRA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -27234,7 +27238,7 @@
       ]
     },
     "SUR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -27551,7 +27555,7 @@
       ]
     },
     "BHS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -27868,7 +27872,7 @@
       ]
     },
     "EGY": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -28185,7 +28189,7 @@
       ]
     },
     "LBN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -28502,7 +28506,7 @@
       ]
     },
     "JOR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -28819,7 +28823,7 @@
       ]
     },
     "PRY": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -29136,7 +29140,7 @@
       ]
     },
     "TKM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -29453,7 +29457,7 @@
       ]
     },
     "MEX": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -29770,7 +29774,7 @@
       ]
     },
     "GRD": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -30087,7 +30091,7 @@
       ]
     },
     "IDN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -30404,7 +30408,7 @@
       ]
     },
     "CPV": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -30721,7 +30725,7 @@
       ]
     },
     "MAR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -31038,7 +31042,7 @@
       ]
     },
     "BGD": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -31355,7 +31359,7 @@
       ]
     },
     "UZB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -31672,7 +31676,7 @@
       ]
     },
     "IRQ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -31989,7 +31993,7 @@
       ]
     },
     "SLV": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -32306,7 +32310,7 @@
       ]
     },
     "KGZ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -32623,7 +32627,7 @@
       ]
     },
     "PHL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -32940,7 +32944,7 @@
       ]
     },
     "TON": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -33257,7 +33261,7 @@
       ]
     },
     "GUY": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -33574,7 +33578,7 @@
       ]
     },
     "NIC": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -33891,7 +33895,7 @@
       ]
     },
     "TTO": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -34208,7 +34212,7 @@
       ]
     },
     "BWA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -34525,7 +34529,7 @@
       ]
     },
     "IND": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -34842,7 +34846,7 @@
       ]
     },
     "TJK": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -35159,7 +35163,7 @@
       ]
     },
     "BLZ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -35476,7 +35480,7 @@
       ]
     },
     "WSM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -35793,7 +35797,7 @@
       ]
     },
     "BOL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -36110,7 +36114,7 @@
       ]
     },
     "GTM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -36427,7 +36431,7 @@
       ]
     },
     "FJI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -36744,7 +36748,7 @@
       ]
     },
     "KHM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -37061,7 +37065,7 @@
       ]
     },
     "LCA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -37378,7 +37382,7 @@
       ]
     },
     "STP": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -37695,7 +37699,7 @@
       ]
     },
     "MRT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -38012,7 +38016,7 @@
       ]
     },
     "NAM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -38329,7 +38333,7 @@
       ]
     },
     "SYR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -38646,7 +38650,7 @@
       ]
     },
     "NPL": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -38963,7 +38967,7 @@
       ]
     },
     "ECU": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -39280,7 +39284,7 @@
       ]
     },
     "GHA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -39597,7 +39601,7 @@
       ]
     },
     "PSE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -39914,7 +39918,7 @@
       ]
     },
     "AGO": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -40231,7 +40235,7 @@
       ]
     },
     "MMR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -40548,7 +40552,7 @@
       ]
     },
     "PAK": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -40865,7 +40869,7 @@
       ]
     },
     "SEN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -41182,7 +41186,7 @@
       ]
     },
     "KEN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -41499,7 +41503,7 @@
       ]
     },
     "FSM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -41816,7 +41820,7 @@
       ]
     },
     "VUT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -42133,7 +42137,7 @@
       ]
     },
     "HND": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -42450,7 +42454,7 @@
       ]
     },
     "SWZ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -42767,7 +42771,7 @@
       ]
     },
     "KIR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -43084,7 +43088,7 @@
       ]
     },
     "TLS": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -43401,7 +43405,7 @@
       ]
     },
     "TZA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -43718,7 +43722,7 @@
       ]
     },
     "RWA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -44035,7 +44039,7 @@
       ]
     },
     "CMR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -44352,7 +44356,7 @@
       ]
     },
     "VCT": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -44669,7 +44673,7 @@
       ]
     },
     "PNG": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -44986,7 +44990,7 @@
       ]
     },
     "ZWE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -45303,7 +45307,7 @@
       ]
     },
     "ETH": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -45620,7 +45624,7 @@
       ]
     },
     "SLB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -45937,7 +45941,7 @@
       ]
     },
     "JAM": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -46254,7 +46258,7 @@
       ]
     },
     "BEN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -46571,7 +46575,7 @@
       ]
     },
     "NGA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -46888,7 +46892,7 @@
       ]
     },
     "ZAF": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -47205,7 +47209,7 @@
       ]
     },
     "UGA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -47522,7 +47526,7 @@
       ]
     },
     "ZMB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -47839,7 +47843,7 @@
       ]
     },
     "SLE": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -48156,7 +48160,7 @@
       ]
     },
     "GNB": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -48473,7 +48477,7 @@
       ]
     },
     "SDN": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -48790,7 +48794,7 @@
       ]
     },
     "BFA": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -49107,7 +49111,7 @@
       ]
     },
     "AFG": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -49424,7 +49428,7 @@
       ]
     },
     "MWI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -49741,7 +49745,7 @@
       ]
     },
     "NER": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -50058,7 +50062,7 @@
       ]
     },
     "HTI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -50375,7 +50379,7 @@
       ]
     },
     "LBR": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -50692,7 +50696,7 @@
       ]
     },
     "MOZ": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -51009,7 +51013,7 @@
       ]
     },
     "BDI": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -51326,7 +51330,7 @@
       ]
     },
     "LSO": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -51643,7 +51647,7 @@
       ]
     },
     "CAF": {
-      "definition": "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+      "definition": "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
       "points": [
         {
           "year": 2000,
@@ -51960,7 +51964,7 @@
       ]
     },
     "WLD": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -52205,7 +52209,7 @@
       ]
     },
     "MEA": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -52450,7 +52454,7 @@
       ]
     },
     "MNA": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -52695,7 +52699,7 @@
       ]
     },
     "LIC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -52940,7 +52944,7 @@
       ]
     },
     "LMY": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -53185,7 +53189,7 @@
       ]
     },
     "IDX": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -53430,7 +53434,7 @@
       ]
     },
     "IDA_TOTAL": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -53675,7 +53679,7 @@
       ]
     },
     "IDA_IBRD_TOTAL": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -53920,7 +53924,7 @@
       ]
     },
     "SSF": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -54165,7 +54169,7 @@
       ]
     },
     "SSA": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -54410,7 +54414,7 @@
       ]
     },
     "LMC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -54655,7 +54659,7 @@
       ]
     },
     "MIC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -54900,7 +54904,7 @@
       ]
     },
     "IBD": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -55145,7 +55149,7 @@
       ]
     },
     "ECS": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -55390,7 +55394,7 @@
       ]
     },
     "ECA": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -55635,7 +55639,7 @@
       ]
     },
     "UMC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -55880,7 +55884,7 @@
       ]
     },
     "HIC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -56125,7 +56129,7 @@
       ]
     },
     "LNX": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -56370,7 +56374,7 @@
       ]
     },
     "LCN": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -56615,7 +56619,7 @@
       ]
     },
     "LAC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -56860,7 +56864,7 @@
       ]
     },
     "EAS": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -57105,7 +57109,7 @@
       ]
     },
     "SAS": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -57350,7 +57354,7 @@
       ]
     },
     "IDB": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -57595,7 +57599,7 @@
       ]
     },
     "NAC": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -57840,7 +57844,7 @@
       ]
     },
     "EAP": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,
@@ -58085,7 +58089,7 @@
       ]
     },
     "INX": {
-      "definition": "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+      "definition": "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
       "points": [
         {
           "year": 2000,

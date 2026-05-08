@@ -22,7 +22,8 @@
         <p class="lede">
           The <strong>Tomer index</strong> uses a <strong>health</strong> pillar that is <strong>½ lifespan</strong> (life expectancy at birth) and <strong>½ healthspan</strong>
           (WHO HALE—healthy life expectancy), each turned into a 0–1 index with the same 20–85 goalposts, then averaged.
-          Other pillars: GNI per capita (PPP) and safety from <strong>intentional homicides /100k</strong>.
+          All non-HALE inputs come from the <strong>World Bank</strong>: life expectancy, GNI per capita (PPP), intentional homicides /100k, population, and grouping metadata.
+          <strong>WHO GHO</strong> is used only for HALE.
           The table lists economies that have <strong>all four</strong> inputs (no substitute series). It also includes <strong>derived</strong> World Bank group rows computed from the same country-level data with population weights: <strong>World</strong>, regions, admin regions, income levels, lending types, and a few obvious unions such as <strong>Low &amp; middle income</strong> and <strong>IDA &amp; IBRD total</strong>.
           Overall Tomer index: LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </p>
@@ -85,9 +86,8 @@
 
       <footer class="foot">
         <small>
-          Life expectancy &amp; GNI: World Bank (<code>SP.DYN.LE00.IN</code>, <code>NY.GNP.PCAP.PP.KD</code>).
-          Global series and derived group rows use population weights from <code>SP.POP.TOTL</code>.
-          HALE: WHO GHO <code>WHOSIS_000002</code> (both sexes). Homicides: <code>VC.IHR.PSRC.P5</code>.
+          World Bank: life expectancy <code>SP.DYN.LE00.IN</code>, GNI <code>NY.GNP.PCAP.PP.KD</code>, homicides <code>VC.IHR.PSRC.P5</code>, population weights <code>SP.POP.TOTL</code>, and grouping metadata.
+          WHO GHO only for HALE: <code>WHOSIS_000002</code> (both sexes).
           LEI = ½·LEI(LE)+½·LEI(HALE). Safety = linear 0–60 homicides/100k → 1–0. Tomer index = LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
         </small>
       </footer>

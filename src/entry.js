@@ -367,7 +367,6 @@ async function load() {
   if (!series?.points?.length) {
     throw new Error(`No history stored for ${row.name}. Run: npm run build-data`);
   }
-
   const rank = String(countries.findIndex((r) => r.iso === iso) + 1);
   document.title = `${row.name} history - Tomer index`;
   $title.textContent = row.name;
