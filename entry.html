@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entry history - Tomer index</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero compare-page-header">
+        <nav class="site-nav" aria-label="Main">
+          <a href="./index.html" class="site-nav-link">Leaderboard</a>
+          <a href="./compare.html" class="site-nav-link">Compare</a>
+        </nav>
+        <p id="entry-kicker" class="kicker">Tomer index history</p>
+        <h1 id="entry-title">Loading...</h1>
+        <p id="entry-sub" class="compare-sub"></p>
+        <p id="status" class="status" aria-live="polite"></p>
+      </header>
+
+      <main class="entry-page">
+        <div id="entry-latest" class="entry-latest"></div>
+        <p id="entry-series-def" class="entry-series-def muted"></p>
+        <div id="entry-charts" class="metric-grid"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/entry.js"></script>
+  </body>
+</html>

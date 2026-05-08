@@ -10,6 +10,7 @@ import {
   latestByCountry,
   mergeRows,
   byCountryYear,
+  haleHistoryByIso,
   haleAsOfYear,
   customIndexHealthIncomeSafety,
   customIndexHealthIncomeSafetyFull,
@@ -52,12 +53,14 @@ async function fetchWorldBankJson(urlString, indicator) {
  * WDI `date=` upper bound (inclusive). Use current calendar year + 1 so each `npm run build-data`
  * requests the newest country-years the API has (leaderboard uses `latestByCountry` / `latestHaleByIso`
  * per series). The **Global average Tomer index over time** is still built only by
- * `worldAggregateTomerSeries` (WLD + global HALE, same calendar year for the four WDI inputs);
+ * `worldAggregateTomerSeries` (WLD + global HALE, same calendar year for all inputs);
  * widening the fetch does not change that definition—only supplies more raw years if present.
  */
 const WDI_END_YEAR = new Date().getUTCFullYear() + 1;
 const DATE_RANGE = `1990:${WDI_END_YEAR}`;
 const DATE_RANGE_POP = `2000:${WDI_END_YEAR}`;
+const SERIES_YEAR_MIN = 2000;
+const SERIES_YEAR_MAX = 2023;
 
 function yearWindowFromRange(range) {
   const m = /^(\d{4}):(\d{4})$/.exec(range.trim());
@@ -98,11 +101,11 @@ function worldAggregateTomerSeries(
   const popM = popByCY.get(WB_WLD);
   const points = [];
   for (let y = yearMin; y <= yearMax; y++) {
-    const leY = leM?.get(y);
-    const gniY = gniM?.get(y);
-    const homY = homM?.get(y);
-    const popY = popM?.get(y);
-    const hale = haleAsOfYear(haleWldMap, WB_WLD, y);
+    const leY = observationForTimelineYear(leM, y);
+    const gniY = observationForTimelineYear(gniM, y);
+    const homY = observationForTimelineYear(homM, y);
+    const popY = observationForTimelineYear(popM, y);
+    const hale = haleForTimelineYear(haleWldMap, WB_WLD, y);
     if (!leY || !gniY || !homY || !hale || !popY) continue;
     const p = popY.value;
     if (typeof p !== "number" || !Number.isFinite(p) || p <= 0) continue;
@@ -115,6 +118,11 @@ function worldAggregateTomerSeries(
     points.push({
       year: y,
       value: Math.round(idx * 10000) / 10000,
+      leYear: leY.year,
+      haleYear: hale.year,
+      gniYear: gniY.year,
+      homicideYear: homY.year,
+      populationYear: popY.year,
       n: 1,
       population: Math.round(p),
     });
@@ -268,6 +276,74 @@ async function fetchWorldBankCountryMeta() {
   return map;
 }
 
+function groupDefsForCountry(meta) {
+  const defs = [{ iso: "WLD", name: "World", kind: "world" }];
+
+  if (meta.region) {
+    defs.push({
+      iso: meta.region.id,
+      name: meta.region.name,
+      kind: "region",
+    });
+  }
+  if (meta.adminregion) {
+    defs.push({
+      iso: meta.adminregion.id,
+      name: meta.adminregion.name,
+      kind: "adminregion",
+    });
+  }
+  if (meta.incomeLevel) {
+    defs.push({
+      iso: meta.incomeLevel.id,
+      name: meta.incomeLevel.name,
+      kind: "incomeLevel",
+    });
+    if (["LIC", "LMC", "UMC"].includes(meta.incomeLevel.id)) {
+      defs.push({
+        iso: "LMY",
+        name: "Low & middle income",
+        kind: "incomeLevel",
+      });
+    }
+    if (["LMC", "UMC"].includes(meta.incomeLevel.id)) {
+      defs.push({
+        iso: "MIC",
+        name: "Middle income",
+        kind: "incomeLevel",
+      });
+    }
+  }
+  if (meta.lendingType) {
+    defs.push({
+      iso: meta.lendingType.id,
+      name: meta.lendingType.name,
+      kind: "lendingType",
+    });
+    if (["IDX", "IDB"].includes(meta.lendingType.id)) {
+      defs.push({
+        iso: "IDA_TOTAL",
+        name: "IDA total",
+        kind: "lendingType",
+      });
+    }
+    if (["IBD", "IDX", "IDB"].includes(meta.lendingType.id)) {
+      defs.push({
+        iso: "IDA_IBRD_TOTAL",
+        name: "IDA & IBRD total",
+        kind: "lendingType",
+      });
+    }
+  }
+
+  const seen = new Set();
+  return defs.filter((d) => {
+    if (seen.has(d.iso)) return false;
+    seen.add(d.iso);
+    return true;
+  });
+}
+
 function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
   const buckets = new Map();
 
@@ -294,74 +370,6 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
     bucket.gni += row.gni * pop;
     bucket.hom += row.homicidesPer100k * pop;
     bucket.members += 1;
-  }
-
-  function groupDefsForCountry(meta) {
-    const defs = [{ iso: "WLD", name: "World", kind: "world" }];
-
-    if (meta.region) {
-      defs.push({
-        iso: meta.region.id,
-        name: meta.region.name,
-        kind: "region",
-      });
-    }
-    if (meta.adminregion) {
-      defs.push({
-        iso: meta.adminregion.id,
-        name: meta.adminregion.name,
-        kind: "adminregion",
-      });
-    }
-    if (meta.incomeLevel) {
-      defs.push({
-        iso: meta.incomeLevel.id,
-        name: meta.incomeLevel.name,
-        kind: "incomeLevel",
-      });
-      if (["LIC", "LMC", "UMC"].includes(meta.incomeLevel.id)) {
-        defs.push({
-          iso: "LMY",
-          name: "Low & middle income",
-          kind: "incomeLevel",
-        });
-      }
-      if (["LMC", "UMC"].includes(meta.incomeLevel.id)) {
-        defs.push({
-          iso: "MIC",
-          name: "Middle income",
-          kind: "incomeLevel",
-        });
-      }
-    }
-    if (meta.lendingType) {
-      defs.push({
-        iso: meta.lendingType.id,
-        name: meta.lendingType.name,
-        kind: "lendingType",
-      });
-      if (["IDX", "IDB"].includes(meta.lendingType.id)) {
-        defs.push({
-          iso: "IDA_TOTAL",
-          name: "IDA total",
-          kind: "lendingType",
-        });
-      }
-      if (["IBD", "IDX", "IDB"].includes(meta.lendingType.id)) {
-        defs.push({
-          iso: "IDA_IBRD_TOTAL",
-          name: "IDA & IBRD total",
-          kind: "lendingType",
-        });
-      }
-    }
-
-    const seen = new Set();
-    return defs.filter((d) => {
-      if (seen.has(d.iso)) return false;
-      seen.add(d.iso);
-      return true;
-    });
   }
 
   for (const row of countryRows) {
@@ -398,6 +406,177 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
   return out;
 }
 
+function rounded(value, digits) {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
+}
+
+function latestAsOfYear(yearMap, year) {
+  if (!yearMap?.size) return null;
+  let best = null;
+  for (const [candidateYear, row] of yearMap) {
+    if (candidateYear <= year && (!best || candidateYear > best.year)) {
+      best = { ...row, year: candidateYear };
+    }
+  }
+  return best;
+}
+
+function firstAfterYear(yearMap, year) {
+  if (!yearMap?.size) return null;
+  let best = null;
+  for (const [candidateYear, row] of yearMap) {
+    if (candidateYear > year && (!best || candidateYear < best.year)) {
+      best = { ...row, year: candidateYear };
+    }
+  }
+  return best;
+}
+
+function observationForTimelineYear(yearMap, year) {
+  return latestAsOfYear(yearMap, year) ?? firstAfterYear(yearMap, year);
+}
+
+function firstHaleAfterYear(haleHistory, iso, year) {
+  const rows = haleHistory.get(iso);
+  if (!rows?.length) return null;
+  return rows.find((row) => row.year > year) ?? null;
+}
+
+function haleForTimelineYear(haleHistory, iso, year) {
+  return haleAsOfYear(haleHistory, iso, year) ?? firstHaleAfterYear(haleHistory, iso, year);
+}
+
+function annualRange(yearMin, yearMax) {
+  const out = [];
+  for (let y = yearMin; y <= yearMax; y++) out.push(y);
+  return out;
+}
+
+function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory, yearMin, yearMax) {
+  const leM = leByCY.get(iso);
+  const gniM = gniByCY.get(iso);
+  const homM = homByCY.get(iso);
+  const popM = popByCY.get(iso);
+  const years = annualRange(yearMin, yearMax);
+  const points = [];
+
+  for (const y of years) {
+    const leY = observationForTimelineYear(leM, y);
+    const gniY = observationForTimelineYear(gniM, y);
+    const homY = observationForTimelineYear(homM, y);
+    const popY = observationForTimelineYear(popM, y);
+    const hale = haleForTimelineYear(haleHistory, iso, y);
+    if (!leY || !gniY || !homY || !hale) continue;
+
+    const idx = customIndexHealthIncomeSafetyFull(
+      leY.value,
+      gniY.value,
+      homY.value,
+      hale.value
+    );
+    const pop = popY?.value;
+    points.push({
+      year: y,
+      le: rounded(leY.value, 2),
+      leYear: leY.year,
+      hale: rounded(hale.value, 2),
+      haleYear: hale.year,
+      gni: rounded(gniY.value, 2),
+      gniYear: gniY.year,
+      homicidesPer100k: rounded(homY.value, 3),
+      homicideYear: homY.year,
+      customIndex: rounded(idx, 4),
+      ...(typeof pop === "number" && Number.isFinite(pop) && pop > 0
+        ? { population: Math.round(pop) }
+        : {}),
+    });
+  }
+
+  return points;
+}
+
+function addWeightedYearBucket(buckets, def, values, pop) {
+  let bucket = buckets.get(def.iso);
+  if (!bucket) {
+    bucket = {
+      iso: def.iso,
+      name: def.name,
+      kind: def.kind,
+      pop: 0,
+      le: 0,
+      hale: 0,
+      gni: 0,
+      hom: 0,
+      members: 0,
+    };
+    buckets.set(def.iso, bucket);
+  }
+  bucket.pop += pop;
+  bucket.le += values.le * pop;
+  bucket.hale += values.hale * pop;
+  bucket.gni += values.gni * pop;
+  bucket.hom += values.hom * pop;
+  bucket.members += 1;
+}
+
+function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
+  const byIso = new Map();
+  const years = annualRange(yearMin, yearMax);
+
+  for (const y of years) {
+    const buckets = new Map();
+    for (const [iso, meta] of countryMeta) {
+      const leY = observationForTimelineYear(leByCY.get(iso), y);
+      const gniY = observationForTimelineYear(gniByCY.get(iso), y);
+      const homY = observationForTimelineYear(homByCY.get(iso), y);
+      const popY = observationForTimelineYear(popByCY.get(iso), y);
+      const hale = haleForTimelineYear(haleHistory, iso, y);
+      const pop = popY?.value;
+      if (!leY || !gniY || !homY || !hale) continue;
+      if (typeof pop !== "number" || !Number.isFinite(pop) || pop <= 0) continue;
+
+      const values = {
+        le: leY.value,
+        hale: hale.value,
+        gni: gniY.value,
+        hom: homY.value,
+      };
+      for (const def of groupDefsForCountry(meta)) {
+        addWeightedYearBucket(buckets, def, values, pop);
+      }
+    }
+
+    for (const bucket of buckets.values()) {
+      if (!bucket.pop || bucket.members === 0) continue;
+      const le = bucket.le / bucket.pop;
+      const hale = bucket.hale / bucket.pop;
+      const gni = bucket.gni / bucket.pop;
+      const homicidesPer100k = bucket.hom / bucket.pop;
+      const idx = customIndexHealthIncomeSafetyFull(le, gni, homicidesPer100k, hale);
+      if (!byIso.has(bucket.iso)) {
+        byIso.set(bucket.iso, {
+          definition:
+            "Population-weighted annual timeline for 2000-2023. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+          points: [],
+        });
+      }
+      byIso.get(bucket.iso).points.push({
+        year: y,
+        le: rounded(le, 2),
+        hale: rounded(hale, 2),
+        gni: rounded(gni, 2),
+        homicidesPer100k: rounded(homicidesPer100k, 3),
+        customIndex: rounded(idx, 4),
+        population: Math.round(bucket.pop),
+        n: bucket.members,
+      });
+    }
+  }
+
+  return byIso;
+}
+
 async function main() {
   console.log("Fetching", WB_LE, "…");
   const leRows = await fetchAllPages(WB_LE);
@@ -432,15 +611,50 @@ async function main() {
   const gniByCY = byCountryYear(gniRows);
   const homByCY = byCountryYear(homRows);
   const popByCY = byCountryYear(popRows);
+  const haleHistory = haleHistoryByIso(haleRows);
+  const seriesYearMin = Math.max(yearMin, SERIES_YEAR_MIN);
+  const seriesYearMax = Math.min(yearMax, SERIES_YEAR_MAX);
   const worldSeries = worldAggregateTomerSeries(
     leByCY,
     gniByCY,
     homByCY,
     popByCY,
     haleWldMap,
-    yearMin,
-    yearMax
+    seriesYearMin,
+    seriesYearMax
   );
+  const entrySeries = {};
+  for (const row of countryRows) {
+    const points = buildCountrySeries(
+      row.iso,
+      leByCY,
+      gniByCY,
+      homByCY,
+      popByCY,
+      haleHistory,
+      seriesYearMin,
+      seriesYearMax
+    );
+    if (points.length) {
+      entrySeries[row.iso] = {
+        definition:
+          "Country annual timeline for 2000-2023. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+        points,
+      };
+    }
+  }
+  for (const [iso, series] of buildDerivedGroupSeries(
+    leByCY,
+    gniByCY,
+    homByCY,
+    popByCY,
+    haleHistory,
+    countryMeta,
+    seriesYearMin,
+    seriesYearMax
+  )) {
+    if (series.points.length) entrySeries[iso] = series;
+  }
   const firstP = worldSeries[0];
   const lastP = worldSeries[worldSeries.length - 1];
   const fmt4 = (v) => (v == null ? "—" : v.toFixed(4));
@@ -448,7 +662,7 @@ async function main() {
     firstP && lastP
       ? `${firstP.year} ${fmt4(firstP.value)} → ${lastP.year} ${fmt4(
           lastP.value
-        )}. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population (all same calendar year). WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Pop. = WLD world total.`
+        )}. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each displayed year uses the latest available observation on or before that year, or the earliest later observation when no prior value exists. Pop. = WLD world total.`
       : "";
 
   const payload = {
@@ -470,11 +684,12 @@ async function main() {
     indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
     globalAverageSeries: {
       definition:
-        "Worldwide published time series, not a sample of individual countries. For each calendar year, the index uses World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL in that same year (if any of the four is missing, the year is skipped — no imputation from earlier years). WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes) uses the latest observation on or before that calendar year. population is WLD world population for that year. n is always 1 (one global aggregate). Series values are stored to four decimal places (full index formula, no premature rounding).",
+        "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
       chartTitle: "Worldwide aggregate (WLD + global HALE)",
       footNote,
       points: worldSeries,
     },
+    entrySeries,
     countries,
   };
 

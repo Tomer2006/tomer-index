@@ -108,6 +108,11 @@ function renderTable(rows) {
   rows.forEach((r, i) => {
     const rank = i + 1;
     const tr = document.createElement("tr");
+    const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
+    tr.className = "leaderboard-row-link";
+    tr.dataset.href = href;
+    tr.tabIndex = 0;
+    tr.setAttribute("aria-label", `Open ${r.name} history`);
     const h = r.homicidesPer100k;
     const hStr =
       typeof h === "number" && !Number.isNaN(h) ? h.toFixed(1) : "—";
@@ -118,7 +123,7 @@ function renderTable(rows) {
         : "—";
     tr.innerHTML = `
       <td>${rank}</td>
-      <td>${escapeHtml(r.name)}</td>
+      <td><a class="leaderboard-entry-link" href="${href}">${escapeHtml(r.name)}</a></td>
       <td>${r.le.toFixed(1)}</td>
       <td>${hale}</td>
       <td>${formatInt(r.gni)}</td>
@@ -131,9 +136,39 @@ function renderTable(rows) {
 
 let cache = [];
 
+function globalSourceYearText(point) {
+  const parts = [
+    ["LE", point.leYear],
+    ["HALE", point.haleYear],
+    ["GNI", point.gniYear],
+    ["Homicides", point.homicideYear],
+  ]
+    .filter(([, year]) => typeof year === "number" && year !== point.year)
+    .map(([label, year]) => `${label} ${year}`);
+  return parts.length ? `Source years: ${parts.join(", ")}` : "";
+}
+
+function clientToSvgPoint(svg, clientX, clientY) {
+  const point = svg.createSVGPoint();
+  point.x = clientX;
+  point.y = clientY;
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return { x: 0, y: 0 };
+  return point.matrixTransform(matrix.inverse());
+}
+
+function svgToClientPoint(svg, x, y) {
+  const point = svg.createSVGPoint();
+  point.x = x;
+  point.y = y;
+  const matrix = svg.getScreenCTM();
+  if (!matrix) return { x: 0, y: 0 };
+  return point.matrixTransform(matrix);
+}
+
 /**
  * @param {HTMLElement} container
- * @param {{ definition?: string, chartTitle?: string, footNote?: string, points: { year: number, value: number, n: number, population?: number }[] }} series
+ * @param {{ definition?: string, chartTitle?: string, footNote?: string, points: { year: number, value: number, n: number, population?: number, leYear?: number, haleYear?: number, gniYear?: number, homicideYear?: number }[] }} series
  */
 function renderGlobalAverageChart(container, series) {
   container.replaceChildren();
@@ -259,7 +294,88 @@ function renderGlobalAverageChart(container, series) {
   title.textContent = series?.chartTitle?.trim() || "Global average (time series)";
   svg.appendChild(title);
 
-  container.appendChild(svg);
+  const hoverLine = document.createElementNS(ns, "line");
+  hoverLine.setAttribute("y1", String(padT));
+  hoverLine.setAttribute("y2", String(padT + innerH));
+  hoverLine.setAttribute("class", "metric-hover-line");
+  hoverLine.style.display = "none";
+  svg.appendChild(hoverLine);
+
+  const hoverDot = document.createElementNS(ns, "circle");
+  hoverDot.setAttribute("r", "4.5");
+  hoverDot.setAttribute("class", "metric-hover-dot");
+  hoverDot.style.display = "none";
+  svg.appendChild(hoverDot);
+
+  const hit = document.createElementNS(ns, "rect");
+  hit.setAttribute("x", String(padL));
+  hit.setAttribute("y", String(padT));
+  hit.setAttribute("width", String(innerW));
+  hit.setAttribute("height", String(innerH));
+  hit.setAttribute("class", "metric-chart-hit");
+  svg.appendChild(hit);
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "metric-tooltip";
+  tooltip.hidden = true;
+  tooltip.setAttribute("role", "status");
+
+  const chart = document.createElement("div");
+  chart.className = "global-series-chart-inner";
+  chart.appendChild(tooltip);
+  chart.appendChild(svg);
+  container.appendChild(chart);
+
+  function showPoint(point) {
+    const x = xAt(point.year);
+    const y = yAt(point.value);
+    hoverLine.style.display = "";
+    hoverDot.style.display = "";
+    hoverLine.setAttribute("x1", String(x));
+    hoverLine.setAttribute("x2", String(x));
+    hoverDot.setAttribute("cx", String(x));
+    hoverDot.setAttribute("cy", String(y));
+
+    const source = globalSourceYearText(point);
+    tooltip.innerHTML = `
+      <strong>${point.year}</strong>
+      <span>Tomer index: ${fmt(point.value)}</span>
+      ${source ? `<small>${escapeHtml(source)}</small>` : ""}
+    `;
+    tooltip.hidden = false;
+
+    const chartRect = chart.getBoundingClientRect();
+    const screenPoint = svgToClientPoint(svg, x, y);
+    const left = Math.max(72, Math.min(screenPoint.x - chartRect.left, chartRect.width - 72));
+    const top = Math.max(28, screenPoint.y - chartRect.top);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function hidePoint() {
+    hoverLine.style.display = "none";
+    hoverDot.style.display = "none";
+    tooltip.hidden = true;
+  }
+
+  svg.addEventListener("pointermove", (e) => {
+    const svgPoint = clientToSvgPoint(svg, e.clientX, e.clientY);
+    const clampedX = Math.max(padL, Math.min(svgPoint.x, padL + innerW));
+    const yearAtPointer = yearLo + ((clampedX - padL) / innerW) * (yearHi - yearLo || 1);
+    let closest = pts[0];
+    let best = Infinity;
+    for (const point of pts) {
+      const delta = Math.abs(point.year - yearAtPointer);
+      if (delta < best) {
+        closest = point;
+        best = delta;
+      }
+    }
+    showPoint(closest);
+  });
+
+  svg.addEventListener("pointerleave", hidePoint);
+  svg.addEventListener("blur", hidePoint);
 
   if ($globalFoot) {
     $globalFoot.hidden = false;
@@ -325,6 +441,22 @@ document.querySelector(".leaderboard-table thead")?.addEventListener("click", (e
     sortState = { key, bestFirst: true };
   }
   refreshLeaderboard();
+});
+
+$tbody.addEventListener("click", (e) => {
+  if (e.target.closest("a, button")) return;
+  const row = e.target.closest("tr[data-href]");
+  const href = row?.dataset.href;
+  if (href) window.location.href = href;
+});
+
+$tbody.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest("tr[data-href]");
+  const href = row?.dataset.href;
+  if (!href) return;
+  e.preventDefault();
+  window.location.href = href;
 });
 
 loadLocalData().catch((e) => {
