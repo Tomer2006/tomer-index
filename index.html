@@ -19,22 +19,12 @@
             <h1>Tomer index</h1>
           </div>
         </div>
-        <p class="lede">
-          The <strong>Tomer index</strong> uses a <strong>health</strong> pillar that is <strong>½ lifespan</strong> (life expectancy at birth) and <strong>½ healthspan</strong>
-          (WHO HALE—healthy life expectancy), each turned into a 0–1 index with the same 20–85 goalposts, then averaged.
-          All non-HALE inputs come from the <strong>World Bank</strong>: life expectancy, GNI per capita (PPP), intentional homicides /100k, population, and grouping metadata.
-          <strong>WHO GHO</strong> is used only for HALE.
-          The table lists economies that have <strong>all four</strong> inputs (no substitute series). It also includes <strong>derived</strong> World Bank group rows computed from the same country-level data with population weights: <strong>World</strong>, regions, admin regions, income levels, lending types, and a few obvious unions such as <strong>Low &amp; middle income</strong> and <strong>IDA &amp; IBRD total</strong>.
-          Overall Tomer index: LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
-        </p>
         <p id="status" class="status" aria-live="polite"></p>
       </header>
 
       <section class="global-series" aria-labelledby="global-series-h">
         <h2 id="global-series-h" class="global-series-title">Global average Tomer index over time</h2>
-        <p id="global-series-def" class="global-series-def muted"></p>
         <div id="global-series-chart" class="global-series-chart" role="img" aria-label="Line chart of global average Tomer index by year"></div>
-        <p id="global-series-foot" class="global-series-foot muted" hidden></p>
       </section>
 
       <main>
@@ -83,14 +73,6 @@
           </table>
         </div>
       </main>
-
-      <footer class="foot">
-        <small>
-          World Bank: life expectancy <code>SP.DYN.LE00.IN</code>, GNI <code>NY.GNP.PCAP.PP.KD</code>, homicides <code>VC.IHR.PSRC.P5</code>, population weights <code>SP.POP.TOTL</code>, and grouping metadata.
-          WHO GHO only for HALE: <code>WHOSIS_000002</code> (both sexes).
-          LEI = ½·LEI(LE)+½·LEI(HALE). Safety = linear 0–60 homicides/100k → 1–0. Tomer index = LEI<sub>health</sub><sup>4/9</sup>×Income<sup>4/9</sup>×Safety<sup>1/9</sup>.
-        </small>
-      </footer>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

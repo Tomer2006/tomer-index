@@ -65,6 +65,29 @@ const DATE_RANGE_POP = `1960:${WDI_END_YEAR}`;
 const SERIES_YEAR_MIN = 2000;
 const SERIES_YEAR_MAX = 2023;
 
+const WORLD_BANK_INPUTS = {
+  lifeExpectancy: {
+    indicator: WB_LE,
+    label: "Life expectancy at birth, total (years)",
+    dateRange: DATE_RANGE,
+  },
+  gniPerCapita: {
+    indicator: WB_GNI,
+    label: "GNI per capita, PPP (constant 2021 international $)",
+    dateRange: DATE_RANGE,
+  },
+  intentionalHomicidesPer100k: {
+    indicator: WB_HOMICIDE,
+    label: "Intentional homicides (per 100,000 people)",
+    dateRange: DATE_RANGE,
+  },
+  population: {
+    indicator: WB_POP,
+    label: "Population, total",
+    dateRange: DATE_RANGE_POP,
+  },
+};
+
 function yearWindowFromRange(range) {
   const m = /^(\d{4}):(\d{4})$/.exec(range.trim());
   if (!m) throw new Error(`Invalid DATE_RANGE: ${range}`);
@@ -190,6 +213,72 @@ async function fetchAllPages(indicator, dateRange = DATE_RANGE) {
     page += 1;
   }
   return out;
+}
+
+function summarizeWorldBankRows(rows, expectedIndicator) {
+  const countries = new Set();
+  let earliestYear = Infinity;
+  let latestYear = -Infinity;
+  for (const row of rows) {
+    const rowIndicator = row?.indicator?.id;
+    if (rowIndicator && rowIndicator !== expectedIndicator) {
+      throw new Error(
+        `Expected World Bank indicator ${expectedIndicator}, got ${rowIndicator}`
+      );
+    }
+    if (row.value == null || Number.isNaN(Number(row.value))) continue;
+    const iso = row.countryiso3code;
+    const year = parseInt(String(row.date), 10);
+    if (typeof iso === "string" && /^[A-Z]{3}$/.test(iso)) countries.add(iso);
+    if (!Number.isNaN(year)) {
+      earliestYear = Math.min(earliestYear, year);
+      latestYear = Math.max(latestYear, year);
+    }
+  }
+  return {
+    rows: rows.length,
+    countriesWithValues: countries.size,
+    earliestYear: Number.isFinite(earliestYear) ? earliestYear : null,
+    latestYear: Number.isFinite(latestYear) ? latestYear : null,
+  };
+}
+
+async function fetchAllWorldBankInputs() {
+  console.log("Downloading all World Bank inputs first ...");
+  const entries = await Promise.all(
+    Object.entries(WORLD_BANK_INPUTS).map(async ([key, spec]) => {
+      console.log("Fetching", spec.indicator, "...");
+      const rows = await fetchAllPages(spec.indicator, spec.dateRange);
+      return [key, { ...spec, rows }];
+    })
+  );
+  console.log("Fetching World Bank country metadata ...");
+  const countryMeta = await fetchWorldBankCountryMeta();
+  const data = Object.fromEntries(entries);
+  const summary = Object.fromEntries(
+    entries.map(([key, item]) => [
+      key,
+      {
+        source: "World Bank WDI",
+        indicator: item.indicator,
+        label: item.label,
+        dateRange: item.dateRange,
+        ...summarizeWorldBankRows(item.rows, item.indicator),
+      },
+    ])
+  );
+  return {
+    data,
+    countryMeta,
+    summary: {
+      downloadedFirst: true,
+      countryMetadata: {
+        source: "World Bank country metadata",
+        countriesWithMetadata: countryMeta.size,
+      },
+      series: summary,
+    },
+  };
 }
 
 /** Latest HALE (years) per ISO3 from WHO GHO rows. */
@@ -579,20 +668,16 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
 }
 
 async function main() {
-  console.log("Fetching", WB_LE, "…");
-  const leRows = await fetchAllPages(WB_LE);
-  console.log("Fetching", WB_GNI, "…");
-  const gniRows = await fetchAllPages(WB_GNI);
-  console.log("Fetching", WB_HOMICIDE, "…");
-  const homRows = await fetchAllPages(WB_HOMICIDE);
-  console.log("Fetching", WB_POP, "…");
-  const popRows = await fetchAllPages(WB_POP, DATE_RANGE_POP);
+  const { data: worldBankData, countryMeta, summary: worldBankAudit } =
+    await fetchAllWorldBankInputs();
+  const leRows = worldBankData.lifeExpectancy.rows;
+  const gniRows = worldBankData.gniPerCapita.rows;
+  const homRows = worldBankData.intentionalHomicidesPer100k.rows;
+  const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
   const haleRows = await fetchAllWhoHale();
   console.log("Fetching WHO global HALE (GLOBAL / SEX_BTSX) for WLD time series …");
   const haleWldMap = await fetchHaleWldMapFromGlobalWho();
-  console.log("Fetching World Bank country metadata …");
-  const countryMeta = await fetchWorldBankCountryMeta();
 
   const leMap = latestByCountry(leRows);
   const gniMap = latestByCountry(gniRows);
@@ -669,6 +754,7 @@ async function main() {
   const payload = {
     generatedAt: new Date().toISOString(),
     yearWindow: DATE_RANGE,
+    worldBankAudit,
     indicators: {
       lifeExpectancy: WB_LE,
       healthyLifeExpectancyHale: "WHO WHOSIS_000002 (HALE at birth, both sexes)",

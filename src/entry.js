@@ -371,8 +371,8 @@ async function load() {
   document.title = `${row.name} history - Tomer index`;
   $title.textContent = row.name;
   $kicker.textContent = row.derivedKind ? `${row.derivedKind} history` : `${row.iso} history`;
-  $sub.textContent = `${series.points.length} yearly points.`;
-  $seriesDef.textContent = series.definition ?? "";
+  if ($sub) $sub.textContent = "";
+  if ($seriesDef) $seriesDef.textContent = "";
   setStatus("");
   renderLatest(row, rank, series);
   renderCharts(series);

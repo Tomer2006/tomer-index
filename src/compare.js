@@ -257,11 +257,7 @@ async function load() {
   }
   const payload = await res.json();
   cache = payload.countries ?? [];
-  const n = cache.length;
-  const when = payload.generatedAt
-    ? ` Data snapshot: ${new Date(payload.generatedAt).toLocaleString()}.`
-    : "";
-  $status.textContent = n ? `${n} countries.${when}` : "No countries in data file.";
+  $status.textContent = cache.length ? "" : "No countries in data file.";
   renderPicks();
   refreshCompare();
 }

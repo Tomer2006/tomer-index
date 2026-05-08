@@ -1,6 +1,55 @@
 {
-  "generatedAt": "2026-05-08T09:31:16.163Z",
+  "generatedAt": "2026-05-08T09:54:34.958Z",
   "yearWindow": "1960:2027",
+  "worldBankAudit": {
+    "downloadedFirst": true,
+    "countryMetadata": {
+      "source": "World Bank country metadata",
+      "countriesWithMetadata": 217
+    },
+    "series": {
+      "lifeExpectancy": {
+        "source": "World Bank WDI",
+        "indicator": "SP.DYN.LE00.IN",
+        "label": "Life expectancy at birth, total (years)",
+        "dateRange": "1960:2027",
+        "rows": 17556,
+        "countriesWithValues": 261,
+        "earliestYear": 1960,
+        "latestYear": 2024
+      },
+      "gniPerCapita": {
+        "source": "World Bank WDI",
+        "indicator": "NY.GNP.PCAP.PP.KD",
+        "label": "GNI per capita, PPP (constant 2021 international $)",
+        "dateRange": "1960:2027",
+        "rows": 17556,
+        "countriesWithValues": 219,
+        "earliestYear": 1990,
+        "latestYear": 2024
+      },
+      "intentionalHomicidesPer100k": {
+        "source": "World Bank WDI",
+        "indicator": "VC.IHR.PSRC.P5",
+        "label": "Intentional homicides (per 100,000 people)",
+        "dateRange": "1960:2027",
+        "rows": 17556,
+        "countriesWithValues": 240,
+        "earliestYear": 1990,
+        "latestYear": 2023
+      },
+      "population": {
+        "source": "World Bank WDI",
+        "indicator": "SP.POP.TOTL",
+        "label": "Population, total",
+        "dateRange": "1960:2027",
+        "rows": 17556,
+        "countriesWithValues": 261,
+        "earliestYear": 1960,
+        "latestYear": 2024
+      }
+    }
+  },
   "indicators": {
     "lifeExpectancy": "SP.DYN.LE00.IN",
     "healthyLifeExpectancyHale": "WHO WHOSIS_000002 (HALE at birth, both sexes)",

@@ -2,9 +2,7 @@ import { escapeHtml, formatInt } from "./format.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
-const $globalDef = document.getElementById("global-series-def");
 const $globalChart = document.getElementById("global-series-chart");
-const $globalFoot = document.getElementById("global-series-foot");
 
 const COLS = 7;
 
@@ -168,18 +166,10 @@ function svgToClientPoint(svg, x, y) {
 
 /**
  * @param {HTMLElement} container
- * @param {{ definition?: string, chartTitle?: string, footNote?: string, points: { year: number, value: number, n: number, population?: number, leYear?: number, haleYear?: number, gniYear?: number, homicideYear?: number }[] }} series
+ * @param {{ points: { year: number, value: number, n: number, population?: number, leYear?: number, haleYear?: number, gniYear?: number, homicideYear?: number }[] }} series
  */
 function renderGlobalAverageChart(container, series) {
   container.replaceChildren();
-  if ($globalDef) {
-    $globalDef.textContent = series?.definition?.trim() ?? "";
-  }
-  if ($globalFoot) {
-    $globalFoot.hidden = true;
-    $globalFoot.textContent = "";
-  }
-
   const pts = series?.points;
   if (!Array.isArray(pts) || !pts.length) {
     const p = document.createElement("p");
@@ -286,14 +276,6 @@ function renderGlobalAverageChart(container, series) {
   cFirst.setAttribute("class", "global-series-dot global-series-dot-start");
   svg.appendChild(cFirst);
 
-  const title = document.createElementNS(ns, "text");
-  title.setAttribute("x", String(padL + innerW * 0.5));
-  title.setAttribute("y", String(padT - 2));
-  title.setAttribute("text-anchor", "middle");
-  title.setAttribute("class", "global-series-heading");
-  title.textContent = series?.chartTitle?.trim() || "Global average (time series)";
-  svg.appendChild(title);
-
   const hoverLine = document.createElementNS(ns, "line");
   hoverLine.setAttribute("y1", String(padT));
   hoverLine.setAttribute("y2", String(padT + innerH));
@@ -377,7 +359,7 @@ function renderGlobalAverageChart(container, series) {
   svg.addEventListener("pointerleave", hidePoint);
   svg.addEventListener("blur", hidePoint);
 
-  if ($globalFoot) {
+  if (false) {
     $globalFoot.hidden = false;
     if (typeof series?.footNote === "string" && series.footNote.trim()) {
       $globalFoot.textContent = series.footNote.trim();
@@ -403,15 +385,7 @@ async function loadLocalData() {
   }
   const payload = await res.json();
   cache = payload.countries ?? [];
-  const n = cache.length;
-  const when = payload.generatedAt
-    ? ` Snapshot: ${new Date(payload.generatedAt).toLocaleString()}.`
-    : "";
-  setStatus(
-    n
-      ? `${n} leaderboard rows.${when}`
-      : "No rows in data file."
-  );
+  setStatus(cache.length ? "" : "No rows in data file.");
   updateHeaderSortUI();
   renderTable(getSortedCache());
   renderGlobalAverageChart(

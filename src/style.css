@@ -140,6 +140,10 @@ a {
   color: var(--muted);
 }
 
+.status:empty {
+  display: none;
+}
+
 .status.error {
   color: var(--danger);
 }
