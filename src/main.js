@@ -5,6 +5,7 @@ import {
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
+import { combinedHealthLei } from "./hdi-core.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
@@ -17,7 +18,13 @@ const $regionChips = document.querySelector("#region-filter .chips");
 const $incomeChips = document.querySelector("#income-filter .chips");
 const $filterReset = document.getElementById("filter-reset");
 
-const COLS = 7;
+const COLS = 8;
+
+function healthValue(r) {
+  if (typeof r.le !== "number" || !Number.isFinite(r.le)) return NaN;
+  if (typeof r.hale !== "number" || !Number.isFinite(r.hale)) return NaN;
+  return combinedHealthLei(r.le, r.hale);
+}
 const YEAR_MIN = 2000;
 const YEAR_MAX = 2023;
 
@@ -45,6 +52,8 @@ function sortValue(r, key) {
       return typeof r.le === "number" && Number.isFinite(r.le) ? r.le : NaN;
     case "hale":
       return typeof r.hale === "number" && Number.isFinite(r.hale) ? r.hale : NaN;
+    case "health":
+      return healthValue(r);
     case "gni":
       return typeof r.gni === "number" && Number.isFinite(r.gni) ? r.gni : NaN;
     case "homicides":
@@ -202,11 +211,13 @@ function renderTable(rows) {
     tr.tabIndex = 0;
     tr.setAttribute("aria-label", `Open ${r.name} history`);
     const idx = r.customIndex ?? r.customHdi ?? 0;
+    const health = healthValue(r);
     tr.innerHTML = `
       <td>${rank}</td>
       <td><a class="leaderboard-entry-link" href="${href}">${escapeHtml(r.name)}</a></td>
       <td>${fmtNum(r.le, 1)}</td>
       <td>${fmtNum(r.hale, 1)}</td>
+      <td>${Number.isFinite(health) ? formatTomer(health) : "—"}</td>
       <td>${typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—"}</td>
       <td>${fmtNum(r.homicidesPer100k, 1)}</td>
       <td>${formatTomer(idx)}</td>
