@@ -145,9 +145,9 @@ function computeFixedDomain() {
       }
     }
   }
-  if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
+  if (Number.isFinite(lo) && lo < 1) {
     state.domainMin = lo;
-    state.domainMax = hi;
+    state.domainMax = 1;
   } else {
     state.domainMin = 0;
     state.domainMax = 1;
