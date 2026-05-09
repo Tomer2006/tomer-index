@@ -118,13 +118,31 @@ function buildIsoMap() {
   }
 
   state.byIso = map;
+}
 
+/**
+ * Computes a single [min, max] domain across every year and every country
+ * timeline. Sharing one domain means a value of e.g. 0.7 in 2000 lands on
+ * the same color as 0.7 in 2023 — colors are directly comparable across
+ * the slider. Called once after the data file loads.
+ */
+function computeFixedDomain() {
+  if (!state.payload) return;
+  const latest = new Map(
+    (state.payload.countries ?? []).map((c) => [c.iso, c])
+  );
+  const series = state.payload.entrySeries ?? {};
   let lo = Infinity;
   let hi = -Infinity;
-  for (const { value } of map.values()) {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      if (value < lo) lo = value;
-      if (value > hi) hi = value;
+  for (const iso of Object.keys(series)) {
+    const row = latest.get(iso);
+    if (!row || row.derivedKind) continue;
+    for (const point of series[iso].points) {
+      const v = point.customIndex;
+      if (typeof v === "number" && Number.isFinite(v)) {
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
     }
   }
   if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
@@ -230,7 +248,6 @@ function setYear(y) {
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
   buildIsoMap();
-  renderLegend();
   renderMap();
 }
 
@@ -247,6 +264,7 @@ async function load() {
   state.worldFeatures = world.features ?? [];
   state.payload = await dataRes.json();
   $status.textContent = "";
+  computeFixedDomain();
   buildIsoMap();
   renderLegend();
   renderMap();
