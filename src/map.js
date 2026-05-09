@@ -4,6 +4,7 @@ import {
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
+import { geoEquirectangular, geoPath } from "d3-geo";
 
 const $status = document.getElementById("status");
 const $scaleControl = document.getElementById("scale-control");
@@ -18,10 +19,14 @@ const YEAR_MAX = 2023;
 
 const W = 960;
 const H = 500;
-/** Latitudes outside [LAT_BOTTOM, LAT_TOP] are clipped — keeps Antarctica's
- *  southern fringe and Greenland in frame without distorting equator. */
-const LAT_TOP = 84;
-const LAT_BOTTOM = -85;
+
+/** d3-geo equirectangular projection scaled to fit the SVG viewBox.
+ *  d3's path generator handles antimeridian splitting and clipping
+ *  automatically, which our naive projector did not. */
+const projection = geoEquirectangular()
+  .scale(W / (2 * Math.PI))
+  .translate([W / 2, H / 2]);
+const pathGen = geoPath(projection);
 
 const state = {
   year: YEAR_MAX,
@@ -31,61 +36,8 @@ const state = {
   byIso: new Map(),
 };
 
-/** Equirectangular projection scaled to the SVG viewBox. Dependency-free. */
-function project([lon, lat]) {
-  const clampedLat = Math.max(LAT_BOTTOM, Math.min(LAT_TOP, lat));
-  const x = ((lon + 180) / 360) * W;
-  const y = ((LAT_TOP - clampedLat) / (LAT_TOP - LAT_BOTTOM)) * H;
-  return [x, y];
-}
-
-/**
- * Splits a ring at antimeridian crossings (|Δlon| > 180°) so countries that
- * span the date line — Russia, Fiji, Kiribati, the Aleutians — don't draw
- * one straight line all the way across the projected map.
- */
-function splitAtAntimeridian(ring) {
-  if (ring.length < 2) return [ring];
-  const segments = [];
-  let current = [ring[0]];
-  for (let i = 1; i < ring.length; i++) {
-    const prev = current[current.length - 1];
-    const cur = ring[i];
-    if (Math.abs(cur[0] - prev[0]) > 180) {
-      if (current.length > 1) segments.push(current);
-      current = [cur];
-    } else {
-      current.push(cur);
-    }
-  }
-  if (current.length > 1) segments.push(current);
-  return segments;
-}
-
-function ringPath(ring) {
-  return splitAtAntimeridian(ring)
-    .map((segment) => {
-      let d = "";
-      for (let i = 0; i < segment.length; i++) {
-        const [x, y] = project(segment[i]);
-        d += `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-      }
-      return d + "Z";
-    })
-    .join(" ");
-}
-
-function geometryPath(geom) {
-  if (!geom) return "";
-  if (geom.type === "Polygon") {
-    return geom.coordinates.map(ringPath).join(" ");
-  }
-  if (geom.type === "MultiPolygon") {
-    return geom.coordinates
-      .map((poly) => poly.map(ringPath).join(" "))
-      .join(" ");
-  }
-  return "";
+function featurePath(feature) {
+  return pathGen(feature) ?? "";
 }
 
 /** 0 → red, 0.5 → amber, 1 → green. Hue from 0° to 130°. */
@@ -161,8 +113,10 @@ function renderMap() {
   const ns = "http://www.w3.org/2000/svg";
   for (const f of state.worldFeatures) {
     const iso = f.id;
+    const d = featurePath(f);
+    if (!d) continue;
     const path = document.createElementNS(ns, "path");
-    path.setAttribute("d", geometryPath(f.geometry));
+    path.setAttribute("d", d);
     const entry = state.byIso.get(iso);
     path.setAttribute(
       "fill",
