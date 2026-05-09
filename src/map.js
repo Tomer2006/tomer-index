@@ -17,7 +17,11 @@ const YEAR_MIN = 2000;
 const YEAR_MAX = 2023;
 
 const W = 960;
-const H = 480;
+const H = 500;
+/** Latitudes outside [LAT_BOTTOM, LAT_TOP] are clipped — keeps Antarctica's
+ *  southern fringe and Greenland in frame without distorting equator. */
+const LAT_TOP = 84;
+const LAT_BOTTOM = -85;
 
 const state = {
   year: YEAR_MAX,
@@ -27,25 +31,48 @@ const state = {
   byIso: new Map(),
 };
 
-/**
- * Equirectangular projection scaled to the SVG viewBox. Crude but
- * dependency-free; centered at (0, 0), longitude in [-180,180], latitude
- * compressed slightly (factor 0.78) so Antarctica doesn't dominate the
- * frame.
- */
+/** Equirectangular projection scaled to the SVG viewBox. Dependency-free. */
 function project([lon, lat]) {
+  const clampedLat = Math.max(LAT_BOTTOM, Math.min(LAT_TOP, lat));
   const x = ((lon + 180) / 360) * W;
-  const y = ((90 - lat * 0.78) / 180) * H;
+  const y = ((LAT_TOP - clampedLat) / (LAT_TOP - LAT_BOTTOM)) * H;
   return [x, y];
 }
 
-function ringPath(ring) {
-  let d = "";
-  for (let i = 0; i < ring.length; i++) {
-    const [x, y] = project(ring[i]);
-    d += `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+/**
+ * Splits a ring at antimeridian crossings (|Δlon| > 180°) so countries that
+ * span the date line — Russia, Fiji, Kiribati, the Aleutians — don't draw
+ * one straight line all the way across the projected map.
+ */
+function splitAtAntimeridian(ring) {
+  if (ring.length < 2) return [ring];
+  const segments = [];
+  let current = [ring[0]];
+  for (let i = 1; i < ring.length; i++) {
+    const prev = current[current.length - 1];
+    const cur = ring[i];
+    if (Math.abs(cur[0] - prev[0]) > 180) {
+      if (current.length > 1) segments.push(current);
+      current = [cur];
+    } else {
+      current.push(cur);
+    }
   }
-  return d + "Z";
+  if (current.length > 1) segments.push(current);
+  return segments;
+}
+
+function ringPath(ring) {
+  return splitAtAntimeridian(ring)
+    .map((segment) => {
+      let d = "";
+      for (let i = 0; i < segment.length; i++) {
+        const [x, y] = project(segment[i]);
+        d += `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      }
+      return d + "Z";
+    })
+    .join(" ");
 }
 
 function geometryPath(geom) {
@@ -125,9 +152,9 @@ function renderMap() {
     return;
   }
 
-  $svg.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" class="map-svg-root" role="presentation">
+  $svg.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" class="map-svg-root" role="presentation">
     <rect width="${W}" height="${H}" class="map-ocean"></rect>
-    <g id="map-countries"></g>
+    <g id="map-countries" shape-rendering="geometricPrecision"></g>
   </svg>`;
   const g = $svg.querySelector("#map-countries");
 

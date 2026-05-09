@@ -15,7 +15,7 @@ const OUT = join(ROOT, "public/data/world.geojson");
 
 /** Numeric ISO 3166-1 → alpha-3, covering the rows in world-atlas. */
 const NUM_TO_ISO3 = {
-  4: "AFG", 8: "ALB", 12: "DZA", 20: "AND", 24: "AGO", 28: "ATG", 31: "AZE",
+  4: "AFG", 8: "ALB", 10: "ATA", 12: "DZA", 20: "AND", 24: "AGO", 28: "ATG", 31: "AZE",
   32: "ARG", 36: "AUS", 40: "AUT", 44: "BHS", 48: "BHR", 50: "BGD", 51: "ARM",
   52: "BRB", 56: "BEL", 60: "BMU", 64: "BTN", 68: "BOL", 70: "BIH", 72: "BWA",
   74: "BVT", 76: "BRA", 84: "BLZ", 86: "IOT", 90: "SLB", 92: "VGB", 96: "BRN",
