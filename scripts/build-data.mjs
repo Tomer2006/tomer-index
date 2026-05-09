@@ -684,6 +684,12 @@ async function main() {
   const homicideMap = latestByCountry(homRows);
   const haleMap = latestHaleByIso(haleRows);
   const countryRows = mergeRows(leMap, gniMap, homicideMap, haleMap);
+  for (const row of countryRows) {
+    const meta = countryMeta.get(row.iso);
+    if (!meta) continue;
+    if (meta.region) row.region = meta.region;
+    if (meta.incomeLevel) row.incomeLevel = meta.incomeLevel;
+  }
   const popMap = latestByCountry(popRows);
   const derivedGroupRows = buildDerivedGroupRows(countryRows, popMap, countryMeta);
   const groupIso = new Set(derivedGroupRows.map((r) => r.iso));

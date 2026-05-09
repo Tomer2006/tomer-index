@@ -10,13 +10,31 @@ const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
 const $globalChart = document.getElementById("global-series-chart");
 const $scaleControl = document.getElementById("scale-control");
+const $yearSlider = document.getElementById("year-slider");
+const $yearOutput = document.getElementById("year-output");
+const $searchInput = document.getElementById("search-input");
+const $regionChips = document.querySelector("#region-filter .chips");
+const $incomeChips = document.querySelector("#income-filter .chips");
+const $filterReset = document.getElementById("filter-reset");
 
 const COLS = 7;
+const YEAR_MIN = 2000;
+const YEAR_MAX = 2023;
 
-/** Current sort: default = best rank (highest Tomer index first). */
-let sortState = { key: "tomer", bestFirst: true };
+const state = {
+  year: YEAR_MAX,
+  search: "",
+  regions: new Set(),
+  incomes: new Set(),
+  sortKey: "tomer",
+  bestFirst: true,
+};
 
-/** @param {string} key */
+let payload = null;
+let latestRows = [];
+let regionsList = [];
+let incomesList = [];
+
 function sortValue(r, key) {
   switch (key) {
     case "tomer": {
@@ -26,23 +44,18 @@ function sortValue(r, key) {
     case "le":
       return typeof r.le === "number" && Number.isFinite(r.le) ? r.le : NaN;
     case "hale":
-      return typeof r.hale === "number" && !Number.isNaN(r.hale) ? r.hale : NaN;
+      return typeof r.hale === "number" && Number.isFinite(r.hale) ? r.hale : NaN;
     case "gni":
       return typeof r.gni === "number" && Number.isFinite(r.gni) ? r.gni : NaN;
-    case "homicides": {
-      const h = r.homicidesPer100k;
-      return typeof h === "number" && !Number.isNaN(h) ? h : NaN;
-    }
+    case "homicides":
+      return typeof r.homicidesPer100k === "number" && Number.isFinite(r.homicidesPer100k)
+        ? r.homicidesPer100k
+        : NaN;
     default:
       return NaN;
   }
 }
 
-/**
- * @param {typeof cache} rows
- * @param {string} key tomer | le | hale | gni | homicides | name
- * @param {boolean} bestFirst better-at-metric first; for name = A–Z
- */
 function sortedRows(rows, key, bestFirst) {
   const copy = [...rows];
   if (key === "name") {
@@ -70,31 +83,100 @@ function sortedRows(rows, key, bestFirst) {
   return copy;
 }
 
-function getSortedCache() {
-  if (!cache.length) return [];
-  const { key, bestFirst } = sortState;
-  return sortedRows(cache, key, bestFirst);
+/**
+ * Build the row set for a given year. For YEAR_MAX we use the latest values
+ * from `payload.countries` (these include `region`/`incomeLevel` metadata and
+ * potentially newer source years than entrySeries' timeline). For other years
+ * we read each entry's point at that year and merge in metadata from the
+ * latest row.
+ */
+function rowsForYear(year) {
+  if (!payload) return [];
+  if (year === YEAR_MAX) return latestRows;
+
+  const out = [];
+  const meta = new Map(latestRows.map((r) => [r.iso, r]));
+  const entrySeries = payload.entrySeries ?? {};
+  for (const iso of Object.keys(entrySeries)) {
+    const point = entrySeries[iso].points.find((p) => p.year === year);
+    if (!point) continue;
+    const base = meta.get(iso);
+    if (!base) continue;
+    out.push({
+      iso,
+      name: base.name,
+      le: point.le,
+      leYear: point.leYear,
+      hale: point.hale,
+      haleYear: point.haleYear,
+      gni: point.gni,
+      gniYear: point.gniYear,
+      homicidesPer100k: point.homicidesPer100k,
+      homicideYear: point.homicideYear,
+      customIndex: point.customIndex,
+      derivedKind: base.derivedKind,
+      memberCount: base.memberCount,
+      region: base.region,
+      incomeLevel: base.incomeLevel,
+    });
+  }
+  return out;
+}
+
+function filterRows(rows) {
+  const q = state.search.trim().toLowerCase();
+  return rows.filter((r) => {
+    if (q) {
+      const hay = [
+        r.name,
+        r.iso,
+        r.region?.name,
+        r.incomeLevel?.name,
+        r.derivedKind,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (state.regions.size) {
+      const id = r.region?.id;
+      if (!id || !state.regions.has(id)) return false;
+    }
+    if (state.incomes.size) {
+      const id = r.incomeLevel?.id;
+      if (!id || !state.incomes.has(id)) return false;
+    }
+    return true;
+  });
+}
+
+function getDisplayRows() {
+  const rows = filterRows(rowsForYear(state.year));
+  return sortedRows(rows, state.sortKey, state.bestFirst);
 }
 
 function updateHeaderSortUI() {
   document.querySelectorAll(".leaderboard-table .th-sort").forEach((btn) => {
     const key = btn.dataset.sort;
-    const active = key === sortState.key;
+    const active = key === state.sortKey;
     const label = btn.querySelector(".th-sort-label")?.textContent?.trim() ?? key;
     const icon = btn.querySelector(".th-sort-icon");
-
     btn.classList.toggle("is-active", active);
-    if (icon) {
-      icon.textContent = active ? (sortState.bestFirst ? "↑" : "↓") : "";
-    }
-
+    if (icon) icon.textContent = active ? (state.bestFirst ? "↑" : "↓") : "";
     if (active) {
-      const hint = sortState.bestFirst ? "Best first — click to reverse" : "Worst first — click to reverse";
+      const hint = state.bestFirst
+        ? "Best first — click to reverse"
+        : "Worst first — click to reverse";
       btn.setAttribute("aria-label", `${label}: ${hint}`);
     } else {
       btn.setAttribute("aria-label", `Sort by ${label}`);
     }
   });
+}
+
+function fmtNum(v, digits = 1) {
+  return typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
 }
 
 function renderTable(rows) {
@@ -104,12 +186,13 @@ function renderTable(rows) {
     const td = document.createElement("td");
     td.colSpan = COLS;
     td.className = "empty";
-    td.textContent = "No data.";
+    td.textContent = "No matches.";
     tr.appendChild(td);
     $tbody.appendChild(tr);
     return;
   }
 
+  const frag = document.createDocumentFragment();
   rows.forEach((r, i) => {
     const rank = i + 1;
     const tr = document.createElement("tr");
@@ -118,28 +201,20 @@ function renderTable(rows) {
     tr.dataset.href = href;
     tr.tabIndex = 0;
     tr.setAttribute("aria-label", `Open ${r.name} history`);
-    const h = r.homicidesPer100k;
-    const hStr =
-      typeof h === "number" && !Number.isNaN(h) ? h.toFixed(1) : "—";
     const idx = r.customIndex ?? r.customHdi ?? 0;
-    const hale =
-      typeof r.hale === "number" && !Number.isNaN(r.hale)
-        ? r.hale.toFixed(1)
-        : "—";
     tr.innerHTML = `
       <td>${rank}</td>
       <td><a class="leaderboard-entry-link" href="${href}">${escapeHtml(r.name)}</a></td>
-      <td>${r.le.toFixed(1)}</td>
-      <td>${hale}</td>
-      <td>${formatInt(r.gni)}</td>
-      <td>${hStr}</td>
+      <td>${fmtNum(r.le, 1)}</td>
+      <td>${fmtNum(r.hale, 1)}</td>
+      <td>${typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—"}</td>
+      <td>${fmtNum(r.homicidesPer100k, 1)}</td>
       <td>${formatTomer(idx)}</td>
     `;
-    $tbody.appendChild(tr);
+    frag.appendChild(tr);
   });
+  $tbody.appendChild(frag);
 }
-
-let cache = [];
 
 function globalSourceYearText(point) {
   const parts = [
@@ -171,11 +246,7 @@ function svgToClientPoint(svg, x, y) {
   return point.matrixTransform(matrix);
 }
 
-/**
- * @param {HTMLElement} container
- * @param {{ points: { year: number, value: number, n: number, population?: number, leYear?: number, haleYear?: number, gniYear?: number, homicideYear?: number }[] }} series
- */
-function renderGlobalAverageChart(container, series) {
+function renderGlobalAverageChart(container, series, highlightYear) {
   container.replaceChildren();
   const pts = series?.points;
   if (!Array.isArray(pts) || !pts.length) {
@@ -282,6 +353,26 @@ function renderGlobalAverageChart(container, series) {
   cFirst.setAttribute("class", "global-series-dot global-series-dot-start");
   svg.appendChild(cFirst);
 
+  if (typeof highlightYear === "number") {
+    const hp = pts.find((p) => p.year === highlightYear);
+    if (hp) {
+      const hx = xAt(hp.year);
+      const vline = document.createElementNS(ns, "line");
+      vline.setAttribute("x1", String(hx));
+      vline.setAttribute("x2", String(hx));
+      vline.setAttribute("y1", String(padT));
+      vline.setAttribute("y2", String(padT + innerH));
+      vline.setAttribute("class", "global-series-highlight-line");
+      svg.appendChild(vline);
+      const dot = document.createElementNS(ns, "circle");
+      dot.setAttribute("cx", String(hx));
+      dot.setAttribute("cy", String(yAt(hp.value)));
+      dot.setAttribute("r", "5");
+      dot.setAttribute("class", "global-series-highlight-dot");
+      svg.appendChild(dot);
+    }
+  }
+
   const hoverLine = document.createElementNS(ns, "line");
   hoverLine.setAttribute("y1", String(padT));
   hoverLine.setAttribute("y2", String(padT + innerH));
@@ -323,7 +414,6 @@ function renderGlobalAverageChart(container, series) {
     hoverLine.setAttribute("x2", String(x));
     hoverDot.setAttribute("cx", String(x));
     hoverDot.setAttribute("cy", String(y));
-
     const source = globalSourceYearText(point);
     tooltip.innerHTML = `
       <strong>${point.year}</strong>
@@ -331,7 +421,6 @@ function renderGlobalAverageChart(container, series) {
       ${source ? `<small>${escapeHtml(source)}</small>` : ""}
     `;
     tooltip.hidden = false;
-
     const chartRect = chart.getBoundingClientRect();
     const screenPoint = svgToClientPoint(svg, x, y);
     const left = Math.max(72, Math.min(screenPoint.x - chartRect.left, chartRect.width - 72));
@@ -362,29 +451,68 @@ function renderGlobalAverageChart(container, series) {
     showPoint(closest);
   });
 
+  svg.addEventListener("click", (e) => {
+    const svgPoint = clientToSvgPoint(svg, e.clientX, e.clientY);
+    const clampedX = Math.max(padL, Math.min(svgPoint.x, padL + innerW));
+    const yearAtPointer = yearLo + ((clampedX - padL) / innerW) * (yearHi - yearLo || 1);
+    let closest = pts[0];
+    let best = Infinity;
+    for (const point of pts) {
+      const delta = Math.abs(point.year - yearAtPointer);
+      if (delta < best) {
+        closest = point;
+        best = delta;
+      }
+    }
+    setYear(closest.year);
+  });
+
   svg.addEventListener("pointerleave", hidePoint);
   svg.addEventListener("blur", hidePoint);
-
-  if (false) {
-    $globalFoot.hidden = false;
-    if (typeof series?.footNote === "string" && series.footNote.trim()) {
-      $globalFoot.textContent = series.footNote.trim();
-    } else {
-      const popBit =
-        typeof last.population === "number" && Number.isFinite(last.population)
-          ? `; pop. sum (included) ≈${last.population.toLocaleString()}`
-          : "";
-      $globalFoot.textContent = `${first.year} ${fmt(first.value)} → ${last.year} ${fmt(
-        last.value
-      )} (${last.n} countries${popBit} in ${last.year}).`;
-    }
-  }
 }
 
+function setYear(year) {
+  const y = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(year, 10) || YEAR_MAX));
+  state.year = y;
+  if ($yearSlider) $yearSlider.value = String(y);
+  if ($yearOutput) $yearOutput.textContent = String(y);
+  refresh();
+}
 
-function refreshLeaderboard() {
+function chipsHtml(list, key) {
+  return list
+    .map(
+      ({ id, name }) => `
+        <button type="button" class="chip" data-key="${key}" data-id="${escapeHtml(id)}">
+          ${escapeHtml(name)}
+        </button>
+      `
+    )
+    .join("");
+}
+
+function renderFilterChips() {
+  if ($regionChips) $regionChips.innerHTML = chipsHtml(regionsList, "region");
+  if ($incomeChips) $incomeChips.innerHTML = chipsHtml(incomesList, "income");
+  syncChipState();
+}
+
+function syncChipState() {
+  document.querySelectorAll(".chip").forEach((chip) => {
+    const key = chip.dataset.key;
+    const id = chip.dataset.id;
+    const active =
+      (key === "region" && state.regions.has(id)) ||
+      (key === "income" && state.incomes.has(id));
+    chip.classList.toggle("is-active", !!active);
+  });
+}
+
+function refresh() {
   updateHeaderSortUI();
-  renderTable(getSortedCache());
+  renderTable(getDisplayRows());
+  renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
+  syncChipState();
 }
 
 function setStatus(msg, isError = false) {
@@ -397,12 +525,12 @@ document.querySelector(".leaderboard-table thead")?.addEventListener("click", (e
   if (!(btn instanceof HTMLButtonElement)) return;
   const key = btn.dataset.sort;
   if (!key) return;
-  if (sortState.key === key) {
-    sortState.bestFirst = !sortState.bestFirst;
-  } else {
-    sortState = { key, bestFirst: true };
+  if (state.sortKey === key) state.bestFirst = !state.bestFirst;
+  else {
+    state.sortKey = key;
+    state.bestFirst = true;
   }
-  refreshLeaderboard();
+  refresh();
 });
 
 $tbody.addEventListener("click", (e) => {
@@ -421,8 +549,40 @@ $tbody.addEventListener("keydown", (e) => {
   window.location.href = href;
 });
 
+$yearSlider?.addEventListener("input", (e) => {
+  setYear(e.target.value);
+});
+
+$searchInput?.addEventListener("input", (e) => {
+  state.search = e.target.value;
+  refresh();
+});
+
+document.addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  const key = chip.dataset.key;
+  const id = chip.dataset.id;
+  if (key === "region") {
+    if (state.regions.has(id)) state.regions.delete(id);
+    else state.regions.add(id);
+  } else if (key === "income") {
+    if (state.incomes.has(id)) state.incomes.delete(id);
+    else state.incomes.add(id);
+  } else return;
+  refresh();
+});
+
+$filterReset?.addEventListener("click", () => {
+  state.search = "";
+  state.regions.clear();
+  state.incomes.clear();
+  if ($searchInput) $searchInput.value = "";
+  refresh();
+});
+
 renderScaleControl($scaleControl);
-let lastGlobalSeries = { points: [] };
+onScaleChange(() => refresh());
 
 async function loadAndCache() {
   const res = await fetch(
@@ -434,23 +594,26 @@ async function loadAndCache() {
       `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
     );
   }
-  const payload = await res.json();
-  cache = payload.countries ?? [];
-  lastGlobalSeries = payload.globalAverageSeries ?? { points: [] };
-  setStatus(cache.length ? "" : "No rows in data file.");
-  updateHeaderSortUI();
-  renderTable(getSortedCache());
-  renderGlobalAverageChart($globalChart, lastGlobalSeries);
-}
+  payload = await res.json();
+  latestRows = payload.countries ?? [];
 
-onScaleChange(() => {
-  renderTable(getSortedCache());
-  renderGlobalAverageChart($globalChart, lastGlobalSeries);
-});
+  const regionMap = new Map();
+  const incomeMap = new Map();
+  for (const r of latestRows) {
+    if (r.region?.id) regionMap.set(r.region.id, r.region);
+    if (r.incomeLevel?.id) incomeMap.set(r.incomeLevel.id, r.incomeLevel);
+  }
+  regionsList = [...regionMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+  incomesList = [...incomeMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+  setStatus(latestRows.length ? "" : "No rows in data file.");
+  if ($yearSlider) $yearSlider.value = String(state.year);
+  if ($yearOutput) $yearOutput.textContent = String(state.year);
+  renderFilterChips();
+  refresh();
+}
 
 loadAndCache().catch((e) => {
   console.error(e);
   setStatus(e instanceof Error ? e.message : "Could not load data.", true);
 });
-
-/** @typedef {{ iso: string, name: string, leYear: number|string, le: number, haleYear?: number|string, hale?: number, gniYear: number|string, gni: number, homicideYear: number|string, homicidesPer100k: number, customIndex: number, derivedKind?: string, memberCount?: number }} CountryRow */

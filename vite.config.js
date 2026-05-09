@@ -30,6 +30,8 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         compare: resolve(__dirname, "compare.html"),
         entry: resolve(__dirname, "entry.html"),
+        methodology: resolve(__dirname, "methodology.html"),
+        map: resolve(__dirname, "map.html"),
       },
     },
   },

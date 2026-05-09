@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Map — Tomer index</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero compare-page-header">
+        <nav class="site-nav" aria-label="Main">
+          <a href="./index.html" class="site-nav-link">Leaderboard</a>
+          <a href="./compare.html" class="site-nav-link">Compare</a>
+          <a href="./map.html" class="site-nav-link" aria-current="page">Map</a>
+          <a href="./methodology.html" class="site-nav-link">Methodology</a>
+        </nav>
+        <div class="hero-row">
+          <div class="hero-titles">
+            <p class="kicker">World map</p>
+            <h1>Tomer index by country</h1>
+          </div>
+          <div id="scale-control" class="scale-control-wrap"></div>
+        </div>
+        <p id="status" class="status" aria-live="polite"></p>
+      </header>
+
+      <main class="map-page">
+        <section class="map-controls" aria-label="Map controls">
+          <label class="year-control">
+            <span class="control-label">Year</span>
+            <input type="range" id="map-year-slider" min="2000" max="2023" step="1" value="2023" />
+            <output id="map-year-output" class="year-output">2023</output>
+          </label>
+          <div class="map-legend" id="map-legend" aria-label="Color legend"></div>
+        </section>
+        <div class="map-wrap">
+          <div id="map-svg" class="map-svg" role="img" aria-label="Choropleth world map of Tomer index"></div>
+          <div id="map-tooltip" class="map-tooltip" hidden></div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/map.js"></script>
+  </body>
+</html>

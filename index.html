@@ -12,6 +12,8 @@
         <nav class="site-nav" aria-label="Main">
           <a href="./index.html" class="site-nav-link" aria-current="page">Leaderboard</a>
           <a href="./compare.html" class="site-nav-link">Compare</a>
+          <a href="./map.html" class="site-nav-link">Map</a>
+          <a href="./methodology.html" class="site-nav-link">Methodology</a>
         </nav>
         <div class="hero-row">
           <div class="hero-titles">
@@ -29,6 +31,30 @@
       </section>
 
       <main>
+        <section class="leaderboard-controls" aria-label="Leaderboard filters">
+          <div class="control-row">
+            <label class="year-control">
+              <span class="control-label">Year</span>
+              <input type="range" id="year-slider" min="2000" max="2023" step="1" />
+              <output id="year-output" class="year-output">2023</output>
+            </label>
+            <label class="search-control">
+              <span class="control-label">Search</span>
+              <input type="search" id="search-input" placeholder="Country, region, group…" autocomplete="off" />
+            </label>
+          </div>
+          <div class="control-row">
+            <fieldset class="filter-chips" id="region-filter">
+              <legend class="control-label">Region</legend>
+              <div class="chips" data-filter-key="region"></div>
+            </fieldset>
+            <fieldset class="filter-chips" id="income-filter">
+              <legend class="control-label">Income</legend>
+              <div class="chips" data-filter-key="income"></div>
+            </fieldset>
+            <button type="button" id="filter-reset" class="btn filter-reset">Reset</button>
+          </div>
+        </section>
         <div class="table-wrap">
           <table class="leaderboard-table">
             <thead>
