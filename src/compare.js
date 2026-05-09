@@ -5,18 +5,39 @@ import {
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
+import {
+  combinedHealthLei,
+  incomeIndexFromGni,
+  safetyIndexFromHomicidesPer100k,
+} from "./hdi-core.js";
 
 const $picks = document.getElementById("compare-picks");
 const $btnAdd = document.getElementById("btn-add");
+const $btnClear = document.getElementById("btn-clear");
 const $compareOut = document.getElementById("compare-out");
 const $status = document.getElementById("status");
 const $scaleControl = document.getElementById("scale-control");
+const $yearSlider = document.getElementById("compare-year-slider");
+const $yearOutput = document.getElementById("compare-year-output");
+const $presetChips = document.getElementById("compare-preset-chips");
+
+const YEAR_MIN = 2000;
+const YEAR_MAX = 2023;
 
 let cache = [];
 let entrySeries = {};
 /** Currently picked ISO3 codes (ordered), `""` for empty pickers. */
 let selections = [""];
 let slotSeq = 0;
+let year = YEAR_MAX;
+
+const PRESETS = [
+  { id: "g7", label: "G7", isos: ["USA", "GBR", "FRA", "DEU", "ITA", "JPN", "CAN"] },
+  { id: "brics", label: "BRICS", isos: ["BRA", "RUS", "IND", "CHN", "ZAF"] },
+  { id: "nordics", label: "Nordics", isos: ["NOR", "SWE", "FIN", "DNK", "ISL"] },
+  { id: "top5", label: "Top 5", isos: null },
+  { id: "bottom5", label: "Bottom 5", isos: null },
+];
 
 const compareMetricDefs = [
   {
@@ -69,6 +90,68 @@ const compareSeriesColors = [
 function rankForCountry(iso) {
   const i = cache.findIndex((c) => c.iso === iso);
   return i < 0 ? "—" : String(i + 1);
+}
+
+/**
+ * Returns a row-shaped snapshot of `iso` at the currently picked year.
+ * For year=YEAR_MAX we use the latest leaderboard row (so the rank field
+ * stays accurate); for any other year we read entrySeries[iso].points.
+ */
+function snapshotForYear(iso) {
+  const base = cache.find((c) => c.iso === iso);
+  if (!base) return null;
+  if (year === YEAR_MAX) return base;
+  const point = entrySeries[iso]?.points?.find((p) => p.year === year);
+  if (!point) return null;
+  return {
+    ...base,
+    le: point.le,
+    leYear: point.leYear,
+    hale: point.hale,
+    haleYear: point.haleYear,
+    gni: point.gni,
+    gniYear: point.gniYear,
+    homicidesPer100k: point.homicidesPer100k,
+    homicideYear: point.homicideYear,
+    customIndex: point.customIndex,
+  };
+}
+
+function pillarValues(row) {
+  const health =
+    typeof row.le === "number" && typeof row.hale === "number"
+      ? combinedHealthLei(row.le, row.hale)
+      : NaN;
+  const income =
+    typeof row.gni === "number" && Number.isFinite(row.gni)
+      ? incomeIndexFromGni(row.gni)
+      : NaN;
+  const safety =
+    typeof row.homicidesPer100k === "number" && Number.isFinite(row.homicidesPer100k)
+      ? safetyIndexFromHomicidesPer100k(row.homicidesPer100k)
+      : NaN;
+  return { health, income, safety };
+}
+
+function pillarBarsHtml(row) {
+  const { health, income, safety } = pillarValues(row);
+  const bar = (label, v, accent) =>
+    Number.isFinite(v)
+      ? `<div class="pillar-bar"><span class="pillar-bar-label">${label}</span>
+           <span class="pillar-bar-track"><span class="pillar-bar-fill" style="width:${(
+             v * 100
+           ).toFixed(1)}%; background:${accent};"></span></span>
+           <span class="pillar-bar-value">${(v * 100).toFixed(0)}</span></div>`
+      : `<div class="pillar-bar"><span class="pillar-bar-label">${label}</span>
+           <span class="pillar-bar-track"></span>
+           <span class="pillar-bar-value muted">—</span></div>`;
+  return `
+    <div class="pillar-bars">
+      ${bar("Health", health, "#6ee7b7")}
+      ${bar("Income", income, "#fbbf24")}
+      ${bar("Safety", safety, "#f472b6")}
+    </div>
+  `;
 }
 
 function sortedOptionsHtml() {
@@ -196,7 +279,7 @@ function bestCols(nums, lower) {
 
 function renderCompareOut() {
   const filled = selections
-    .map((iso) => (iso ? cache.find((c) => c.iso === iso) : null))
+    .map((iso) => (iso ? snapshotForYear(iso) : null))
     .filter((x) => x != null);
 
   if (!filled.length) {
@@ -211,49 +294,24 @@ function renderCompareOut() {
     return;
   }
 
-  const hStr = (r) =>
-    typeof r.homicidesPer100k === "number" && !Number.isNaN(r.homicidesPer100k)
-      ? r.homicidesPer100k.toFixed(1)
-      : "—";
-  const haleStr = (r) =>
-    typeof r.hale === "number" && !Number.isNaN(r.hale)
-      ? r.hale.toFixed(1)
-      : "—";
+  const num = (v, digits = 1) =>
+    typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
+  const intOrDash = (v) =>
+    typeof v === "number" && Number.isFinite(v) ? formatInt(v) : "—";
 
   const rankNums = filled.map((r) => {
     const i = cache.findIndex((c) => c.iso === r.iso);
     return i < 0 ? NaN : i + 1;
   });
+  const healthVals = filled.map((r) => pillarValues(r).health);
   const bestRank = bestCols(rankNums, true);
-  const bestLe = bestCols(
-    filled.map((r) => r.le),
-    false
-  );
-  const bestHale = bestCols(
-    filled.map((r) =>
-      typeof r.hale === "number" && !Number.isNaN(r.hale) ? r.hale : NaN
-    ),
-    false
-  );
-  const bestGni = bestCols(
-    filled.map((r) =>
-      typeof r.gni === "number" && Number.isFinite(r.gni) ? r.gni : NaN
-    ),
-    false
-  );
-  const bestHom = bestCols(
-    filled.map((r) =>
-      typeof r.homicidesPer100k === "number" && !Number.isNaN(r.homicidesPer100k)
-        ? r.homicidesPer100k
-        : NaN
-    ),
-    true
-  );
+  const bestLe = bestCols(filled.map((r) => r.le), false);
+  const bestHale = bestCols(filled.map((r) => r.hale), false);
+  const bestHealth = bestCols(healthVals, false);
+  const bestGni = bestCols(filled.map((r) => r.gni), false);
+  const bestHom = bestCols(filled.map((r) => r.homicidesPer100k), true);
   const bestTomer = bestCols(
-    filled.map((r) => {
-      const v = r.customIndex ?? r.customHdi;
-      return typeof v === "number" && Number.isFinite(v) ? v : NaN;
-    }),
+    filled.map((r) => r.customIndex ?? r.customHdi),
     false
   );
 
@@ -261,7 +319,15 @@ function renderCompareOut() {
   const green = (cols) => (multi ? cols : new Set());
 
   const headCells = filled
-    .map((r) => `<th scope="col">${escapeHtml(r.name)}</th>`)
+    .map(
+      (r, i) =>
+        `<th scope="col">
+          <span class="compare-head-name">${escapeHtml(r.name)}</span>
+          <span class="compare-head-swatch" style="--series-color: ${
+            compareSeriesColors[i % compareSeriesColors.length]
+          }"></span>
+        </th>`
+    )
     .join("");
 
   const row = (label, texts, cols) => `
@@ -280,6 +346,9 @@ function renderCompareOut() {
     filled.length === 1 ? "compare-table compare-single" : "compare-table";
 
   $compareOut.innerHTML = `
+    <div class="compare-summary muted">Comparing ${filled.length} ${
+      filled.length === 1 ? "entry" : "entries"
+    } at <strong>${year}</strong>.</div>
     <div class="compare-table-wrap">
       <table class="${tableClass}">
         <thead>
@@ -296,18 +365,27 @@ function renderCompareOut() {
           )}
           ${row(
             "Life exp. (years)",
-            filled.map((r) => r.le.toFixed(1)),
+            filled.map((r) => num(r.le, 1)),
             green(bestLe)
           )}
-          ${row("HALE (years)", filled.map((r) => haleStr(r)), green(bestHale))}
+          ${row(
+            "HALE (years)",
+            filled.map((r) => num(r.hale, 1)),
+            green(bestHale)
+          )}
+          ${row(
+            "Health pillar",
+            healthVals.map((v) => (Number.isFinite(v) ? formatTomer(v) : "—")),
+            green(bestHealth)
+          )}
           ${row(
             "GNI pc (PPP)",
-            filled.map((r) => formatInt(r.gni)),
+            filled.map((r) => intOrDash(r.gni)),
             green(bestGni)
           )}
           ${row(
             "Homicides /100k",
-            filled.map((r) => hStr(r)),
+            filled.map((r) => num(r.homicidesPer100k, 1)),
             green(bestHom)
           )}
           ${row(
@@ -315,6 +393,10 @@ function renderCompareOut() {
             filled.map((r) => formatTomer(r.customIndex ?? r.customHdi ?? 0)),
             green(bestTomer)
           )}
+          <tr class="pillar-bars-row">
+            <th scope="row">Pillar mix</th>
+            ${filled.map((r) => `<td>${pillarBarsHtml(r)}</td>`).join("")}
+          </tr>
         </tbody>
       </table>
     </div>
@@ -649,6 +731,52 @@ $btnAdd.addEventListener("click", () => {
   selects[selects.length - 1]?.focus();
 });
 
+$btnClear?.addEventListener("click", () => {
+  selections = [""];
+  renderPicks();
+  refreshCompare();
+});
+
+$yearSlider?.addEventListener("input", (e) => {
+  year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(e.target.value, 10) || YEAR_MAX));
+  if ($yearOutput) $yearOutput.textContent = String(year);
+  refreshCompare();
+});
+
+function presetIsos(preset) {
+  if (preset.isos) {
+    return preset.isos.filter((iso) => cache.find((c) => c.iso === iso));
+  }
+  if (preset.id === "top5" || preset.id === "bottom5") {
+    const real = cache.filter((r) => !r.derivedKind);
+    if (preset.id === "top5") return real.slice(0, 5).map((r) => r.iso);
+    return real.slice(-5).reverse().map((r) => r.iso);
+  }
+  return [];
+}
+
+function applyPreset(preset) {
+  const isos = presetIsos(preset);
+  if (!isos.length) return;
+  selections = isos;
+  renderPicks();
+  refreshCompare();
+}
+
+function renderPresetChips() {
+  if (!$presetChips) return;
+  $presetChips.innerHTML = PRESETS.map(
+    (p) =>
+      `<button type="button" class="chip compare-preset-chip" data-preset="${p.id}">${escapeHtml(p.label)}</button>`
+  ).join("");
+  $presetChips.querySelectorAll(".compare-preset-chip").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const preset = PRESETS.find((p) => p.id === btn.dataset.preset);
+      if (preset) applyPreset(preset);
+    });
+  });
+}
+
 async function load() {
   const res = await fetch(
     `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
@@ -663,6 +791,7 @@ async function load() {
   cache = payload.countries ?? [];
   entrySeries = payload.entrySeries ?? {};
   $status.textContent = cache.length ? "" : "No countries in data file.";
+  renderPresetChips();
   renderPicks();
   refreshCompare();
 }

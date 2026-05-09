@@ -41,6 +41,12 @@ export function safetyIndexFromHomicidesPer100k(homicidesPer100k) {
 }
 
 /** Original 2-pillar index: √(LEI × Income Index) — health + income only. */
+/** Income pillar 0-1 from GNI per capita (PPP) using HDI log goalposts. */
+export function incomeIndexFromGni(gniPerCapita) {
+  const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
+  return (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
+}
+
 export function customHdiNoEducation(lifeExpectancy, gniPerCapita) {
   const lei = leiFromYears(lifeExpectancy);
   const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
