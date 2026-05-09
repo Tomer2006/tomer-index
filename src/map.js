@@ -139,7 +139,11 @@ function computeFixedDomain() {
     if (!row || row.derivedKind) continue;
     for (const point of series[iso].points) {
       const v = point.customIndex;
-      if (typeof v === "number" && Number.isFinite(v)) {
+      // Skip exact-zero points: those are the safety pillar's homicide
+      // floor (h ≥ 60/100k) collapsing the geometric mean to 0, not a
+      // realistic Tomer value. Including them squashes the visible
+      // domain back to [0, 1] and erases color contrast for everyone.
+      if (typeof v === "number" && Number.isFinite(v) && v > 0) {
         if (v < lo) lo = v;
         if (v > hi) hi = v;
       }
