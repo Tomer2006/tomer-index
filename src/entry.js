@@ -1,4 +1,10 @@
 import { escapeHtml, formatInt } from "./format.js";
+import {
+  formatTomer,
+  formatTomerAxis,
+  onScaleChange,
+  renderScaleControl,
+} from "./index-scale.js";
 
 const $title = document.getElementById("entry-title");
 const $kicker = document.getElementById("entry-kicker");
@@ -7,16 +13,19 @@ const $status = document.getElementById("status");
 const $latest = document.getElementById("entry-latest");
 const $seriesDef = document.getElementById("entry-series-def");
 const $charts = document.getElementById("entry-charts");
+const $scaleControl = document.getElementById("scale-control");
 
 const params = new URLSearchParams(window.location.search);
 const iso = params.get("iso")?.trim() ?? "";
+
+const state = { row: null, rank: "", series: null };
 
 const metricDefs = [
   {
     key: "customIndex",
     label: "Tomer index",
-    axis: (v) => v.toFixed(3),
-    value: (v) => v.toFixed(4),
+    axis: (v) => formatTomerAxis(v),
+    value: (v) => formatTomer(v),
   },
   {
     key: "le",
@@ -128,7 +137,7 @@ function renderLatest(row, rank, series) {
         ${statHtml("HALE", hale)}
         ${statHtml("GNI pc", formatInt(row.gni))}
         ${statHtml("Homicides", h)}
-        ${statHtml("Tomer", idx.toFixed(3))}
+        ${statHtml("Tomer", formatTomer(idx))}
       </div>
     </section>
   `;
@@ -352,7 +361,10 @@ async function load() {
   if (!iso) {
     throw new Error("Missing entry id.");
   }
-  const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
+  const res = await fetch(
+    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
+    { cache: "no-cache" }
+  );
   if (!res.ok) {
     throw new Error(
       `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
@@ -374,9 +386,20 @@ async function load() {
   if ($sub) $sub.textContent = "";
   if ($seriesDef) $seriesDef.textContent = "";
   setStatus("");
+  state.row = row;
+  state.rank = rank;
+  state.series = series;
   renderLatest(row, rank, series);
   renderCharts(series);
 }
+
+renderScaleControl($scaleControl);
+onScaleChange(() => {
+  if (state.row && state.series) {
+    renderLatest(state.row, state.rank, state.series);
+    renderCharts(state.series);
+  }
+});
 
 load().catch((e) => {
   console.error(e);

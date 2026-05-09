@@ -1,9 +1,16 @@
 import { escapeHtml, formatInt } from "./format.js";
+import {
+  formatTomer,
+  formatTomerAxis,
+  onScaleChange,
+  renderScaleControl,
+} from "./index-scale.js";
 
 const $picks = document.getElementById("compare-picks");
 const $btnAdd = document.getElementById("btn-add");
 const $compareOut = document.getElementById("compare-out");
 const $status = document.getElementById("status");
+const $scaleControl = document.getElementById("scale-control");
 
 let cache = [];
 let entrySeries = {};
@@ -15,8 +22,8 @@ const compareMetricDefs = [
   {
     key: "customIndex",
     label: "Tomer index",
-    axis: (v) => v.toFixed(3),
-    value: (v) => v.toFixed(4),
+    axis: (v) => formatTomerAxis(v),
+    value: (v) => formatTomer(v),
   },
   {
     key: "le",
@@ -305,9 +312,7 @@ function renderCompareOut() {
           )}
           ${row(
             "Tomer index",
-            filled.map((r) =>
-              (r.customIndex ?? r.customHdi ?? 0).toFixed(3)
-            ),
+            filled.map((r) => formatTomer(r.customIndex ?? r.customHdi ?? 0)),
             green(bestTomer)
           )}
         </tbody>
@@ -645,7 +650,10 @@ $btnAdd.addEventListener("click", () => {
 });
 
 async function load() {
-  const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
+  const res = await fetch(
+    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
+    { cache: "no-cache" }
+  );
   if (!res.ok) {
     throw new Error(
       `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
@@ -658,6 +666,11 @@ async function load() {
   renderPicks();
   refreshCompare();
 }
+
+renderScaleControl($scaleControl);
+onScaleChange(() => {
+  renderCompareOut();
+});
 
 load().catch((e) => {
   console.error(e);

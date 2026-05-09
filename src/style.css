@@ -133,6 +133,76 @@ a {
   border-color: var(--accent-dim);
 }
 
+.scale-control-wrap {
+  display: flex;
+  align-items: flex-start;
+}
+
+.scale-control {
+  margin: 0;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scale-control-legend {
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0;
+}
+
+.scale-control-options {
+  display: inline-flex;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 0.2rem;
+}
+
+.scale-control-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 550;
+  color: var(--muted);
+  border-radius: 6px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.scale-control-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scale-control-option:hover {
+  color: var(--text);
+}
+
+.scale-control-option:has(input:checked) {
+  background: linear-gradient(160deg, #1f3d32, #162a24);
+  color: #ecfdf5;
+  box-shadow: 0 0 0 1px #2d5c4a inset;
+}
+
+.scale-control-option:focus-within {
+  outline: 2px solid var(--accent-dim);
+  outline-offset: 2px;
+}
+
 .status {
   margin: 0;
   min-height: 1.5rem;

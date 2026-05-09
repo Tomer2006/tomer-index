@@ -1,8 +1,15 @@
 import { escapeHtml, formatInt } from "./format.js";
+import {
+  formatTomer,
+  formatTomerAxis,
+  onScaleChange,
+  renderScaleControl,
+} from "./index-scale.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
 const $globalChart = document.getElementById("global-series-chart");
+const $scaleControl = document.getElementById("scale-control");
 
 const COLS = 7;
 
@@ -126,7 +133,7 @@ function renderTable(rows) {
       <td>${hale}</td>
       <td>${formatInt(r.gni)}</td>
       <td>${hStr}</td>
-      <td>${idx.toFixed(3)}</td>
+      <td>${formatTomer(idx)}</td>
     `;
     $tbody.appendChild(tr);
   });
@@ -213,7 +220,7 @@ function renderGlobalAverageChart(container, series) {
 
   const last = pts[pts.length - 1];
   const first = pts[0];
-  const fmt = (v) => v.toFixed(4);
+  const fmt = (v) => formatTomer(v);
 
   const ns = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(ns, "svg");
@@ -238,8 +245,7 @@ function renderGlobalAverageChart(container, series) {
     lab.setAttribute("y", String(gy + 4));
     lab.setAttribute("text-anchor", "end");
     lab.setAttribute("class", "global-series-axis");
-    const span0 = y1 - y0 || 1;
-    lab.textContent = span0 < 0.05 ? v.toFixed(4) : v.toFixed(2);
+    lab.textContent = formatTomerAxis(v);
     svg.appendChild(lab);
   }
 
@@ -375,24 +381,6 @@ function renderGlobalAverageChart(container, series) {
   }
 }
 
-async function loadLocalData() {
-  setStatus("");
-  const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
-  if (!res.ok) {
-    throw new Error(
-      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
-    );
-  }
-  const payload = await res.json();
-  cache = payload.countries ?? [];
-  setStatus(cache.length ? "" : "No rows in data file.");
-  updateHeaderSortUI();
-  renderTable(getSortedCache());
-  renderGlobalAverageChart(
-    $globalChart,
-    payload.globalAverageSeries ?? { points: [] }
-  );
-}
 
 function refreshLeaderboard() {
   updateHeaderSortUI();
@@ -433,7 +421,34 @@ $tbody.addEventListener("keydown", (e) => {
   window.location.href = href;
 });
 
-loadLocalData().catch((e) => {
+renderScaleControl($scaleControl);
+let lastGlobalSeries = { points: [] };
+
+async function loadAndCache() {
+  const res = await fetch(
+    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
+    { cache: "no-cache" }
+  );
+  if (!res.ok) {
+    throw new Error(
+      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
+    );
+  }
+  const payload = await res.json();
+  cache = payload.countries ?? [];
+  lastGlobalSeries = payload.globalAverageSeries ?? { points: [] };
+  setStatus(cache.length ? "" : "No rows in data file.");
+  updateHeaderSortUI();
+  renderTable(getSortedCache());
+  renderGlobalAverageChart($globalChart, lastGlobalSeries);
+}
+
+onScaleChange(() => {
+  renderTable(getSortedCache());
+  renderGlobalAverageChart($globalChart, lastGlobalSeries);
+});
+
+loadAndCache().catch((e) => {
   console.error(e);
   setStatus(e instanceof Error ? e.message : "Could not load data.", true);
 });
