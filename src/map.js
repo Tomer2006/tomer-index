@@ -34,20 +34,43 @@ const state = {
   payload: null,
   /** Map<iso3, { value: number, row?: object, point?: object }>. */
   byIso: new Map(),
+  /** Visible-year value range — drives the color stretch. */
+  domainMin: 0,
+  domainMax: 1,
 };
 
 function featurePath(feature) {
   return pathGen(feature) ?? "";
 }
 
-/** 0 → red, 0.5 → amber, 1 → green. Hue from 0° to 130°. */
-function colorForValue(v01) {
-  if (typeof v01 !== "number" || !Number.isFinite(v01)) return "#2a3142";
-  const t = Math.max(0, Math.min(1, v01));
+/**
+ * Stretches a Tomer index value to a 0–1 ramp position using the visible
+ * year's [min, max] so the full red→amber→green palette covers the actual
+ * spread of countries instead of squishing the entire world into the
+ * green half. Domain is recomputed from `state.byIso` whenever the year
+ * changes.
+ */
+function rampPosition(v) {
+  if (typeof v !== "number" || !Number.isFinite(v)) return null;
+  const { domainMin, domainMax } = state;
+  const span = domainMax - domainMin;
+  if (!span) return 0.5;
+  const t = (v - domainMin) / span;
+  return Math.max(0, Math.min(1, t));
+}
+
+/** Saturated red → amber → green ramp. Hue 0° → 60° → 130°, lightness fixed-ish. */
+function colorAtRampT(t) {
   const hue = 0 + t * 130;
-  const sat = 65 - 18 * (1 - Math.abs(0.5 - t) * 2);
-  const light = 30 + 20 * t;
+  const sat = 78 - 8 * Math.abs(0.5 - t) * 2;
+  const light = 38 + 12 * t;
   return `hsl(${hue.toFixed(1)} ${sat.toFixed(0)}% ${light.toFixed(0)}%)`;
+}
+
+function colorForValue(v) {
+  const t = rampPosition(v);
+  if (t == null) return "#2a3142";
+  return colorAtRampT(t);
 }
 
 function renderLegend() {
@@ -56,12 +79,12 @@ function renderLegend() {
   const N = 12;
   for (let i = 0; i < N; i++) {
     const t = i / (N - 1);
-    stops.push(`<i class="map-legend-stop" style="background:${colorForValue(t)}"></i>`);
+    stops.push(`<i class="map-legend-stop" style="background:${colorAtRampT(t)}"></i>`);
   }
   $legend.innerHTML = `
-    <span class="map-legend-label">${formatTomer(0)}</span>
+    <span class="map-legend-label">${formatTomer(state.domainMin)}</span>
     <span class="map-legend-bar">${stops.join("")}</span>
-    <span class="map-legend-label">${formatTomer(1)}</span>
+    <span class="map-legend-label">${formatTomer(state.domainMax)}</span>
   `;
 }
 
@@ -95,6 +118,22 @@ function buildIsoMap() {
   }
 
   state.byIso = map;
+
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const { value } of map.values()) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      if (value < lo) lo = value;
+      if (value > hi) hi = value;
+    }
+  }
+  if (Number.isFinite(lo) && Number.isFinite(hi) && hi > lo) {
+    state.domainMin = lo;
+    state.domainMax = hi;
+  } else {
+    state.domainMin = 0;
+    state.domainMax = 1;
+  }
 }
 
 function renderMap() {
@@ -191,6 +230,7 @@ function setYear(y) {
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
   buildIsoMap();
+  renderLegend();
   renderMap();
 }
 
