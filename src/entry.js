@@ -105,8 +105,8 @@ function svgToClientPoint(svg, x, y) {
 
 function sourceYearText(point, metric) {
   const sourceYear = metric.sourceYearKey ? point?.[metric.sourceYearKey] : null;
-  return typeof sourceYear === "number" && sourceYear === point.year
-    ? `Source year has data: ${sourceYear}`
+  return typeof sourceYear === "number" && sourceYear !== point.year
+    ? `Source year ${sourceYear}`
     : "";
 }
 
