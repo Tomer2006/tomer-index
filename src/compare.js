@@ -13,6 +13,7 @@ import {
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
+import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 
 const $picks = document.getElementById("compare-picks");
 const $btnAdd = document.getElementById("btn-add");
@@ -24,9 +25,6 @@ const $yearSlider = document.getElementById("compare-year-slider");
 const $yearOutput = document.getElementById("compare-year-output");
 const $presetChips = document.getElementById("compare-preset-chips");
 const $selectedChips = document.getElementById("compare-selected-chips");
-
-const YEAR_MIN = 2000;
-const YEAR_MAX = 2023;
 
 let cache = [];
 let entrySeries = {};
@@ -121,6 +119,23 @@ function snapshotForYear(iso) {
     homicideYear: point.homicideYear,
     customIndex: point.customIndex,
   };
+}
+
+function indexValue(row) {
+  const v = row?.customIndex ?? row?.customHdi;
+  return typeof v === "number" && Number.isFinite(v) ? v : NaN;
+}
+
+function rankedRowsForYear() {
+  return cache
+    .map((row) => snapshotForYear(row.iso))
+    .filter((row) => row && Number.isFinite(indexValue(row)))
+    .sort((a, b) => indexValue(b) - indexValue(a) || a.name.localeCompare(b.name));
+}
+
+function rankForCountryInRows(iso, rankedRows) {
+  const i = rankedRows.findIndex((row) => row.iso === iso);
+  return i < 0 ? "-" : String(i + 1);
 }
 
 function pillarValues(row) {
@@ -419,8 +434,9 @@ function renderCompareOut() {
   const intOrDash = (v) =>
     typeof v === "number" && Number.isFinite(v) ? formatInt(v) : "—";
 
+  const rankedRows = rankedRowsForYear();
   const rankNums = filled.map((r) => {
-    const i = cache.findIndex((c) => c.iso === r.iso);
+    const i = rankedRows.findIndex((c) => c.iso === r.iso);
     return i < 0 ? NaN : i + 1;
   });
   const healthVals = filled.map((r) => pillarValues(r).health);
@@ -451,7 +467,7 @@ function renderCompareOut() {
     compareValueHtml(r, compareMetricDefs[0], formatTomer(r.customIndex ?? r.customHdi))
   );
   const rankTexts = filled.map((r) =>
-    `${escapeHtml(String(rankForCountry(r.iso)))}${displayYearBadgeHtml(year)}`
+    `${escapeHtml(rankForCountryInRows(r.iso, rankedRows))}${displayYearBadgeHtml(year)}`
   );
 
   const headCells = filled

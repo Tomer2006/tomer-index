@@ -8,6 +8,7 @@ import {
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
+import { YEAR_MAX } from "./site-years.js";
 
 const $title = document.getElementById("entry-title");
 const $kicker = document.getElementById("entry-kicker");
@@ -136,14 +137,14 @@ function renderLatest(row, rank, series) {
       </div>
       <div class="entry-stats" role="list">
         ${statHtml("Rank", rank)}
-        ${statHtml("Life exp.", row.le.toFixed(1), sourceYearBadgeHtml(row, "leYear", 2023))}
-        ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", 2023))}
-        ${statHtml("GNI pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", 2023))}
-        ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", 2023))}
+        ${statHtml("Life exp.", row.le.toFixed(1), sourceYearBadgeHtml(row, "leYear", YEAR_MAX))}
+        ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", YEAR_MAX))}
+        ${statHtml("GNI pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
+        ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", YEAR_MAX))}
         ${statHtml(
           "Tomer",
           formatTomer(idx),
-          sourceYearBadgeHtml(row, ["leYear", "haleYear", "gniYear", "homicideYear"], 2023)
+          sourceYearBadgeHtml(row, ["leYear", "haleYear", "gniYear", "homicideYear"], YEAR_MAX)
         )}
       </div>
     </section>

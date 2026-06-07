@@ -7,6 +7,7 @@ import {
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadMapData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
+import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { geoEquirectangular, geoPath } from "d3-geo";
 
 const $status = document.getElementById("status");
@@ -17,9 +18,6 @@ const $legend = document.getElementById("map-legend");
 const $year = document.getElementById("map-year-slider");
 const $yearOut = document.getElementById("map-year-output");
 const $detail = document.getElementById("map-detail");
-
-const YEAR_MIN = 2000;
-const YEAR_MAX = 2023;
 
 const W = 960;
 const H = 500;

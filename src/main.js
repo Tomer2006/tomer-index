@@ -9,6 +9,7 @@ import { combinedHealthLei } from "./hdi-core.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
+import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
@@ -39,9 +40,6 @@ function healthValue(r) {
   if (typeof r.hale !== "number" || !Number.isFinite(r.hale)) return NaN;
   return combinedHealthLei(r.le, r.hale);
 }
-const YEAR_MIN = 2000;
-const YEAR_MAX = 2023;
-
 const state = {
   year: YEAR_MAX,
   search: "",

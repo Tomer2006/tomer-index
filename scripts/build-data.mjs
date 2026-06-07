@@ -16,6 +16,7 @@ import {
   customIndexHealthIncomeSafetyFull,
 } from "../src/hdi-core.js";
 import { dataQualityForSeries } from "../src/data-quality.js";
+import { YEAR_MAX, YEAR_MIN } from "../src/site-years.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -61,15 +62,16 @@ async function fetchWorldBankJson(urlString, indicator) {
 /**
  * WDI `date=` upper bound (inclusive). Use current calendar year + 1 so each `npm run build-data`
  * requests the newest country-years the API has (leaderboard uses `latestByCountry` / `latestHaleByIso`
- * per series). Entry history pages are rendered on a 2000-2023 timeline using the best observation
+ * per series). Entry history pages are rendered on a configured timeline using the best observation
  * available as of each year within that window: exact same-year values when present, otherwise
  * the latest prior value from 2000 onward. Future observations are not pulled backward.
  */
 const WDI_END_YEAR = new Date().getUTCFullYear() + 1;
 const DATE_RANGE = `1960:${WDI_END_YEAR}`;
 const DATE_RANGE_POP = `1960:${WDI_END_YEAR}`;
-const SERIES_YEAR_MIN = 2000;
-const SERIES_YEAR_MAX = 2023;
+const SERIES_YEAR_MIN = YEAR_MIN;
+const SERIES_YEAR_MAX = YEAR_MAX;
+const SERIES_RANGE_LABEL = `${SERIES_YEAR_MIN}-${SERIES_YEAR_MAX}`;
 
 const WORLD_BANK_INPUTS = {
   lifeExpectancy: {
@@ -648,7 +650,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Each plotted year includes countries with observations available as of that year within the 2000-2023 window: exact same-year values when present, otherwise the latest prior value from 2000 onward. Future observations are not pulled backward.",
+            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Each plotted year includes countries with observations available as of that year within the ${SERIES_RANGE_LABEL} window: exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
           points: [],
         });
       }
@@ -666,6 +668,46 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
   }
 
   return byIso;
+}
+
+function indexSortValue(row) {
+  const v = row.customIndex ?? row.customHdi;
+  return typeof v === "number" && Number.isFinite(v) ? v : NaN;
+}
+
+function sortRowsByIndex(rows) {
+  return rows.sort((a, b) => {
+    const av = indexSortValue(a);
+    const bv = indexSortValue(b);
+    const aBad = !Number.isFinite(av);
+    const bBad = !Number.isFinite(bv);
+    if (aBad && bBad) return a.name.localeCompare(b.name);
+    if (aBad) return 1;
+    if (bBad) return -1;
+    return bv - av || a.name.localeCompare(b.name);
+  });
+}
+
+function rowsForDisplayYear(rows, entrySeries, displayYear) {
+  return sortRowsByIndex(
+    rows.map((row) => {
+      const point = entrySeries[row.iso]?.points?.find((p) => p.year === displayYear);
+      if (!point) return row;
+      return {
+        ...row,
+        le: point.le,
+        leYear: point.leYear ?? row.leYear,
+        hale: point.hale,
+        haleYear: point.haleYear ?? row.haleYear,
+        gni: point.gni,
+        gniYear: point.gniYear ?? row.gniYear,
+        homicidesPer100k: point.homicidesPer100k,
+        homicideYear: point.homicideYear ?? row.homicideYear,
+        population: point.population ?? row.population,
+        customIndex: point.customIndex,
+      };
+    })
+  );
 }
 
 async function main() {
@@ -694,10 +736,10 @@ async function main() {
   const popMap = latestByCountry(popRows);
   const derivedGroupRows = buildDerivedGroupRows(countryRows, popMap, countryMeta);
   const groupIso = new Set(derivedGroupRows.map((r) => r.iso));
-  const countries = [
+  const latestCountries = sortRowsByIndex([
     ...countryRows.filter((r) => !groupIso.has(r.iso)),
     ...derivedGroupRows,
-  ].sort((a, b) => b.customIndex - a.customIndex);
+  ]);
 
   const { yearMin, yearMax } = yearWindowFromRange(DATE_RANGE);
   const leByCY = byCountryYear(leRows);
@@ -731,7 +773,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each metric is stored whenever it has an observation available as of that year within the 2000-2023 window: exact same-year values when present, otherwise the latest prior value from 2000 onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.",
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each metric is stored whenever it has an observation available as of that year within the ${SERIES_RANGE_LABEL} window: exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
@@ -748,6 +790,7 @@ async function main() {
   )) {
     if (series.points.length) entrySeries[iso] = series;
   }
+  const countries = rowsForDisplayYear(latestCountries, entrySeries, SERIES_YEAR_MAX);
   const firstP = worldSeries[0];
   const lastP = worldSeries[worldSeries.length - 1];
   const fmt4 = (v) => (v == null ? "—" : v.toFixed(4));
@@ -784,7 +827,7 @@ async function main() {
     indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
     globalAverageSeries: {
       definition:
-        "Worldwide published timeline, not a sample of individual countries. Each plotted year from 2000-2023 uses observations available as of that year within the 2000-2023 window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from 2000 onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.",
+        `Worldwide published timeline, not a sample of individual countries. Each plotted year from ${SERIES_RANGE_LABEL} uses observations available as of that year within the ${SERIES_RANGE_LABEL} window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from ${SERIES_YEAR_MIN} onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.`,
       chartTitle: "Worldwide aggregate (WLD + global HALE)",
       footNote,
       points: worldSeries,
