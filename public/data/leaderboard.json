@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T17:28:55.478Z",
+  "generatedAt": "2026-06-07T18:18:42.932Z",
   "yearWindow": "1960:2027",
   "indicators": {
     "lifeExpectancy": "SP.DYN.LE00.IN",
@@ -21,9 +21,9 @@
     "safety": 0.1111111111111111
   },
   "globalAverageSeries": {
-    "definition": "Worldwide published timeline, not a sample of individual countries. Each plotted year from 2000-2025 uses observations available as of that year within the 2000-2025 window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from 2000 onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.",
+    "definition": "Worldwide published timeline, not a sample of individual countries. Each plotted year from 2000-2023 uses observations available as of that year within the 2000-2023 window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from 2000 onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.",
     "chartTitle": "Worldwide aggregate (WLD + global HALE)",
-    "footNote": "2000 0.7194 → 2025 0.7782. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each plotted year uses exact same-year values when present, otherwise the latest prior value from 2000 onward. Pop. = WLD world total.",
+    "footNote": "2000 0.7194 → 2023 0.7777. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each plotted year uses exact same-year values when present, otherwise the latest prior value from 2000 onward. Pop. = WLD world total.",
     "points": [
       {
         "year": 2000,
@@ -288,568 +288,546 @@
         "populationYear": 2023,
         "n": 1,
         "population": 8064057930
-      },
-      {
-        "year": 2024,
-        "value": 0.7782,
-        "leYear": 2024,
-        "haleYear": 2021,
-        "gniYear": 2023,
-        "homicideYear": 2023,
-        "populationYear": 2024,
-        "n": 1,
-        "population": 8141808945
-      },
-      {
-        "year": 2025,
-        "value": 0.7782,
-        "leYear": 2024,
-        "haleYear": 2021,
-        "gniYear": 2023,
-        "homicideYear": 2023,
-        "populationYear": 2024,
-        "n": 1,
-        "population": 8141808945
       }
     ]
   },
   "qualityByIso": {
     "ISL": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ARE": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "QAT": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "KWT": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BHR": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 1 yearly point out of 26 points.",
+      "description": "Homicides /100k missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GRC": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "OMN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 2 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 2 yearly points out of 24 points.",
       "badPoints": 2,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "CHL": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 3 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 3 yearly points out of 24 points.",
       "badPoints": 3,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MNE": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MYS": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 15 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 15 yearly points out of 24 points.",
       "badPoints": 15,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TUR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "PRI": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MDV": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 14 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 14 yearly points out of 24 points.",
       "badPoints": 14,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "CHN": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ARG": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 1 yearly point out of 26 points.",
+      "description": "Homicides /100k missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SYC": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ATG": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "RUS": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 12 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 12 yearly points out of 24 points.",
       "badPoints": 12,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "THA": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GEO": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "AZE": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "DZA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 6 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BRB": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "IRN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 9 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 9 yearly points out of 24 points.",
       "badPoints": 9,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "LKA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 5 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 5 yearly points out of 24 points.",
       "badPoints": 5,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "VNM": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 1 yearly point out of 26 points.",
+      "description": "Homicides /100k missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "PER": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 11 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 11 yearly points out of 24 points.",
       "badPoints": 11,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MNG": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TUN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SUR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "EGY": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 3 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 3 yearly points out of 24 points.",
       "badPoints": 3,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "LBN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 8 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 8 yearly points out of 24 points.",
       "badPoints": 8,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "JOR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TKM": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GRD": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "IDN": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "CPV": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 7 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 7 yearly points out of 24 points.",
       "badPoints": 7,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BGD": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 16 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 16 yearly points out of 24 points.",
       "badPoints": 16,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "UZB": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "IRQ": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 8 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 8 yearly points out of 24 points.",
       "badPoints": 8,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "KGZ": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 10 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 10 yearly points out of 24 points.",
       "badPoints": 10,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GUY": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TTO": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BWA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 1 yearly point out of 26 points.",
+      "description": "Homicides /100k missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "WSM": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 9 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 9 yearly points out of 24 points.",
       "badPoints": 9,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BOL": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 15 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 15 yearly points out of 24 points.",
       "badPoints": 15,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "FJI": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "LCA": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "STP": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MRT": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 18 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 18 yearly points out of 24 points.",
       "badPoints": 18,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SYR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "NPL": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 1 yearly point out of 26 points.",
+      "description": "GNI pc (PPP) missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GHA": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "AGO": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 11 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 11 yearly points out of 24 points.",
       "badPoints": 11,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MMR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SEN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 15 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 15 yearly points out of 24 points.",
       "badPoints": 15,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "KEN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "FSM": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "VUT": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 19 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 19 yearly points out of 24 points.",
       "badPoints": 19,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SWZ": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 13 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 13 yearly points out of 24 points.",
       "badPoints": 13,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "KIR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 6 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TLS": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "TZA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 3 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 3 yearly points out of 24 points.",
       "badPoints": 3,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "RWA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 6 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 6 yearly points out of 24 points.",
       "badPoints": 6,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "VCT": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "PNG": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ZWE": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 9 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 9 yearly points out of 24 points.",
       "badPoints": 9,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ETH": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 12 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 12 yearly points out of 24 points.",
       "badPoints": 12,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SLB": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "JAM": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BEN": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 17 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 17 yearly points out of 24 points.",
       "badPoints": 17,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "NGA": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "UGA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 7 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 7 yearly points out of 24 points.",
       "badPoints": 7,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "ZMB": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SLE": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 4 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 4 yearly points out of 24 points.",
       "badPoints": 4,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "GNB": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 16 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 16 yearly points out of 24 points.",
       "badPoints": 16,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "SDN": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 18 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 18 yearly points out of 24 points.",
       "badPoints": 18,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BFA": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 2 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 2 yearly points out of 24 points.",
       "badPoints": 2,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "AFG": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 20 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 20 yearly points out of 24 points.",
       "badPoints": 20,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MWI": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) missing for 17 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) missing for 17 yearly points out of 24 points.",
       "badPoints": 17,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "NER": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 11 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 11 yearly points out of 24 points.",
       "badPoints": 11,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "HTI": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 7 yearly points out of 26 points.",
+      "description": "Homicides /100k missing for 7 yearly points out of 24 points.",
       "badPoints": 7,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "LBR": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "MOZ": {
       "label": "Incomplete data",
-      "description": "Homicides /100k missing for 1 yearly point out of 26 points.",
+      "description": "Homicides /100k missing for 1 yearly point out of 24 points.",
       "badPoints": 1,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "BDI": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 21 yearly points out of 24 points.",
       "badPoints": 21,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "LSO": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 7 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 7 yearly points out of 24 points.",
       "badPoints": 7,
-      "totalPoints": 26
+      "totalPoints": 24
     },
     "CAF": {
       "label": "Incomplete data",
-      "description": "GNI pc (PPP) and Homicides /100k missing for 16 yearly points out of 26 points.",
+      "description": "GNI pc (PPP) and Homicides /100k missing for 16 yearly points out of 24 points.",
       "badPoints": 16,
-      "totalPoints": 26
+      "totalPoints": 24
     }
   },
   "countries": [
     {
       "iso": "SGP",
       "name": "Singapore",
-      "leYear": 2024,
-      "le": 83.35,
+      "leYear": 2023,
+      "le": 83.1,
       "haleYear": 2021,
       "hale": 73.65,
-      "gniYear": 2024,
-      "gni": 110344.36,
+      "gniYear": 2023,
+      "gni": 106019.49,
       "homicideYear": 2023,
       "homicidesPer100k": 0.069,
-      "customIndex": 0.9541,
+      "customIndex": 0.9532,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -858,20 +836,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 6036860
+      "population": 5917648
     },
     {
       "iso": "CHE",
       "name": "Switzerland",
-      "leYear": 2024,
-      "le": 84.41,
+      "leYear": 2023,
+      "le": 84.16,
       "haleYear": 2021,
       "hale": 71.15,
       "gniYear": 2023,
       "gni": 79625.11,
       "homicideYear": 2023,
       "homicidesPer100k": 0.597,
-      "customIndex": 0.9479,
+      "customIndex": 0.947,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -880,20 +858,42 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 9005582
+      "population": 8888822
+    },
+    {
+      "iso": "LUX",
+      "name": "Luxembourg",
+      "leYear": 2023,
+      "le": 83.31,
+      "haleYear": 2021,
+      "hale": 71.23,
+      "gniYear": 2023,
+      "gni": 87964.76,
+      "homicideYear": 2022,
+      "homicidesPer100k": 1.531,
+      "customIndex": 0.9426,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 666430
     },
     {
       "iso": "NOR",
       "name": "Norway",
-      "leYear": 2024,
-      "le": 83.16,
+      "leYear": 2023,
+      "le": 83.01,
       "haleYear": 2021,
       "hale": 71.16,
       "gniYear": 2022,
       "gni": 110848.88,
       "homicideYear": 2023,
       "homicidesPer100k": 0.725,
-      "customIndex": 0.9432,
+      "customIndex": 0.9426,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -902,42 +902,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5572279
-    },
-    {
-      "iso": "LUX",
-      "name": "Luxembourg",
-      "leYear": 2024,
-      "le": 83.2,
-      "haleYear": 2021,
-      "hale": 71.23,
-      "gniYear": 2024,
-      "gni": 85030.47,
-      "homicideYear": 2022,
-      "homicidesPer100k": 1.531,
-      "customIndex": 0.9422,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 677012
+      "population": 5519601
     },
     {
       "iso": "IRL",
       "name": "Ireland",
-      "leYear": 2024,
-      "le": 83.01,
+      "leYear": 2023,
+      "le": 82.81,
       "haleYear": 2021,
       "hale": 70,
-      "gniYear": 2024,
-      "gni": 88655.91,
+      "gniYear": 2023,
+      "gni": 86356.05,
       "homicideYear": 2023,
       "homicidesPer100k": 0.654,
-      "customIndex": 0.9385,
+      "customIndex": 0.9378,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -946,20 +924,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5395790
+      "population": 5311538
     },
     {
       "iso": "SWE",
       "name": "Sweden",
-      "leYear": 2024,
-      "le": 84.06,
+      "leYear": 2023,
+      "le": 83.31,
       "haleYear": 2021,
       "hale": 71.12,
-      "gniYear": 2024,
-      "gni": 64920.64,
+      "gniYear": 2023,
+      "gni": 64451.08,
       "homicideYear": 2023,
       "homicidesPer100k": 1.147,
-      "customIndex": 0.9364,
+      "customIndex": 0.9332,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -968,20 +946,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 10569709
+      "population": 10536632
     },
     {
       "iso": "DNK",
       "name": "Denmark",
-      "leYear": 2024,
-      "le": 82.25,
+      "leYear": 2023,
+      "le": 81.75,
       "haleYear": 2021,
       "hale": 70.06,
-      "gniYear": 2024,
-      "gni": 71584.7,
+      "gniYear": 2023,
+      "gni": 70178.86,
       "homicideYear": 2023,
       "homicidesPer100k": 0.841,
-      "customIndex": 0.9327,
+      "customIndex": 0.9296,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -990,20 +968,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5976992
+      "population": 5946952
     },
     {
       "iso": "NLD",
       "name": "Netherlands",
-      "leYear": 2024,
-      "le": 81.97,
+      "leYear": 2023,
+      "le": 81.86,
       "haleYear": 2021,
       "hale": 69.97,
-      "gniYear": 2024,
-      "gni": 70390.12,
+      "gniYear": 2023,
+      "gni": 69746.15,
       "homicideYear": 2023,
       "homicidesPer100k": 0.691,
-      "customIndex": 0.9305,
+      "customIndex": 0.9295,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1012,42 +990,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 17993485
-    },
-    {
-      "iso": "KOR",
-      "name": "Korea, Rep.",
-      "leYear": 2024,
-      "le": 83.63,
-      "haleYear": 2021,
-      "hale": 72.45,
-      "gniYear": 2024,
-      "gni": 55151.45,
-      "homicideYear": 2023,
-      "homicidesPer100k": 0.477,
-      "customIndex": 0.9302,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 51751065
+      "population": 17877117
     },
     {
       "iso": "ISL",
       "name": "Iceland",
-      "leYear": 2024,
-      "le": 82.81,
+      "leYear": 2023,
+      "le": 82.46,
       "haleYear": 2021,
       "hale": 71.37,
       "gniYear": 2021,
       "gni": 61705.4,
       "homicideYear": 2023,
       "homicidesPer100k": 1.29,
-      "customIndex": 0.9292,
+      "customIndex": 0.928,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1056,20 +1012,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 386506
+      "population": 385663
     },
     {
       "iso": "ARE",
       "name": "United Arab Emirates",
-      "leYear": 2024,
-      "le": 83.07,
+      "leYear": 2023,
+      "le": 82.91,
       "haleYear": 2021,
       "hale": 67.27,
       "gniYear": 2023,
       "gni": 84671.33,
       "homicideYear": 2022,
       "homicidesPer100k": 0.693,
-      "customIndex": 0.9285,
+      "customIndex": 0.9279,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -1078,12 +1034,34 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 10986400
+      "population": 10483751
+    },
+    {
+      "iso": "KOR",
+      "name": "Korea, Rep.",
+      "leYear": 2023,
+      "le": 83.43,
+      "haleYear": 2021,
+      "hale": 72.45,
+      "gniYear": 2023,
+      "gni": 53103.33,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.477,
+      "customIndex": 0.927,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 51712619
     },
     {
       "iso": "JPN",
       "name": "Japan",
-      "leYear": 2024,
+      "leYear": 2023,
       "le": 84.04,
       "haleYear": 2021,
       "hale": 73.4,
@@ -1100,20 +1078,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 123975371
+      "population": 124516650
     },
     {
       "iso": "AUS",
       "name": "Australia",
-      "leYear": 2024,
+      "leYear": 2023,
       "le": 83.05,
       "haleYear": 2021,
       "hale": 70.61,
-      "gniYear": 2024,
-      "gni": 58610.67,
+      "gniYear": 2023,
+      "gni": 59439.47,
       "homicideYear": 2023,
       "homicidesPer100k": 0.854,
-      "customIndex": 0.9248,
+      "customIndex": 0.9257,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -1122,39 +1100,17 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 27196812
-    },
-    {
-      "iso": "QAT",
-      "name": "Qatar",
-      "leYear": 2024,
-      "le": 82.52,
-      "haleYear": 2021,
-      "hale": 66.21,
-      "gniYear": 2021,
-      "gni": 115036.66,
-      "homicideYear": 2022,
-      "homicidesPer100k": 0.069,
-      "customIndex": 0.9235,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 2857822
+      "population": 26659922
     },
     {
       "iso": "BEL",
       "name": "Belgium",
-      "leYear": 2024,
-      "le": 82.3,
+      "leYear": 2023,
+      "le": 82.4,
       "haleYear": 2021,
       "hale": 69.79,
-      "gniYear": 2024,
-      "gni": 62970.64,
+      "gniYear": 2023,
+      "gni": 62624.98,
       "homicideYear": 2021,
       "homicidesPer100k": 1.08,
       "customIndex": 0.9233,
@@ -1166,42 +1122,42 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 11858610
+      "population": 11779946
     },
     {
-      "iso": "ITA",
-      "name": "Italy",
-      "leYear": 2024,
-      "le": 83.95,
+      "iso": "QAT",
+      "name": "Qatar",
+      "leYear": 2023,
+      "le": 82.37,
       "haleYear": 2021,
-      "hale": 70.56,
-      "gniYear": 2024,
-      "gni": 53200.45,
-      "homicideYear": 2023,
-      "homicidesPer100k": 0.568,
-      "customIndex": 0.9221,
+      "hale": 66.21,
+      "gniYear": 2021,
+      "gni": 115036.66,
+      "homicideYear": 2022,
+      "homicidesPer100k": 0.069,
+      "customIndex": 0.923,
       "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
       },
       "incomeLevel": {
         "id": "HIC",
         "name": "High income"
       },
-      "population": 58952704
+      "population": 2656032
     },
     {
       "iso": "AUT",
       "name": "Austria",
-      "leYear": 2024,
-      "le": 82,
+      "leYear": 2023,
+      "le": 81.79,
       "haleYear": 2021,
       "hale": 69.79,
-      "gniYear": 2024,
-      "gni": 62384.58,
+      "gniYear": 2023,
+      "gni": 63324.74,
       "homicideYear": 2023,
       "homicidesPer100k": 0.876,
-      "customIndex": 0.9219,
+      "customIndex": 0.9222,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1210,20 +1166,108 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 9177982
+      "population": 9131761
+    },
+    {
+      "iso": "MLT",
+      "name": "Malta",
+      "leYear": 2023,
+      "le": 83.36,
+      "haleYear": 2021,
+      "hale": 70.71,
+      "gniYear": 2023,
+      "gni": 52801.93,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.563,
+      "customIndex": 0.92,
+      "region": {
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 552747
+    },
+    {
+      "iso": "ITA",
+      "name": "Italy",
+      "leYear": 2023,
+      "le": 83.35,
+      "haleYear": 2021,
+      "hale": 70.56,
+      "gniYear": 2023,
+      "gni": 52417.71,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.568,
+      "customIndex": 0.919,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 58984216
+    },
+    {
+      "iso": "DEU",
+      "name": "Germany",
+      "leYear": 2023,
+      "le": 81.04,
+      "haleYear": 2021,
+      "hale": 68.93,
+      "gniYear": 2023,
+      "gni": 65179.65,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.911,
+      "customIndex": 0.918,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 83287273
+    },
+    {
+      "iso": "FRA",
+      "name": "France",
+      "leYear": 2023,
+      "le": 82.83,
+      "haleYear": 2021,
+      "hale": 70.08,
+      "gniYear": 2023,
+      "gni": 54757.9,
+      "homicideYear": 2023,
+      "homicidesPer100k": 1.335,
+      "customIndex": 0.9169,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 68372286
     },
     {
       "iso": "KWT",
       "name": "Kuwait",
-      "leYear": 2024,
-      "le": 84.58,
+      "leYear": 2023,
+      "le": 83.19,
       "haleYear": 2021,
       "hale": 67.78,
       "gniYear": 2023,
       "gni": 59021.36,
       "homicideYear": 2020,
       "homicidesPer100k": 0.25,
-      "customIndex": 0.9216,
+      "customIndex": 0.9165,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -1232,64 +1276,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 4897263
-    },
-    {
-      "iso": "MLT",
-      "name": "Malta",
-      "leYear": 2024,
-      "le": 82.96,
-      "haleYear": 2021,
-      "hale": 70.71,
-      "gniYear": 2024,
-      "gni": 54738.56,
-      "homicideYear": 2023,
-      "homicidesPer100k": 0.563,
-      "customIndex": 0.9209,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 568847
-    },
-    {
-      "iso": "FRA",
-      "name": "France",
-      "leYear": 2024,
-      "le": 82.98,
-      "haleYear": 2021,
-      "hale": 70.08,
-      "gniYear": 2024,
-      "gni": 55091.11,
-      "homicideYear": 2023,
-      "homicidesPer100k": 1.335,
-      "customIndex": 0.9178,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 68551653
+      "population": 4853420
     },
     {
       "iso": "ESP",
       "name": "Spain",
-      "leYear": 2024,
-      "le": 83.89,
+      "leYear": 2023,
+      "le": 83.93,
       "haleYear": 2021,
       "hale": 71.11,
-      "gniYear": 2024,
-      "gni": 48453.57,
+      "gniYear": 2023,
+      "gni": 47148.19,
       "homicideYear": 2023,
       "homicidesPer100k": 0.691,
-      "customIndex": 0.9175,
+      "customIndex": 0.9158,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1298,42 +1298,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 48848840
-    },
-    {
-      "iso": "DEU",
-      "name": "Germany",
-      "leYear": 2024,
-      "le": 80.79,
-      "haleYear": 2021,
-      "hale": 68.93,
-      "gniYear": 2024,
-      "gni": 65115.83,
-      "homicideYear": 2023,
-      "homicidesPer100k": 0.911,
-      "customIndex": 0.917,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 83516593
+      "population": 48352528
     },
     {
       "iso": "FIN",
       "name": "Finland",
-      "leYear": 2024,
-      "le": 82.34,
+      "leYear": 2023,
+      "le": 81.59,
       "haleYear": 2021,
       "hale": 69.93,
-      "gniYear": 2024,
-      "gni": 55001.81,
+      "gniYear": 2023,
+      "gni": 55493.14,
       "homicideYear": 2023,
       "homicidesPer100k": 0.982,
-      "customIndex": 0.9154,
+      "customIndex": 0.9133,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1342,20 +1320,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5619911
+      "population": 5583911
     },
     {
       "iso": "CAN",
       "name": "Canada",
-      "leYear": 2024,
-      "le": 82.11,
+      "leYear": 2023,
+      "le": 81.63,
       "haleYear": 2021,
       "hale": 69.78,
-      "gniYear": 2024,
-      "gni": 55393.58,
+      "gniYear": 2023,
+      "gni": 56168.47,
       "homicideYear": 2023,
       "homicidesPer100k": 1.98,
-      "customIndex": 0.9128,
+      "customIndex": 0.912,
       "region": {
         "id": "NAC",
         "name": "North America"
@@ -1364,20 +1342,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 41288599
+      "population": 40083484
     },
     {
       "iso": "ISR",
       "name": "Israel",
-      "leYear": 2024,
+      "leYear": 2023,
       "le": 83.2,
       "haleYear": 2021,
       "hale": 70.76,
-      "gniYear": 2024,
-      "gni": 46940.04,
+      "gniYear": 2023,
+      "gni": 46720.54,
       "homicideYear": 2022,
       "homicidesPer100k": 1.626,
-      "customIndex": 0.9101,
+      "customIndex": 0.9098,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -1386,36 +1364,36 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 9974400
+      "population": 9849000
     },
     {
       "iso": "LNX",
       "name": "Not classified",
       "leYear": "mixed",
-      "le": 81.34,
+      "le": 81.08,
       "haleYear": "mixed",
-      "hale": 68.24,
+      "hale": 68.26,
       "gniYear": "mixed",
-      "gni": 61263.28,
+      "gni": 61014.65,
       "homicideYear": "mixed",
-      "homicidesPer100k": 2.347,
+      "homicidesPer100k": 2.345,
       "derivedKind": "lendingType",
       "memberCount": 45,
-      "customIndex": 0.9101,
-      "population": 1144389916
+      "customIndex": 0.909,
+      "population": 1134424706
     },
     {
       "iso": "CYP",
       "name": "Cyprus",
-      "leYear": 2024,
-      "le": 81.82,
+      "leYear": 2023,
+      "le": 81.65,
       "haleYear": 2021,
       "hale": 70.74,
-      "gniYear": 2024,
-      "gni": 47841.86,
+      "gniYear": 2023,
+      "gni": 46699.94,
       "homicideYear": 2023,
       "homicidesPer100k": 0.818,
-      "customIndex": 0.9077,
+      "customIndex": 0.9055,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1424,20 +1402,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 1358282
+      "population": 1344976
     },
     {
       "iso": "SVN",
       "name": "Slovenia",
-      "leYear": 2024,
-      "le": 82.29,
+      "leYear": 2023,
+      "le": 81.93,
       "haleYear": 2021,
       "hale": 69.36,
-      "gniYear": 2024,
-      "gni": 48592.27,
+      "gniYear": 2023,
+      "gni": 47485.46,
       "homicideYear": 2023,
       "homicidesPer100k": 0.566,
-      "customIndex": 0.9059,
+      "customIndex": 0.9031,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1446,20 +1424,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 2127400
+      "population": 2120461
     },
     {
       "iso": "GBR",
       "name": "United Kingdom",
-      "leYear": 2024,
-      "le": 81.39,
+      "leYear": 2023,
+      "le": 81.24,
       "haleYear": 2021,
       "hale": 68.64,
-      "gniYear": 2024,
-      "gni": 52324.65,
+      "gniYear": 2023,
+      "gni": 51329.07,
       "homicideYear": 2021,
       "homicidesPer100k": 1.119,
-      "customIndex": 0.9038,
+      "customIndex": 0.9021,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1468,20 +1446,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 69226000
+      "population": 68492000
     },
     {
       "iso": "NZL",
       "name": "New Zealand",
-      "leYear": 2024,
-      "le": 82.01,
+      "leYear": 2023,
+      "le": 81.76,
       "haleYear": 2021,
       "hale": 69.98,
       "gniYear": 2023,
       "gni": 46357.02,
       "homicideYear": 2022,
       "homicidesPer100k": 1.461,
-      "customIndex": 0.9025,
+      "customIndex": 0.9016,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -1490,20 +1468,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5287500
+      "population": 5200000
     },
     {
       "iso": "BHR",
       "name": "Bahrain",
-      "leYear": 2024,
-      "le": 81.42,
+      "leYear": 2023,
+      "le": 81.28,
       "haleYear": 2021,
       "hale": 64.24,
-      "gniYear": 2024,
-      "gni": 63324.06,
+      "gniYear": 2023,
+      "gni": 62996.98,
       "homicideYear": 2022,
       "homicidesPer100k": 0.196,
-      "customIndex": 0.9012,
+      "customIndex": 0.9004,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -1512,20 +1490,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 1588670
+      "population": 1577059
     },
     {
       "iso": "BRN",
       "name": "Brunei Darussalam",
-      "leYear": 2024,
-      "le": 75.5,
+      "leYear": 2023,
+      "le": 75.33,
       "haleYear": 2021,
       "hale": 67.1,
-      "gniYear": 2024,
-      "gni": 80624.53,
+      "gniYear": 2023,
+      "gni": 79542.67,
       "homicideYear": 2013,
       "homicidesPer100k": 0.486,
-      "customIndex": 0.8994,
+      "customIndex": 0.8987,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -1534,36 +1512,58 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 462721
+      "population": 458949
+    },
+    {
+      "iso": "SAU",
+      "name": "Saudi Arabia",
+      "leYear": 2023,
+      "le": 78.73,
+      "haleYear": 2021,
+      "hale": 65.64,
+      "gniYear": 2023,
+      "gni": 65885.2,
+      "homicideYear": 2019,
+      "homicidesPer100k": 0.935,
+      "customIndex": 0.8975,
+      "region": {
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 33702731
     },
     {
       "iso": "HIC",
       "name": "High income",
       "leYear": "mixed",
-      "le": 80.36,
+      "le": 80.12,
       "haleYear": "mixed",
-      "hale": 67.3,
+      "hale": 67.31,
       "gniYear": "mixed",
-      "gni": 57383.75,
+      "gni": 57044.62,
       "homicideYear": "mixed",
-      "homicidesPer100k": 2.96,
+      "homicidesPer100k": 2.962,
       "derivedKind": "incomeLevel",
       "memberCount": 58,
-      "customIndex": 0.8978,
-      "population": 1384047132
+      "customIndex": 0.8966,
+      "population": 1374440246
     },
     {
       "iso": "PRT",
       "name": "Portugal",
-      "leYear": 2024,
-      "le": 82.38,
+      "leYear": 2023,
+      "le": 82.33,
       "haleYear": 2021,
       "hale": 69.52,
-      "gniYear": 2024,
-      "gni": 42358.14,
+      "gniYear": 2023,
+      "gni": 41041.13,
       "homicideYear": 2022,
       "homicidesPer100k": 0.72,
-      "customIndex": 0.8976,
+      "customIndex": 0.8953,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1572,58 +1572,36 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 10694681
-    },
-    {
-      "iso": "SAU",
-      "name": "Saudi Arabia",
-      "leYear": 2024,
-      "le": 78.98,
-      "haleYear": 2021,
-      "hale": 65.64,
-      "gniYear": 2024,
-      "gni": 62735.81,
-      "homicideYear": 2019,
-      "homicidesPer100k": 0.935,
-      "customIndex": 0.8955,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 35300280
+      "population": 10578174
     },
     {
       "iso": "NAC",
       "name": "North America",
       "leYear": "mixed",
-      "le": 79.24,
+      "le": 78.73,
       "haleYear": "mixed",
-      "hale": 64.55,
+      "hale": 64.54,
       "gniYear": "mixed",
-      "gni": 72107.36,
+      "gni": 72225.42,
       "homicideYear": "mixed",
-      "homicidesPer100k": 5.354,
+      "homicidesPer100k": 5.361,
       "derivedKind": "region",
       "memberCount": 2,
-      "customIndex": 0.8931,
-      "population": 381399587
+      "customIndex": 0.8911,
+      "population": 376889715
     },
     {
       "iso": "USA",
       "name": "United States",
-      "leYear": 2024,
-      "le": 78.89,
+      "leYear": 2023,
+      "le": 78.39,
       "haleYear": 2021,
       "hale": 63.91,
       "gniYear": 2023,
       "gni": 74136.37,
       "homicideYear": 2023,
       "homicidesPer100k": 5.763,
-      "customIndex": 0.8902,
+      "customIndex": 0.8883,
       "region": {
         "id": "NAC",
         "name": "North America"
@@ -1632,20 +1610,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 340110988
+      "population": 336806231
     },
     {
       "iso": "GRC",
       "name": "Greece",
-      "leYear": 2024,
-      "le": 81.84,
+      "leYear": 2023,
+      "le": 81.74,
       "haleYear": 2021,
       "hale": 68.55,
-      "gniYear": 2024,
-      "gni": 38018.39,
+      "gniYear": 2023,
+      "gni": 36948.2,
       "homicideYear": 2023,
       "homicidesPer100k": 0.84,
-      "customIndex": 0.8848,
+      "customIndex": 0.8826,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1654,20 +1632,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 10405134
+      "population": 10407351
     },
     {
       "iso": "CZE",
       "name": "Czechia",
-      "leYear": 2024,
-      "le": 79.98,
+      "leYear": 2023,
+      "le": 79.83,
       "haleYear": 2021,
       "hale": 66.66,
-      "gniYear": 2024,
-      "gni": 46352.64,
+      "gniYear": 2023,
+      "gni": 45394.18,
       "homicideYear": 2023,
       "homicidesPer100k": 0.768,
-      "customIndex": 0.8842,
+      "customIndex": 0.8823,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1676,20 +1654,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 10905028
+      "population": 10864042
     },
     {
       "iso": "HRV",
       "name": "Croatia",
-      "leYear": 2024,
-      "le": 78.93,
+      "leYear": 2023,
+      "le": 78.47,
       "haleYear": 2021,
       "hale": 66.8,
-      "gniYear": 2024,
-      "gni": 43183.14,
+      "gniYear": 2023,
+      "gni": 40859.19,
       "homicideYear": 2023,
       "homicidesPer100k": 0.667,
-      "customIndex": 0.8765,
+      "customIndex": 0.8713,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1698,20 +1676,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 3866200
+      "population": 3859686
     },
     {
       "iso": "EST",
       "name": "Estonia",
-      "leYear": 2024,
-      "le": 79.3,
+      "leYear": 2023,
+      "le": 78.79,
       "haleYear": 2021,
       "hale": 66.74,
-      "gniYear": 2024,
-      "gni": 41321.15,
+      "gniYear": 2023,
+      "gni": 41134.42,
       "homicideYear": 2023,
       "homicidesPer100k": 1.536,
-      "customIndex": 0.8734,
+      "customIndex": 0.8713,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1720,36 +1698,36 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 1372341
+      "population": 1370286
     },
     {
       "iso": "ECS",
       "name": "Europe & Central Asia",
       "leYear": "mixed",
-      "le": 78.6,
+      "le": 78.39,
       "haleYear": "mixed",
-      "hale": 66.25,
+      "hale": 66.24,
       "gniYear": "mixed",
-      "gni": 43793.7,
+      "gni": 43291.36,
       "homicideYear": "mixed",
-      "homicidesPer100k": 2.272,
+      "homicidesPer100k": 2.277,
       "derivedKind": "region",
       "memberCount": 48,
-      "customIndex": 0.8715,
-      "population": 926070727
+      "customIndex": 0.87,
+      "population": 922495731
     },
     {
       "iso": "POL",
       "name": "Poland",
-      "leYear": 2024,
-      "le": 78.41,
+      "leYear": 2023,
+      "le": 78.26,
       "haleYear": 2021,
       "hale": 65.52,
-      "gniYear": 2024,
-      "gni": 43133.95,
+      "gniYear": 2023,
+      "gni": 41589.46,
       "homicideYear": 2023,
       "homicidesPer100k": 0.802,
-      "customIndex": 0.8696,
+      "customIndex": 0.8667,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1758,64 +1736,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 36559233
-    },
-    {
-      "iso": "LTU",
-      "name": "Lithuania",
-      "leYear": 2024,
-      "le": 77.2,
-      "haleYear": 2021,
-      "hale": 64.23,
-      "gniYear": 2024,
-      "gni": 45884.45,
-      "homicideYear": 2023,
-      "homicidesPer100k": 2.628,
-      "customIndex": 0.8611,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 2888278
-    },
-    {
-      "iso": "SVK",
-      "name": "Slovak Republic",
-      "leYear": 2024,
-      "le": 78.37,
-      "haleYear": 2021,
-      "hale": 64.94,
-      "gniYear": 2024,
-      "gni": 37683.62,
-      "homicideYear": 2023,
-      "homicidesPer100k": 1.124,
-      "customIndex": 0.8581,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 5422069
+      "population": 36687353
     },
     {
       "iso": "OMN",
       "name": "Oman",
-      "leYear": 2024,
-      "le": 80.25,
+      "leYear": 2023,
+      "le": 80.03,
       "haleYear": 2021,
       "hale": 63.19,
-      "gniYear": 2024,
-      "gni": 36389.52,
+      "gniYear": 2023,
+      "gni": 37725.28,
       "homicideYear": 2023,
       "homicidesPer100k": 0.139,
-      "customIndex": 0.8579,
+      "customIndex": 0.8594,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -1824,20 +1758,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 5281538
+      "population": 5049269
     },
     {
-      "iso": "HUN",
-      "name": "Hungary",
-      "leYear": 2024,
-      "le": 76.72,
+      "iso": "LTU",
+      "name": "Lithuania",
+      "leYear": 2023,
+      "le": 77.29,
       "haleYear": 2021,
-      "hale": 64.84,
-      "gniYear": 2024,
-      "gni": 37897.99,
+      "hale": 64.23,
+      "gniYear": 2023,
+      "gni": 43912.23,
       "homicideYear": 2023,
-      "homicidesPer100k": 0.723,
-      "customIndex": 0.8526,
+      "homicidesPer100k": 2.628,
+      "customIndex": 0.8587,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1846,19 +1780,41 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 9562065
+      "population": 2871585
     },
     {
-      "iso": "ROU",
-      "name": "Romania",
-      "leYear": 2024,
-      "le": 76.46,
+      "iso": "SVK",
+      "name": "Slovak Republic",
+      "leYear": 2023,
+      "le": 78.12,
       "haleYear": 2021,
-      "hale": 63.85,
-      "gniYear": 2024,
-      "gni": 40935.25,
+      "hale": 64.94,
+      "gniYear": 2023,
+      "gni": 36635.5,
       "homicideYear": 2023,
-      "homicidesPer100k": 1.109,
+      "homicidesPer100k": 1.124,
+      "customIndex": 0.8554,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 5426740
+    },
+    {
+      "iso": "HUN",
+      "name": "Hungary",
+      "leYear": 2023,
+      "le": 76.57,
+      "haleYear": 2021,
+      "hale": 64.84,
+      "gniYear": 2023,
+      "gni": 38009.55,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.723,
       "customIndex": 0.8522,
       "region": {
         "id": "ECS",
@@ -1868,20 +1824,42 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 19051804
+      "population": 9592186
+    },
+    {
+      "iso": "ROU",
+      "name": "Romania",
+      "leYear": 2023,
+      "le": 76.4,
+      "haleYear": 2021,
+      "hale": 63.85,
+      "gniYear": 2023,
+      "gni": 39478.1,
+      "homicideYear": 2023,
+      "homicidesPer100k": 1.109,
+      "customIndex": 0.8497,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 19061062
     },
     {
       "iso": "CHL",
       "name": "Chile",
-      "leYear": 2024,
-      "le": 81.36,
+      "leYear": 2023,
+      "le": 81.17,
       "haleYear": 2021,
       "hale": 67.65,
-      "gniYear": 2024,
-      "gni": 28707.1,
+      "gniYear": 2023,
+      "gni": 27878.9,
       "homicideYear": 2023,
       "homicidesPer100k": 6.348,
-      "customIndex": 0.8519,
+      "customIndex": 0.8492,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -1890,20 +1868,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 19764771
+      "population": 19658835
     },
     {
       "iso": "PAN",
       "name": "Panama",
-      "leYear": 2024,
-      "le": 79.78,
+      "leYear": 2023,
+      "le": 79.59,
       "haleYear": 2021,
       "hale": 66.74,
-      "gniYear": 2024,
-      "gni": 35141.09,
+      "gniYear": 2023,
+      "gni": 34655.95,
       "homicideYear": 2023,
       "homicidesPer100k": 11.707,
-      "customIndex": 0.8464,
+      "customIndex": 0.8449,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -1912,64 +1890,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 4515577
-    },
-    {
-      "iso": "LVA",
-      "name": "Latvia",
-      "leYear": 2024,
-      "le": 76.43,
-      "haleYear": 2021,
-      "hale": 63.76,
-      "gniYear": 2024,
-      "gni": 37141.84,
-      "homicideYear": 2023,
-      "homicidesPer100k": 2.497,
-      "customIndex": 0.8434,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 1866124
-    },
-    {
-      "iso": "MNE",
-      "name": "Montenegro",
-      "leYear": 2024,
-      "le": 77.89,
-      "haleYear": 2021,
-      "hale": 65.15,
-      "gniYear": 2024,
-      "gni": 29697.54,
-      "homicideYear": 2023,
-      "homicidesPer100k": 0.789,
-      "customIndex": 0.8422,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 623525
+      "population": 4458759
     },
     {
       "iso": "TUR",
       "name": "Turkiye",
-      "leYear": 2024,
-      "le": 77.42,
+      "leYear": 2023,
+      "le": 77.16,
       "haleYear": 2021,
       "hale": 65.21,
       "gniYear": 2021,
       "gni": 31697.01,
       "homicideYear": 2023,
       "homicidesPer100k": 3.228,
-      "customIndex": 0.841,
+      "customIndex": 0.84,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -1978,42 +1912,42 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 85518661
+      "population": 85325965
     },
     {
-      "iso": "MYS",
-      "name": "Malaysia",
-      "leYear": 2024,
-      "le": 76.82,
+      "iso": "MNE",
+      "name": "Montenegro",
+      "leYear": 2023,
+      "le": 77.59,
       "haleYear": 2021,
-      "hale": 63.95,
-      "gniYear": 2024,
-      "gni": 32966.2,
+      "hale": 65.15,
+      "gniYear": 2023,
+      "gni": 29097.08,
       "homicideYear": 2023,
-      "homicidesPer100k": 0.734,
-      "customIndex": 0.8407,
+      "homicidesPer100k": 0.789,
+      "customIndex": 0.8397,
       "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
+        "id": "ECS",
+        "name": "Europe & Central Asia"
       },
       "incomeLevel": {
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 35557673
+      "population": 623529
     },
     {
       "iso": "PRI",
       "name": "Puerto Rico (US)",
-      "leYear": 2024,
-      "le": 81.9,
+      "leYear": 2023,
+      "le": 81.69,
       "haleYear": 2021,
       "hale": 68.82,
       "gniYear": 2021,
       "gni": 27956.63,
       "homicideYear": 2023,
       "homicidesPer100k": 14.59,
-      "customIndex": 0.8403,
+      "customIndex": 0.8396,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2022,64 +1956,64 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 3203295
+      "population": 3203792
     },
     {
-      "iso": "MDV",
-      "name": "Maldives",
-      "leYear": 2024,
-      "le": 81.29,
+      "iso": "LVA",
+      "name": "Latvia",
+      "leYear": 2023,
+      "le": 75.43,
       "haleYear": 2021,
-      "hale": 66.67,
-      "gniYear": 2024,
-      "gni": 21146.93,
-      "homicideYear": 2019,
-      "homicidesPer100k": 0.615,
-      "customIndex": 0.8369,
-      "region": {
-        "id": "SAS",
-        "name": "South Asia"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 527799
-    },
-    {
-      "iso": "ALB",
-      "name": "Albania",
-      "leYear": 2024,
-      "le": 79.78,
-      "haleYear": 2021,
-      "hale": 66.69,
-      "gniYear": 2024,
-      "gni": 22397.5,
+      "hale": 63.76,
+      "gniYear": 2023,
+      "gni": 36448.38,
       "homicideYear": 2023,
-      "homicidesPer100k": 1.387,
-      "customIndex": 0.8345,
+      "homicidesPer100k": 2.497,
+      "customIndex": 0.8384,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
       },
       "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 1883710
+    },
+    {
+      "iso": "MYS",
+      "name": "Malaysia",
+      "leYear": 2023,
+      "le": 76.66,
+      "haleYear": 2021,
+      "hale": 63.95,
+      "gniYear": 2023,
+      "gni": 31883.02,
+      "homicideYear": 2023,
+      "homicidesPer100k": 0.734,
+      "customIndex": 0.838,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 2377128
+      "population": 35126298
     },
     {
       "iso": "CHN",
       "name": "China",
-      "leYear": 2024,
-      "le": 78.02,
+      "leYear": 2023,
+      "le": 77.95,
       "haleYear": 2021,
       "hale": 68.58,
       "gniYear": 2021,
       "gni": 20701.13,
       "homicideYear": 2020,
       "homicidesPer100k": 0.502,
-      "customIndex": 0.8309,
+      "customIndex": 0.8307,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -2088,42 +2022,86 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 1408975000
+      "population": 1410710000
     },
     {
-      "iso": "BGR",
-      "name": "Bulgaria",
-      "leYear": 2024,
-      "le": 75.76,
+      "iso": "ALB",
+      "name": "Albania",
+      "leYear": 2023,
+      "le": 79.6,
       "haleYear": 2021,
-      "hale": 62.39,
-      "gniYear": 2024,
-      "gni": 32336.99,
+      "hale": 66.69,
+      "gniYear": 2023,
+      "gni": 20937.31,
       "homicideYear": 2023,
-      "homicidesPer100k": 1.089,
+      "homicidesPer100k": 1.387,
       "customIndex": 0.8292,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
       },
       "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 2414095
+    },
+    {
+      "iso": "MDV",
+      "name": "Maldives",
+      "leYear": 2023,
+      "le": 81.04,
+      "haleYear": 2021,
+      "hale": 66.67,
+      "gniYear": 2023,
+      "gni": 19054.68,
+      "homicideYear": 2019,
+      "homicidesPer100k": 0.615,
+      "customIndex": 0.8288,
+      "region": {
+        "id": "SAS",
+        "name": "South Asia"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 525994
+    },
+    {
+      "iso": "BGR",
+      "name": "Bulgaria",
+      "leYear": 2023,
+      "le": 75.76,
+      "haleYear": 2021,
+      "hale": 62.39,
+      "gniYear": 2023,
+      "gni": 31406.2,
+      "homicideYear": 2023,
+      "homicidesPer100k": 1.089,
+      "customIndex": 0.8273,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
         "id": "HIC",
         "name": "High income"
       },
-      "population": 6441421
+      "population": 6446596
     },
     {
       "iso": "ARG",
       "name": "Argentina",
-      "leYear": 2024,
-      "le": 77.54,
+      "leYear": 2023,
+      "le": 77.4,
       "haleYear": 2021,
       "hale": 64.79,
-      "gniYear": 2024,
-      "gni": 25824.31,
+      "gniYear": 2023,
+      "gni": 26934.28,
       "homicideYear": 2023,
       "homicidesPer100k": 4.493,
-      "customIndex": 0.8245,
+      "customIndex": 0.8267,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2132,20 +2110,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 45696159
+      "population": 45538401
+    },
+    {
+      "iso": "EAS",
+      "name": "East Asia & Pacific",
+      "leYear": "mixed",
+      "le": 76.65,
+      "haleYear": "mixed",
+      "hale": 66.88,
+      "gniYear": "mixed",
+      "gni": 21468.17,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 0.95,
+      "derivedKind": "region",
+      "memberCount": 24,
+      "customIndex": 0.822,
+      "population": 2317861702
     },
     {
       "iso": "URY",
       "name": "Uruguay",
-      "leYear": 2024,
-      "le": 78.29,
+      "leYear": 2023,
+      "le": 78.14,
       "haleYear": 2021,
       "hale": 64.99,
-      "gniYear": 2024,
-      "gni": 28939.08,
+      "gniYear": 2023,
+      "gni": 28167.32,
       "homicideYear": 2023,
       "homicidesPer100k": 11.245,
-      "customIndex": 0.8233,
+      "customIndex": 0.8211,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2154,36 +2148,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 3386588
-    },
-    {
-      "iso": "EAS",
-      "name": "East Asia & Pacific",
-      "leYear": "mixed",
-      "le": 76.73,
-      "haleYear": "mixed",
-      "hale": 66.87,
-      "gniYear": "mixed",
-      "gni": 21667.84,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 0.953,
-      "derivedKind": "region",
-      "memberCount": 24,
-      "customIndex": 0.8228,
-      "population": 2321516751
+      "population": 3388081
     },
     {
       "iso": "KAZ",
       "name": "Kazakhstan",
-      "leYear": 2024,
-      "le": 74.53,
+      "leYear": 2023,
+      "le": 74.4,
       "haleYear": 2021,
       "hale": 61.55,
-      "gniYear": 2024,
-      "gni": 34259.15,
+      "gniYear": 2023,
+      "gni": 32537.45,
       "homicideYear": 2022,
       "homicidesPer100k": 2.551,
-      "customIndex": 0.8227,
+      "customIndex": 0.819,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2192,20 +2170,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 20592571
+      "population": 20330104
     },
     {
       "iso": "SYC",
       "name": "Seychelles",
-      "leYear": 2024,
-      "le": 76.3,
+      "leYear": 2023,
+      "le": 75.42,
       "haleYear": 2021,
       "hale": 64.72,
       "gniYear": 2023,
       "gni": 29195.04,
       "homicideYear": 2022,
       "homicidesPer100k": 7.967,
-      "customIndex": 0.8218,
+      "customIndex": 0.8186,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -2214,20 +2192,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 121354
+      "population": 119773
     },
     {
       "iso": "SRB",
       "name": "Serbia",
-      "leYear": 2024,
-      "le": 75.97,
+      "leYear": 2023,
+      "le": 76.14,
       "haleYear": 2021,
       "hale": 63.87,
-      "gniYear": 2024,
-      "gni": 25854.53,
+      "gniYear": 2023,
+      "gni": 24640.09,
       "homicideYear": 2023,
       "homicidesPer100k": 1.314,
-      "customIndex": 0.8206,
+      "customIndex": 0.8181,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2236,42 +2214,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 6586476
-    },
-    {
-      "iso": "CRI",
-      "name": "Costa Rica",
-      "leYear": 2024,
-      "le": 81,
-      "haleYear": 2021,
-      "hale": 67.63,
-      "gniYear": 2024,
-      "gni": 24652.65,
-      "homicideYear": 2023,
-      "homicidesPer100k": 17.745,
-      "customIndex": 0.8183,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
-      },
-      "population": 5129910
+      "population": 6623183
     },
     {
       "iso": "ATG",
       "name": "Antigua and Barbuda",
-      "leYear": 2024,
-      "le": 77.77,
+      "leYear": 2023,
+      "le": 77.6,
       "haleYear": 2021,
       "hale": 66.52,
       "gniYear": 2021,
       "gni": 24824.89,
       "homicideYear": 2023,
       "homicidesPer100k": 10.716,
-      "customIndex": 0.8179,
+      "customIndex": 0.8173,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2280,42 +2236,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 93772
-    },
-    {
-      "iso": "BLR",
-      "name": "Belarus",
-      "leYear": 2024,
-      "le": 74.37,
-      "haleYear": 2021,
-      "hale": 63.71,
-      "gniYear": 2024,
-      "gni": 28145.06,
-      "homicideYear": 2019,
-      "homicidesPer100k": 2.385,
-      "customIndex": 0.8179,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 9132629
+      "population": 93316
     },
     {
       "iso": "RUS",
       "name": "Russian Federation",
-      "leYear": 2024,
-      "le": 73.44,
+      "leYear": 2023,
+      "le": 73.25,
       "haleYear": 2021,
       "hale": 60.94,
       "gniYear": 2023,
       "gni": 38912.21,
       "homicideYear": 2021,
       "homicidesPer100k": 6.765,
-      "customIndex": 0.8171,
+      "customIndex": 0.8164,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2324,20 +2258,86 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 143533851
+      "population": 143826130
+    },
+    {
+      "iso": "CRI",
+      "name": "Costa Rica",
+      "leYear": 2023,
+      "le": 80.8,
+      "haleYear": 2021,
+      "hale": 67.63,
+      "gniYear": 2023,
+      "gni": 23745.79,
+      "homicideYear": 2023,
+      "homicidesPer100k": 17.745,
+      "customIndex": 0.8151,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 5105525
+    },
+    {
+      "iso": "BLR",
+      "name": "Belarus",
+      "leYear": 2023,
+      "le": 74.18,
+      "haleYear": 2021,
+      "hale": 63.71,
+      "gniYear": 2023,
+      "gni": 26814.22,
+      "homicideYear": 2019,
+      "homicidesPer100k": 2.385,
+      "customIndex": 0.8141,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 9178298
+    },
+    {
+      "iso": "BIH",
+      "name": "Bosnia and Herzegovina",
+      "leYear": 2023,
+      "le": 77.85,
+      "haleYear": 2021,
+      "hale": 64.99,
+      "gniYear": 2023,
+      "gni": 19081.59,
+      "homicideYear": 2023,
+      "homicidesPer100k": 1.224,
+      "customIndex": 0.8111,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 3185073
     },
     {
       "iso": "MUS",
       "name": "Mauritius",
-      "leYear": 2024,
-      "le": 73.79,
+      "leYear": 2023,
+      "le": 73.41,
       "haleYear": 2021,
       "hale": 63.63,
-      "gniYear": 2024,
-      "gni": 27929.71,
+      "gniYear": 2023,
+      "gni": 26729.55,
       "homicideYear": 2022,
       "homicidesPer100k": 2.272,
-      "customIndex": 0.8152,
+      "customIndex": 0.811,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -2346,42 +2346,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 1245779
-    },
-    {
-      "iso": "BIH",
-      "name": "Bosnia and Herzegovina",
-      "leYear": 2024,
-      "le": 78.04,
-      "haleYear": 2021,
-      "hale": 64.99,
-      "gniYear": 2024,
-      "gni": 20039.25,
-      "homicideYear": 2023,
-      "homicidesPer100k": 1.224,
-      "customIndex": 0.8151,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 3164253
+      "population": 1248647
     },
     {
       "iso": "MKD",
       "name": "North Macedonia",
-      "leYear": 2024,
-      "le": 76.62,
+      "leYear": 2023,
+      "le": 75.32,
       "haleYear": 2021,
       "hale": 63.71,
-      "gniYear": 2024,
-      "gni": 22899.17,
+      "gniYear": 2023,
+      "gni": 22027.3,
       "homicideYear": 2023,
       "homicidesPer100k": 1.529,
-      "customIndex": 0.814,
+      "customIndex": 0.8067,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2390,74 +2368,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 1824359
+      "population": 1827816
     },
     {
       "iso": "EAP",
       "name": "East Asia & Pacific (excluding high income)",
       "leYear": "mixed",
-      "le": 76.01,
+      "le": 75.93,
       "haleYear": "mixed",
-      "hale": 66.27,
+      "hale": 66.28,
       "gniYear": "mixed",
-      "gni": 18495.67,
+      "gni": 18332.2,
       "homicideYear": "mixed",
-      "homicidesPer100k": 1.01,
+      "homicidesPer100k": 1.007,
       "derivedKind": "adminregion",
       "memberCount": 18,
-      "customIndex": 0.8073,
-      "population": 2106806422
-    },
-    {
-      "iso": "ARM",
-      "name": "Armenia",
-      "leYear": 2024,
-      "le": 78.32,
-      "haleYear": 2021,
-      "hale": 64.01,
-      "gniYear": 2024,
-      "gni": 18666.14,
-      "homicideYear": 2023,
-      "homicidesPer100k": 2.208,
-      "customIndex": 0.8063,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 3033500
-    },
-    {
-      "iso": "ECA",
-      "name": "Europe & Central Asia (excluding high income)",
-      "leYear": "mixed",
-      "le": 75.12,
-      "haleYear": "mixed",
-      "hale": 63.57,
-      "gniYear": "mixed",
-      "gni": 22708.18,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 2.555,
-      "derivedKind": "adminregion",
-      "memberCount": 17,
-      "customIndex": 0.8059,
-      "population": 248687168
+      "customIndex": 0.8065,
+      "population": 2103395914
     },
     {
       "iso": "THA",
       "name": "Thailand",
-      "leYear": 2024,
-      "le": 76.56,
+      "leYear": 2023,
+      "le": 76.41,
       "haleYear": 2021,
       "hale": 65.76,
       "gniYear": 2021,
       "gni": 19539.57,
       "homicideYear": 2011,
       "homicidesPer100k": 4.792,
-      "customIndex": 0.8053,
+      "customIndex": 0.8047,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -2466,20 +2406,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 71668011
+      "population": 71702435
     },
     {
-      "iso": "GEO",
-      "name": "Georgia",
-      "leYear": 2024,
-      "le": 74.66,
+      "iso": "ECA",
+      "name": "Europe & Central Asia (excluding high income)",
+      "leYear": "mixed",
+      "le": 74.77,
+      "haleYear": "mixed",
+      "hale": 63.58,
+      "gniYear": "mixed",
+      "gni": 22350.96,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.559,
+      "derivedKind": "adminregion",
+      "memberCount": 17,
+      "customIndex": 0.8036,
+      "population": 247038717
+    },
+    {
+      "iso": "ARM",
+      "name": "Armenia",
+      "leYear": 2023,
+      "le": 77.47,
       "haleYear": 2021,
-      "hale": 62.48,
-      "gniYear": 2024,
-      "gni": 23913.75,
-      "homicideYear": 2019,
-      "homicidesPer100k": 2.028,
-      "customIndex": 0.8044,
+      "hale": 64.01,
+      "gniYear": 2023,
+      "gni": 18575.1,
+      "homicideYear": 2023,
+      "homicidesPer100k": 2.208,
+      "customIndex": 0.8029,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2488,36 +2444,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 3699557
+      "population": 2964300
     },
     {
       "iso": "UMC",
       "name": "Upper middle income",
       "leYear": "mixed",
-      "le": 76.34,
+      "le": 76.22,
       "haleYear": "mixed",
-      "hale": 65.39,
+      "hale": 65.4,
       "gniYear": "mixed",
-      "gni": 19762.58,
+      "gni": 19652.88,
       "homicideYear": "mixed",
-      "homicidesPer100k": 5.763,
+      "homicidesPer100k": 5.735,
       "derivedKind": "incomeLevel",
       "memberCount": 46,
-      "customIndex": 0.8024,
-      "population": 2793412672
+      "customIndex": 0.8017,
+      "population": 2784641867
     },
     {
       "iso": "AZE",
       "name": "Azerbaijan",
-      "leYear": 2024,
-      "le": 74.58,
+      "leYear": 2023,
+      "le": 74.43,
       "haleYear": 2021,
       "hale": 64.04,
       "gniYear": 2021,
       "gni": 19693.91,
       "homicideYear": 2023,
       "homicidesPer100k": 2.161,
-      "customIndex": 0.7968,
+      "customIndex": 0.7963,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2526,20 +2482,42 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 10202830
+      "population": 10153958
+    },
+    {
+      "iso": "GEO",
+      "name": "Georgia",
+      "leYear": 2023,
+      "le": 74.5,
+      "haleYear": 2021,
+      "hale": 62.48,
+      "gniYear": 2023,
+      "gni": 21126.82,
+      "homicideYear": 2019,
+      "homicidesPer100k": 2.028,
+      "customIndex": 0.7957,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 3715483
     },
     {
       "iso": "DZA",
       "name": "Algeria",
-      "leYear": 2024,
-      "le": 76.47,
+      "leYear": 2023,
+      "le": 76.26,
       "haleYear": 2021,
       "hale": 65.55,
-      "gniYear": 2024,
-      "gni": 15873.68,
+      "gniYear": 2023,
+      "gni": 15961.87,
       "homicideYear": 2023,
       "homicidesPer100k": 1.161,
-      "customIndex": 0.7956,
+      "customIndex": 0.7952,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -2548,20 +2526,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 46814308
+      "population": 46164219
     },
     {
       "iso": "BRB",
       "name": "Barbados",
-      "leYear": 2024,
-      "le": 76.33,
+      "leYear": 2023,
+      "le": 76.18,
       "haleYear": 2021,
       "hale": 66.67,
       "gniYear": 2021,
       "gni": 17397.31,
       "homicideYear": 2023,
       "homicidesPer100k": 7.438,
-      "customIndex": 0.7953,
+      "customIndex": 0.7948,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2570,20 +2548,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 282467
+      "population": 282336
     },
     {
       "iso": "IRN",
       "name": "Iran, Islamic Rep.",
-      "leYear": 2024,
-      "le": 77.85,
+      "leYear": 2023,
+      "le": 77.65,
       "haleYear": 2021,
       "hale": 63.98,
-      "gniYear": 2024,
-      "gni": 16076.53,
+      "gniYear": 2023,
+      "gni": 16174.44,
       "homicideYear": 2014,
       "homicidesPer100k": 2.375,
-      "customIndex": 0.794,
+      "customIndex": 0.7937,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -2592,36 +2570,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 91567738
+      "population": 90608707
     },
     {
       "iso": "WLD",
       "name": "World",
       "leYear": "mixed",
-      "le": 73.92,
+      "le": 73.76,
       "haleYear": "mixed",
-      "hale": 62.47,
+      "hale": 62.5,
       "gniYear": "mixed",
-      "gni": 21201.4,
+      "gni": 21005.05,
       "homicideYear": "mixed",
-      "homicidesPer100k": 4.658,
+      "homicidesPer100k": 4.646,
       "derivedKind": "world",
       "memberCount": 163,
-      "customIndex": 0.7897,
-      "population": 7692417124
+      "customIndex": 0.7887,
+      "population": 7624931640
     },
     {
       "iso": "DOM",
       "name": "Dominican Republic",
-      "leYear": 2024,
-      "le": 73.87,
+      "leYear": 2023,
+      "le": 73.72,
       "haleYear": 2021,
       "hale": 63.56,
-      "gniYear": 2024,
-      "gni": 23475.95,
+      "gniYear": 2023,
+      "gni": 22794.44,
       "homicideYear": 2023,
       "homicidesPer100k": 10.917,
-      "customIndex": 0.7896,
+      "customIndex": 0.7872,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2630,20 +2608,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 11427557
+      "population": 11331265
     },
     {
       "iso": "LKA",
       "name": "Sri Lanka",
-      "leYear": 2024,
-      "le": 77.67,
+      "leYear": 2023,
+      "le": 77.48,
       "haleYear": 2021,
       "hale": 66.73,
-      "gniYear": 2024,
-      "gni": 13379.3,
+      "gniYear": 2023,
+      "gni": 12406.95,
       "homicideYear": 2019,
       "homicidesPer100k": 3.311,
-      "customIndex": 0.7883,
+      "customIndex": 0.7823,
       "region": {
         "id": "SAS",
         "name": "South Asia"
@@ -2652,20 +2630,36 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 21916000
+      "population": 22037000
+    },
+    {
+      "iso": "IBD",
+      "name": "IBRD only",
+      "leYear": "mixed",
+      "le": 74.54,
+      "haleYear": "mixed",
+      "hale": 62.73,
+      "gniYear": "mixed",
+      "gni": 16812.64,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.594,
+      "derivedKind": "lendingType",
+      "memberCount": 60,
+      "customIndex": 0.7776,
+      "population": 4912196979
     },
     {
       "iso": "VNM",
       "name": "Viet Nam",
-      "leYear": 2024,
-      "le": 74.74,
+      "leYear": 2023,
+      "le": 74.59,
       "haleYear": 2021,
       "hale": 65.35,
-      "gniYear": 2024,
-      "gni": 14164.57,
+      "gniYear": 2023,
+      "gni": 13215.93,
       "homicideYear": 2011,
       "homicidesPer100k": 1.535,
-      "customIndex": 0.7804,
+      "customIndex": 0.775,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -2674,36 +2668,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 100987686
-    },
-    {
-      "iso": "IBD",
-      "name": "IBRD only",
-      "leYear": "mixed",
-      "le": 74.7,
-      "haleYear": "mixed",
-      "hale": 62.71,
-      "gniYear": "mixed",
-      "gni": 17065.49,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 4.605,
-      "derivedKind": "lendingType",
-      "memberCount": 60,
-      "customIndex": 0.7791,
-      "population": 4939127049
+      "population": 100352192
     },
     {
       "iso": "PER",
       "name": "Peru",
-      "leYear": 2024,
-      "le": 77.94,
+      "leYear": 2023,
+      "le": 77.74,
       "haleYear": 2021,
       "hale": 62.99,
-      "gniYear": 2024,
-      "gni": 15032.34,
+      "gniYear": 2023,
+      "gni": 14337.79,
       "homicideYear": 2021,
       "homicidesPer100k": 8.605,
-      "customIndex": 0.7762,
+      "customIndex": 0.7723,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2712,20 +2690,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 34217848
+      "population": 33845617
     },
     {
       "iso": "UKR",
       "name": "Ukraine",
-      "leYear": 2024,
-      "le": 74.69,
+      "leYear": 2023,
+      "le": 73.42,
       "haleYear": 2021,
       "hale": 61.55,
-      "gniYear": 2024,
-      "gni": 16951.98,
+      "gniYear": 2023,
+      "gni": 16516.21,
       "homicideYear": 2021,
       "homicidesPer100k": 3.777,
-      "customIndex": 0.7758,
+      "customIndex": 0.7694,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2734,20 +2712,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 37860221
+      "population": 37732836
     },
     {
       "iso": "BTN",
       "name": "Bhutan",
-      "leYear": 2024,
-      "le": 73.26,
+      "leYear": 2023,
+      "le": 72.97,
       "haleYear": 2021,
       "hale": 64.8,
       "gniYear": 2023,
       "gni": 13205.65,
       "homicideYear": 2020,
       "homicidesPer100k": 2.468,
-      "customIndex": 0.7671,
+      "customIndex": 0.7661,
       "region": {
         "id": "SAS",
         "name": "South Asia"
@@ -2756,20 +2734,58 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 791524
+      "population": 786385
+    },
+    {
+      "iso": "COL",
+      "name": "Colombia",
+      "leYear": 2023,
+      "le": 77.72,
+      "haleYear": 2021,
+      "hale": 65.02,
+      "gniYear": 2023,
+      "gni": 18386.72,
+      "homicideYear": 2023,
+      "homicidesPer100k": 24.913,
+      "customIndex": 0.7632,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 52321152
+    },
+    {
+      "iso": "LCN",
+      "name": "Latin America & Caribbean",
+      "leYear": "mixed",
+      "le": 75.74,
+      "haleYear": "mixed",
+      "hale": 62.4,
+      "gniYear": "mixed",
+      "gni": 19106.81,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 19.616,
+      "derivedKind": "region",
+      "memberCount": 30,
+      "customIndex": 0.762,
+      "population": 617587049
     },
     {
       "iso": "MDA",
       "name": "Moldova",
-      "leYear": 2024,
-      "le": 71.33,
+      "leYear": 2023,
+      "le": 71.2,
       "haleYear": 2021,
       "hale": 61.21,
-      "gniYear": 2024,
-      "gni": 17178.41,
+      "gniYear": 2023,
+      "gni": 16217.01,
       "homicideYear": 2023,
       "homicidesPer100k": 2.543,
-      "customIndex": 0.7651,
+      "customIndex": 0.7608,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -2778,58 +2794,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 2402306
+      "population": 2457783
     },
     {
-      "iso": "COL",
-      "name": "Colombia",
-      "leYear": 2024,
-      "le": 77.91,
+      "iso": "EGY",
+      "name": "Egypt, Arab Rep.",
+      "leYear": 2023,
+      "le": 71.63,
       "haleYear": 2021,
-      "hale": 65.02,
-      "gniYear": 2024,
-      "gni": 18648.17,
-      "homicideYear": 2023,
-      "homicidesPer100k": 24.913,
-      "customIndex": 0.7647,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 52886363
-    },
-    {
-      "iso": "LCN",
-      "name": "Latin America & Caribbean",
-      "leYear": "mixed",
-      "le": 75.92,
-      "haleYear": "mixed",
-      "hale": 62.4,
-      "gniYear": "mixed",
-      "gni": 19306,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 19.623,
-      "derivedKind": "region",
-      "memberCount": 30,
-      "customIndex": 0.7633,
-      "population": 622089733
-    },
-    {
-      "iso": "TUN",
-      "name": "Tunisia",
-      "leYear": 2024,
-      "le": 76.71,
-      "haleYear": 2021,
-      "hale": 63.58,
-      "gniYear": 2024,
-      "gni": 11725.63,
-      "homicideYear": 2020,
-      "homicidesPer100k": 4.693,
-      "customIndex": 0.7629,
+      "hale": 60.36,
+      "gniYear": 2023,
+      "gni": 15982.44,
+      "homicideYear": 2017,
+      "homicidesPer100k": 1.312,
+      "customIndex": 0.7601,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -2838,64 +2816,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 12277109
-    },
-    {
-      "iso": "MNG",
-      "name": "Mongolia",
-      "leYear": 2024,
-      "le": 72.4,
-      "haleYear": 2021,
-      "hale": 61.31,
-      "gniYear": 2024,
-      "gni": 16784.44,
-      "homicideYear": 2023,
-      "homicidesPer100k": 5.915,
-      "customIndex": 0.7627,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 3524788
-    },
-    {
-      "iso": "BRA",
-      "name": "Brazil",
-      "leYear": 2024,
-      "le": 76.02,
-      "haleYear": 2021,
-      "hale": 61.83,
-      "gniYear": 2024,
-      "gni": 18865.22,
-      "homicideYear": 2023,
-      "homicidesPer100k": 19.275,
-      "customIndex": 0.7609,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 211998573
+      "population": 114535772
     },
     {
       "iso": "SUR",
       "name": "Suriname",
-      "leYear": 2024,
-      "le": 73.76,
+      "leYear": 2023,
+      "le": 73.63,
       "haleYear": 2021,
       "hale": 60.3,
       "gniYear": 2021,
       "gni": 16194.11,
       "homicideYear": 2023,
       "homicidesPer100k": 6.519,
-      "customIndex": 0.7606,
+      "customIndex": 0.7601,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -2904,64 +2838,42 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 634431
+      "population": 628886
     },
     {
-      "iso": "BHS",
-      "name": "Bahamas, The",
-      "leYear": 2024,
-      "le": 74.71,
+      "iso": "MNG",
+      "name": "Mongolia",
+      "leYear": 2023,
+      "le": 72.12,
       "haleYear": 2021,
-      "hale": 61.52,
-      "gniYear": 2024,
-      "gni": 34709.96,
-      "homicideYear": 2022,
-      "homicidesPer100k": 32.198,
-      "customIndex": 0.7602,
+      "hale": 61.31,
+      "gniYear": 2023,
+      "gni": 16350.08,
+      "homicideYear": 2023,
+      "homicidesPer100k": 5.915,
+      "customIndex": 0.7599,
       "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
+        "id": "EAS",
+        "name": "East Asia & Pacific"
       },
       "incomeLevel": {
-        "id": "HIC",
-        "name": "High income"
+        "id": "UMC",
+        "name": "Upper middle income"
       },
-      "population": 401283
-    },
-    {
-      "iso": "EGY",
-      "name": "Egypt, Arab Rep.",
-      "leYear": 2024,
-      "le": 71.81,
-      "haleYear": 2021,
-      "hale": 60.36,
-      "gniYear": 2024,
-      "gni": 15804.98,
-      "homicideYear": 2017,
-      "homicidesPer100k": 1.312,
-      "customIndex": 0.76,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 116538258
+      "population": 3481145
     },
     {
       "iso": "LBN",
       "name": "Lebanon",
-      "leYear": 2024,
-      "le": 77.94,
+      "leYear": 2023,
+      "le": 77.82,
       "haleYear": 2021,
       "hale": 63.22,
       "gniYear": 2023,
       "gni": 10236.56,
       "homicideYear": 2020,
       "homicidesPer100k": 2.245,
-      "customIndex": 0.7598,
+      "customIndex": 0.7593,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -2970,20 +2882,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 5805962
+      "population": 5773493
+    },
+    {
+      "iso": "BRA",
+      "name": "Brazil",
+      "leYear": 2023,
+      "le": 75.85,
+      "haleYear": 2021,
+      "hale": 61.83,
+      "gniYear": 2023,
+      "gni": 18463.99,
+      "homicideYear": 2023,
+      "homicidesPer100k": 19.275,
+      "customIndex": 0.7589,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 211140729
     },
     {
       "iso": "JOR",
       "name": "Jordan",
-      "leYear": 2024,
-      "le": 77.98,
+      "leYear": 2023,
+      "le": 77.81,
       "haleYear": 2021,
       "hale": 65.07,
       "gniYear": 2021,
       "gni": 9136.54,
       "homicideYear": 2023,
       "homicidesPer100k": 0.988,
-      "customIndex": 0.7594,
+      "customIndex": 0.7589,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -2992,20 +2926,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 11552876
+      "population": 11439213
+    },
+    {
+      "iso": "TUN",
+      "name": "Tunisia",
+      "leYear": 2023,
+      "le": 76.51,
+      "haleYear": 2021,
+      "hale": 63.58,
+      "gniYear": 2023,
+      "gni": 11164,
+      "homicideYear": 2020,
+      "homicidesPer100k": 4.693,
+      "customIndex": 0.7588,
+      "region": {
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 12200431
     },
     {
       "iso": "TKM",
       "name": "Turkmenistan",
-      "leYear": 2024,
-      "le": 70.2,
+      "leYear": 2023,
+      "le": 70.07,
       "haleYear": 2021,
       "hale": 60.82,
       "gniYear": 2021,
       "gni": 16332.58,
       "homicideYear": 2015,
       "homicidesPer100k": 1.014,
-      "customIndex": 0.7584,
+      "customIndex": 0.7579,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -3014,36 +2970,58 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 7494498
+      "population": 7364438
+    },
+    {
+      "iso": "BHS",
+      "name": "Bahamas, The",
+      "leYear": 2023,
+      "le": 74.55,
+      "haleYear": 2021,
+      "hale": 61.52,
+      "gniYear": 2023,
+      "gni": 33623.17,
+      "homicideYear": 2022,
+      "homicidesPer100k": 32.198,
+      "customIndex": 0.7578,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "HIC",
+        "name": "High income"
+      },
+      "population": 399440
     },
     {
       "iso": "LAC",
       "name": "Latin America & Caribbean (excluding high income)",
       "leYear": "mixed",
-      "le": 75.62,
+      "le": 75.45,
       "haleYear": "mixed",
       "hale": 62.1,
       "gniYear": "mixed",
-      "gni": 18680,
+      "gni": 18511.46,
       "homicideYear": "mixed",
-      "homicidesPer100k": 20.178,
+      "homicidesPer100k": 20.171,
       "derivedKind": "adminregion",
       "memberCount": 20,
-      "customIndex": 0.758,
-      "population": 583112650
+      "customIndex": 0.7568,
+      "population": 578803102
     },
     {
       "iso": "PRY",
       "name": "Paraguay",
-      "leYear": 2024,
-      "le": 73.98,
+      "leYear": 2023,
+      "le": 73.84,
       "haleYear": 2021,
       "hale": 60.88,
-      "gniYear": 2024,
-      "gni": 14941.15,
+      "gniYear": 2023,
+      "gni": 14731.78,
       "homicideYear": 2023,
       "homicidesPer100k": 6.78,
-      "customIndex": 0.7577,
+      "customIndex": 0.7562,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3052,52 +3030,52 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 6929153
-    },
-    {
-      "iso": "MIC",
-      "name": "Middle income",
-      "leYear": "mixed",
-      "le": 72.99,
-      "haleYear": "mixed",
-      "hale": 61.82,
-      "gniYear": "mixed",
-      "gni": 14107.32,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 4.972,
-      "derivedKind": "incomeLevel",
-      "memberCount": 90,
-      "customIndex": 0.7564,
-      "population": 5851566439
+      "population": 6844146
     },
     {
       "iso": "MEA",
       "name": "Middle East, North Africa, Afghanistan & Pakistan",
       "leYear": "mixed",
-      "le": 72.49,
+      "le": 72.27,
       "haleYear": "mixed",
       "hale": 60.36,
       "gniYear": "mixed",
-      "gni": 14979.84,
+      "gni": 15049.23,
       "homicideYear": "mixed",
-      "homicidesPer100k": 3.118,
+      "homicidesPer100k": 3.121,
       "derivedKind": "region",
       "memberCount": 20,
-      "customIndex": 0.7562,
-      "population": 764013227
+      "customIndex": 0.7557,
+      "population": 749952052
+    },
+    {
+      "iso": "MIC",
+      "name": "Middle income",
+      "leYear": "mixed",
+      "le": 72.84,
+      "haleYear": "mixed",
+      "hale": 61.85,
+      "gniYear": "mixed",
+      "gni": 13898.64,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.957,
+      "derivedKind": "incomeLevel",
+      "memberCount": 90,
+      "customIndex": 0.755,
+      "population": 5805222417
     },
     {
       "iso": "MEX",
       "name": "Mexico",
-      "leYear": 2024,
-      "le": 75.26,
+      "leYear": 2023,
+      "le": 75.07,
       "haleYear": 2021,
       "hale": 61.44,
-      "gniYear": 2024,
-      "gni": 22498.31,
+      "gniYear": 2023,
+      "gni": 22409.74,
       "homicideYear": 2023,
       "homicidesPer100k": 24.859,
-      "customIndex": 0.7556,
+      "customIndex": 0.7547,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3106,20 +3084,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 130861007
+      "population": 129739759
     },
     {
       "iso": "GRD",
       "name": "Grenada",
-      "leYear": 2024,
-      "le": 75.37,
+      "leYear": 2023,
+      "le": 75.21,
       "haleYear": 2021,
       "hale": 63.16,
       "gniYear": 2021,
       "gni": 13944.1,
       "homicideYear": 2023,
       "homicidesPer100k": 13.666,
-      "customIndex": 0.7541,
+      "customIndex": 0.7535,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3128,36 +3106,52 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 117207
+      "population": 117081
     },
     {
       "iso": "IDA_IBRD_TOTAL",
       "name": "IDA & IBRD total",
       "leYear": "mixed",
-      "le": 72.62,
+      "le": 72.48,
       "haleYear": "mixed",
-      "hale": 61.46,
+      "hale": 61.49,
       "gniYear": "mixed",
-      "gni": 14199.84,
+      "gni": 14012.08,
       "homicideYear": "mixed",
-      "homicidesPer100k": 5.062,
+      "homicidesPer100k": 5.048,
       "derivedKind": "lendingType",
       "memberCount": 118,
-      "customIndex": 0.7541,
-      "population": 6548027208
+      "customIndex": 0.7529,
+      "population": 6490506934
+    },
+    {
+      "iso": "LMY",
+      "name": "Low & middle income",
+      "leYear": "mixed",
+      "le": 72.47,
+      "haleYear": "mixed",
+      "hale": 61.49,
+      "gniYear": "mixed",
+      "gni": 13296.9,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 4.942,
+      "derivedKind": "incomeLevel",
+      "memberCount": 104,
+      "customIndex": 0.7494,
+      "population": 6121799702
     },
     {
       "iso": "IDN",
       "name": "Indonesia",
-      "leYear": 2024,
-      "le": 71.29,
+      "leYear": 2023,
+      "le": 71.15,
       "haleYear": 2021,
       "hale": 60.67,
-      "gniYear": 2024,
-      "gni": 13851.49,
+      "gniYear": 2023,
+      "gni": 13318.24,
       "homicideYear": 2022,
       "homicidesPer100k": 0.304,
-      "customIndex": 0.7517,
+      "customIndex": 0.7486,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -3166,36 +3160,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 283487931
-    },
-    {
-      "iso": "LMY",
-      "name": "Low & middle income",
-      "leYear": "mixed",
-      "le": 72.61,
-      "haleYear": "mixed",
-      "hale": 61.46,
-      "gniYear": "mixed",
-      "gni": 13482.4,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 4.956,
-      "derivedKind": "incomeLevel",
-      "memberCount": 104,
-      "customIndex": 0.7507,
-      "population": 6176310225
+      "population": 281190067
     },
     {
       "iso": "CPV",
       "name": "Cabo Verde",
-      "leYear": 2024,
-      "le": 76.22,
+      "leYear": 2023,
+      "le": 76.06,
       "haleYear": 2021,
       "hale": 63.77,
-      "gniYear": 2024,
-      "gni": 9725.89,
+      "gniYear": 2023,
+      "gni": 8901.74,
       "homicideYear": 2020,
       "homicidesPer100k": 6.995,
-      "customIndex": 0.745,
+      "customIndex": 0.738,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -3204,20 +3182,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 524877
+      "population": 522331
     },
     {
       "iso": "MAR",
       "name": "Morocco",
-      "leYear": 2024,
-      "le": 75.49,
+      "leYear": 2023,
+      "le": 75.31,
       "haleYear": 2021,
       "hale": 62.34,
-      "gniYear": 2024,
-      "gni": 9168.87,
+      "gniYear": 2023,
+      "gni": 8732.79,
       "homicideYear": 2023,
       "homicidesPer100k": 1.705,
-      "customIndex": 0.7413,
+      "customIndex": 0.7372,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -3226,42 +3204,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 38081173
+      "population": 37712505
     },
     {
-      "iso": "BGD",
-      "name": "Bangladesh",
-      "leYear": 2024,
-      "le": 74.93,
+      "iso": "IRQ",
+      "name": "Iraq",
+      "leYear": 2023,
+      "le": 72.32,
       "haleYear": 2021,
-      "hale": 63.05,
-      "gniYear": 2024,
-      "gni": 8852.25,
-      "homicideYear": 2018,
-      "homicidesPer100k": 2.342,
-      "customIndex": 0.7384,
+      "hale": 61.02,
+      "gniYear": 2023,
+      "gni": 12690.86,
+      "homicideYear": 2013,
+      "homicidesPer100k": 9.464,
+      "customIndex": 0.737,
       "region": {
-        "id": "SAS",
-        "name": "South Asia"
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
       },
       "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
+        "id": "UMC",
+        "name": "Upper middle income"
       },
-      "population": 173562364
+      "population": 45074049
     },
     {
       "iso": "UZB",
       "name": "Uzbekistan",
-      "leYear": 2024,
-      "le": 72.53,
+      "leYear": 2023,
+      "le": 72.39,
       "haleYear": 2021,
       "hale": 63.36,
       "gniYear": 2021,
       "gni": 9290.37,
       "homicideYear": 2021,
       "homicidesPer100k": 1.399,
-      "customIndex": 0.7361,
+      "customIndex": 0.7356,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -3270,42 +3248,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 36361859
+      "population": 35652307
     },
     {
-      "iso": "IRQ",
-      "name": "Iraq",
-      "leYear": 2024,
-      "le": 72.42,
+      "iso": "BGD",
+      "name": "Bangladesh",
+      "leYear": 2023,
+      "le": 74.67,
       "haleYear": 2021,
-      "hale": 61.02,
-      "gniYear": 2024,
-      "gni": 12009.75,
-      "homicideYear": 2013,
-      "homicidesPer100k": 9.464,
-      "customIndex": 0.7336,
+      "hale": 63.05,
+      "gniYear": 2023,
+      "gni": 8571.37,
+      "homicideYear": 2018,
+      "homicidesPer100k": 2.342,
+      "customIndex": 0.7351,
       "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+        "id": "SAS",
+        "name": "South Asia"
       },
       "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
+        "id": "LMC",
+        "name": "Lower middle income"
       },
-      "population": 46042015
+      "population": 171466990
     },
     {
       "iso": "SLV",
       "name": "El Salvador",
-      "leYear": 2024,
-      "le": 72.3,
+      "leYear": 2023,
+      "le": 72.1,
       "haleYear": 2021,
       "hale": 62.2,
-      "gniYear": 2024,
-      "gni": 10825.28,
+      "gniYear": 2023,
+      "gni": 10668.28,
       "homicideYear": 2022,
       "homicidesPer100k": 7.898,
-      "customIndex": 0.7326,
+      "customIndex": 0.7309,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3314,80 +3292,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 6338193
-    },
-    {
-      "iso": "KGZ",
-      "name": "Kyrgyz Republic",
-      "leYear": 2024,
-      "le": 72.4,
-      "haleYear": 2021,
-      "hale": 63.42,
-      "gniYear": 2024,
-      "gni": 8035.97,
-      "homicideYear": 2020,
-      "homicidesPer100k": 1.747,
-      "customIndex": 0.7249,
-      "region": {
-        "id": "ECS",
-        "name": "Europe & Central Asia"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 7221868
-    },
-    {
-      "iso": "PHL",
-      "name": "Philippines",
-      "leYear": 2024,
-      "le": 69.95,
-      "haleYear": 2021,
-      "hale": 58.77,
-      "gniYear": 2024,
-      "gni": 11699.57,
-      "homicideYear": 2023,
-      "homicidesPer100k": 4.348,
-      "customIndex": 0.7228,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 115843670
+      "population": 6309624
     },
     {
       "iso": "MNA",
       "name": "Middle East, North Africa, Afghanistan & Pakistan (excluding high income)",
       "leYear": "mixed",
-      "le": 71.62,
+      "le": 71.42,
       "haleYear": "mixed",
-      "hale": 59.72,
+      "hale": 59.73,
       "gniYear": "mixed",
-      "gni": 9948.69,
+      "gni": 9992.03,
       "homicideYear": "mixed",
-      "homicidesPer100k": 3.354,
+      "homicidesPer100k": 3.352,
       "derivedKind": "adminregion",
       "memberCount": 12,
-      "customIndex": 0.7225,
-      "population": 692558007
+      "customIndex": 0.7221,
+      "population": 681228043
     },
     {
       "iso": "TON",
       "name": "Tonga",
-      "leYear": 2024,
-      "le": 73.07,
+      "leYear": 2023,
+      "le": 72.9,
       "haleYear": 2021,
       "hale": 63.78,
       "gniYear": 2023,
       "gni": 7252.73,
       "homicideYear": 2019,
       "homicidesPer100k": 0.946,
-      "customIndex": 0.7218,
+      "customIndex": 0.7212,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -3396,20 +3330,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 104175
+      "population": 104597
     },
     {
       "iso": "GUY",
       "name": "Guyana",
-      "leYear": 2024,
-      "le": 70.32,
+      "leYear": 2023,
+      "le": 70.18,
       "haleYear": 2021,
       "hale": 56.82,
       "gniYear": 2021,
       "gni": 18312.57,
       "homicideYear": 2023,
       "homicidesPer100k": 19.12,
-      "customIndex": 0.7212,
+      "customIndex": 0.7207,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3418,58 +3352,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 831087
-    },
-    {
-      "iso": "NIC",
-      "name": "Nicaragua",
-      "leYear": 2024,
-      "le": 75.1,
-      "haleYear": 2021,
-      "hale": 64.61,
-      "gniYear": 2024,
-      "gni": 7785.77,
-      "homicideYear": 2021,
-      "homicidesPer100k": 11.347,
-      "customIndex": 0.7209,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 6916140
-    },
-    {
-      "iso": "SAS",
-      "name": "South Asia",
-      "leYear": "mixed",
-      "le": 72.56,
-      "haleYear": "mixed",
-      "hale": 58.81,
-      "gniYear": "mixed",
-      "gni": 9571.81,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 2.76,
-      "derivedKind": "region",
-      "memberCount": 6,
-      "customIndex": 0.7207,
-      "population": 1677384532
+      "population": 826353
     },
     {
       "iso": "TTO",
       "name": "Trinidad and Tobago",
-      "leYear": 2024,
-      "le": 73.62,
+      "leYear": 2023,
+      "le": 73.49,
       "haleYear": 2021,
       "hale": 61.94,
       "gniYear": 2021,
       "gni": 29989.21,
       "homicideYear": 2022,
       "homicidesPer100k": 40.443,
-      "customIndex": 0.7207,
+      "customIndex": 0.7202,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3478,20 +3374,20 @@
         "id": "HIC",
         "name": "High income"
       },
-      "population": 1368333
+      "population": 1367510
     },
     {
       "iso": "BWA",
       "name": "Botswana",
-      "leYear": 2024,
-      "le": 69.29,
+      "leYear": 2023,
+      "le": 69.16,
       "haleYear": 2021,
       "hale": 53.1,
       "gniYear": 2023,
       "gni": 19060.91,
       "homicideYear": 2021,
       "homicidesPer100k": 11.368,
-      "customIndex": 0.7196,
+      "customIndex": 0.7191,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -3500,20 +3396,42 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 2521139
+      "population": 2480244
+    },
+    {
+      "iso": "PHL",
+      "name": "Philippines",
+      "leYear": 2023,
+      "le": 69.83,
+      "haleYear": 2021,
+      "hale": 58.77,
+      "gniYear": 2023,
+      "gni": 10954.71,
+      "homicideYear": 2023,
+      "homicidesPer100k": 4.348,
+      "customIndex": 0.718,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 114891199
     },
     {
       "iso": "TJK",
       "name": "Tajikistan",
-      "leYear": 2024,
-      "le": 71.93,
+      "leYear": 2023,
+      "le": 71.79,
       "haleYear": 2021,
       "hale": 63.09,
       "gniYear": 2023,
       "gni": 7500.21,
       "homicideYear": 2020,
       "homicidesPer100k": 0.892,
-      "customIndex": 0.7182,
+      "customIndex": 0.7178,
       "region": {
         "id": "ECS",
         "name": "Europe & Central Asia"
@@ -3522,20 +3440,80 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 10590927
+      "population": 10389799
+    },
+    {
+      "iso": "SAS",
+      "name": "South Asia",
+      "leYear": "mixed",
+      "le": 72.32,
+      "haleYear": "mixed",
+      "hale": 58.81,
+      "gniYear": "mixed",
+      "gni": 9090.33,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 2.76,
+      "derivedKind": "region",
+      "memberCount": 6,
+      "customIndex": 0.7163,
+      "population": 1662580579
+    },
+    {
+      "iso": "NIC",
+      "name": "Nicaragua",
+      "leYear": 2023,
+      "le": 74.95,
+      "haleYear": 2021,
+      "hale": 64.61,
+      "gniYear": 2023,
+      "gni": 7359.57,
+      "homicideYear": 2021,
+      "homicidesPer100k": 11.347,
+      "customIndex": 0.7162,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 6823613
+    },
+    {
+      "iso": "KGZ",
+      "name": "Kyrgyz Republic",
+      "leYear": 2023,
+      "le": 72.25,
+      "haleYear": 2021,
+      "hale": 63.42,
+      "gniYear": 2023,
+      "gni": 7103.52,
+      "homicideYear": 2020,
+      "homicidesPer100k": 1.747,
+      "customIndex": 0.7152,
+      "region": {
+        "id": "ECS",
+        "name": "Europe & Central Asia"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 7099750
     },
     {
       "iso": "IND",
       "name": "India",
-      "leYear": 2024,
-      "le": 72.24,
+      "leYear": 2023,
+      "le": 72,
       "haleYear": 2021,
       "hale": 58.15,
-      "gniYear": 2024,
-      "gni": 9686.16,
+      "gniYear": 2023,
+      "gni": 9182.7,
       "homicideYear": 2022,
       "homicidesPer100k": 2.815,
-      "customIndex": 0.718,
+      "customIndex": 0.7135,
       "region": {
         "id": "SAS",
         "name": "South Asia"
@@ -3544,86 +3522,86 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 1450935791
+      "population": 1438069596
     },
     {
-      "iso": "BLZ",
-      "name": "Belize",
-      "leYear": 2024,
-      "le": 73.74,
+      "iso": "BOL",
+      "name": "Bolivia",
+      "leYear": 2023,
+      "le": 68.58,
       "haleYear": 2021,
-      "hale": 63.82,
-      "gniYear": 2024,
-      "gni": 12098.05,
-      "homicideYear": 2022,
-      "homicidesPer100k": 28.058,
-      "customIndex": 0.7111,
+      "hale": 57.43,
+      "gniYear": 2023,
+      "gni": 11065.99,
+      "homicideYear": 2023,
+      "homicidesPer100k": 4.418,
+      "customIndex": 0.7091,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
       },
       "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
+        "id": "LMC",
+        "name": "Lower middle income"
       },
-      "population": 417072
+      "population": 12244159
     },
     {
-      "iso": "WSM",
-      "name": "Samoa",
-      "leYear": 2024,
-      "le": 71.83,
+      "iso": "BLZ",
+      "name": "Belize",
+      "leYear": 2023,
+      "le": 73.57,
       "haleYear": 2021,
-      "hale": 61.57,
-      "gniYear": 2024,
-      "gni": 8031.09,
-      "homicideYear": 2018,
-      "homicidesPer100k": 6.263,
-      "customIndex": 0.7102,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 218019
-    },
-    {
-      "iso": "BOL",
-      "name": "Bolivia",
-      "leYear": 2024,
-      "le": 68.74,
-      "haleYear": 2021,
-      "hale": 57.43,
-      "gniYear": 2024,
-      "gni": 10954.72,
-      "homicideYear": 2023,
-      "homicidesPer100k": 4.418,
+      "hale": 63.82,
+      "gniYear": 2023,
+      "gni": 11807.98,
+      "homicideYear": 2022,
+      "homicidesPer100k": 28.058,
       "customIndex": 0.709,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
       },
       "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
+        "id": "UMC",
+        "name": "Upper middle income"
       },
-      "population": 12413315
+      "population": 411106
+    },
+    {
+      "iso": "WSM",
+      "name": "Samoa",
+      "leYear": 2023,
+      "le": 71.7,
+      "haleYear": 2021,
+      "hale": 61.57,
+      "gniYear": 2023,
+      "gni": 7453.64,
+      "homicideYear": 2018,
+      "homicidesPer100k": 6.263,
+      "customIndex": 0.7044,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 216663
     },
     {
       "iso": "GTM",
       "name": "Guatemala",
-      "leYear": 2024,
-      "le": 72.75,
+      "leYear": 2023,
+      "le": 72.6,
       "haleYear": 2021,
       "hale": 59.25,
-      "gniYear": 2024,
-      "gni": 12682.17,
+      "gniYear": 2023,
+      "gni": 12192.41,
       "homicideYear": 2023,
       "homicidesPer100k": 23.366,
-      "customIndex": 0.7065,
+      "customIndex": 0.7035,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3632,36 +3610,36 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 18406359
+      "population": 18124838
     },
     {
       "iso": "LMC",
       "name": "Lower middle income",
       "leYear": "mixed",
-      "le": 69.92,
+      "le": 69.73,
       "haleYear": "mixed",
       "hale": 58.57,
       "gniYear": "mixed",
-      "gni": 8941.63,
+      "gni": 8593.87,
       "homicideYear": "mixed",
-      "homicidesPer100k": 4.249,
+      "homicidesPer100k": 4.238,
       "derivedKind": "incomeLevel",
       "memberCount": 44,
-      "customIndex": 0.7037,
-      "population": 3058153767
+      "customIndex": 0.7003,
+      "population": 3020580550
     },
     {
       "iso": "FJI",
       "name": "Fiji",
-      "leYear": 2024,
-      "le": 67.46,
+      "leYear": 2023,
+      "le": 67.32,
       "haleYear": 2021,
       "hale": 57.69,
       "gniYear": 2021,
       "gni": 9701.15,
       "homicideYear": 2023,
       "homicidesPer100k": 2.056,
-      "customIndex": 0.7004,
+      "customIndex": 0.6998,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -3670,42 +3648,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 928784
-    },
-    {
-      "iso": "KHM",
-      "name": "Cambodia",
-      "leYear": 2024,
-      "le": 70.82,
-      "haleYear": 2021,
-      "hale": 60.63,
-      "gniYear": 2024,
-      "gni": 6640.67,
-      "homicideYear": 2011,
-      "homicidesPer100k": 1.82,
-      "customIndex": 0.696,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 17638801
+      "population": 924145
     },
     {
       "iso": "LCA",
       "name": "St. Lucia",
-      "leYear": 2024,
-      "le": 72.85,
+      "leYear": 2023,
+      "le": 72.7,
       "haleYear": 2021,
       "hale": 61.76,
       "gniYear": 2021,
       "gni": 18450.54,
       "homicideYear": 2023,
       "homicidesPer100k": 39.044,
-      "customIndex": 0.6949,
+      "customIndex": 0.6945,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3714,20 +3670,42 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 179744
+      "population": 179285
+    },
+    {
+      "iso": "KHM",
+      "name": "Cambodia",
+      "leYear": 2023,
+      "le": 70.67,
+      "haleYear": 2021,
+      "hale": 60.63,
+      "gniYear": 2023,
+      "gni": 6500.11,
+      "homicideYear": 2011,
+      "homicidesPer100k": 1.82,
+      "customIndex": 0.6939,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 17423880
     },
     {
       "iso": "STP",
       "name": "Sao Tome and Principe",
-      "leYear": 2024,
-      "le": 69.91,
+      "leYear": 2023,
+      "le": 69.72,
       "haleYear": 2021,
       "hale": 62.44,
       "gniYear": 2021,
       "gni": 5762.54,
       "homicideYear": 2011,
       "homicidesPer100k": 3.232,
-      "customIndex": 0.6865,
+      "customIndex": 0.6859,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -3736,20 +3714,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 235536
+      "population": 230871
+    },
+    {
+      "iso": "PSE",
+      "name": "West Bank and Gaza",
+      "leYear": 2023,
+      "le": 65.17,
+      "haleYear": 2021,
+      "hale": 62.93,
+      "gniYear": 2023,
+      "gni": 6446.59,
+      "homicideYear": 2022,
+      "homicidesPer100k": 0.622,
+      "customIndex": 0.6839,
+      "region": {
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 5165775
     },
     {
       "iso": "MRT",
       "name": "Mauritania",
-      "leYear": 2024,
-      "le": 68.71,
+      "leYear": 2023,
+      "le": 68.48,
       "haleYear": 2021,
       "hale": 60.39,
-      "gniYear": 2024,
-      "gni": 6125.56,
+      "gniYear": 2023,
+      "gni": 5836.12,
       "homicideYear": 2020,
       "homicidesPer100k": 1,
-      "customIndex": 0.6831,
+      "customIndex": 0.6788,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -3758,42 +3758,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 5169395
-    },
-    {
-      "iso": "NAM",
-      "name": "Namibia",
-      "leYear": 2024,
-      "le": 67.52,
-      "haleYear": 2021,
-      "hale": 52.82,
-      "gniYear": 2024,
-      "gni": 10769.13,
-      "homicideYear": 2021,
-      "homicidesPer100k": 11.208,
-      "customIndex": 0.6763,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 3030131
+      "population": 5022441
     },
     {
       "iso": "SYR",
       "name": "Syrian Arab Republic",
-      "leYear": 2024,
-      "le": 72.56,
+      "leYear": 2023,
+      "le": 72.12,
       "haleYear": 2021,
       "hale": 62.27,
       "gniYear": 2021,
       "gni": 4425.99,
       "homicideYear": 2010,
       "homicidesPer100k": 2.059,
-      "customIndex": 0.6757,
+      "customIndex": 0.6743,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -3802,20 +3780,64 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 24672760
+      "population": 23594623
+    },
+    {
+      "iso": "NAM",
+      "name": "Namibia",
+      "leYear": 2023,
+      "le": 67.39,
+      "haleYear": 2021,
+      "hale": 52.82,
+      "gniYear": 2023,
+      "gni": 10344.12,
+      "homicideYear": 2021,
+      "homicidesPer100k": 11.208,
+      "customIndex": 0.6732,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 2963095
+    },
+    {
+      "iso": "ECU",
+      "name": "Ecuador",
+      "leYear": 2023,
+      "le": 77.39,
+      "haleYear": 2021,
+      "hale": 64.34,
+      "gniYear": 2023,
+      "gni": 13953.34,
+      "homicideYear": 2023,
+      "homicidesPer100k": 45.723,
+      "customIndex": 0.6712,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 17980083
     },
     {
       "iso": "NPL",
       "name": "Nepal",
-      "leYear": 2024,
-      "le": 70.64,
+      "leYear": 2023,
+      "le": 70.35,
       "haleYear": 2021,
       "hale": 60.2,
-      "gniYear": 2024,
-      "gni": 5070.95,
+      "gniYear": 2023,
+      "gni": 4866.57,
       "homicideYear": 2020,
       "homicidesPer100k": 2.13,
-      "customIndex": 0.6733,
+      "customIndex": 0.6693,
       "region": {
         "id": "SAS",
         "name": "South Asia"
@@ -3824,20 +3846,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 29651054
+      "population": 29694614
     },
     {
       "iso": "GHA",
       "name": "Ghana",
-      "leYear": 2024,
-      "le": 65.69,
+      "leYear": 2023,
+      "le": 65.5,
       "haleYear": 2021,
       "hale": 57.88,
-      "gniYear": 2024,
-      "gni": 6958.78,
+      "gniYear": 2023,
+      "gni": 6394.38,
       "homicideYear": 2022,
       "homicidesPer100k": 1.831,
-      "customIndex": 0.672,
+      "customIndex": 0.6653,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -3846,20 +3868,364 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 34427414
+      "population": 33787914
     },
     {
-      "iso": "ECU",
-      "name": "Ecuador",
-      "leYear": 2024,
-      "le": 77.58,
+      "iso": "MMR",
+      "name": "Myanmar",
+      "leYear": 2023,
+      "le": 66.89,
       "haleYear": 2021,
-      "hale": 64.34,
-      "gniYear": 2024,
-      "gni": 13942.55,
+      "hale": 59.75,
+      "gniYear": 2021,
+      "gni": 5096.7,
       "homicideYear": 2023,
-      "homicidesPer100k": 45.723,
-      "customIndex": 0.6717,
+      "homicidesPer100k": 2.575,
+      "customIndex": 0.6591,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 54133798
+    },
+    {
+      "iso": "AGO",
+      "name": "Angola",
+      "leYear": 2023,
+      "le": 64.62,
+      "haleYear": 2021,
+      "hale": 53.76,
+      "gniYear": 2023,
+      "gni": 7788.9,
+      "homicideYear": 2016,
+      "homicidesPer100k": 4.098,
+      "customIndex": 0.6578,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 36749906
+    },
+    {
+      "iso": "PAK",
+      "name": "Pakistan",
+      "leYear": 2023,
+      "le": 67.65,
+      "haleYear": 2021,
+      "hale": 56.89,
+      "gniYear": 2023,
+      "gni": 5454.21,
+      "homicideYear": 2023,
+      "homicidesPer100k": 4.335,
+      "customIndex": 0.6547,
+      "region": {
+        "id": "MEA",
+        "name": "Middle East, North Africa, Afghanistan & Pakistan"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 247504495
+    },
+    {
+      "iso": "SEN",
+      "name": "Senegal",
+      "leYear": 2023,
+      "le": 68.68,
+      "haleYear": 2021,
+      "hale": 58.9,
+      "gniYear": 2023,
+      "gni": 4151,
+      "homicideYear": 2015,
+      "homicidesPer100k": 0.268,
+      "customIndex": 0.6496,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 18077573
+    },
+    {
+      "iso": "IDX",
+      "name": "IDA only",
+      "leYear": "mixed",
+      "le": 68.43,
+      "haleYear": "mixed",
+      "hale": 58.42,
+      "gniYear": "mixed",
+      "gni": 4575.52,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 5,
+      "derivedKind": "lendingType",
+      "memberCount": 42,
+      "customIndex": 0.6486,
+      "population": 951329112
+    },
+    {
+      "iso": "IDA_TOTAL",
+      "name": "IDA total",
+      "leYear": "mixed",
+      "le": 66.06,
+      "haleYear": "mixed",
+      "hale": 57.62,
+      "gniYear": "mixed",
+      "gni": 5295.88,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 6.458,
+      "derivedKind": "lendingType",
+      "memberCount": 58,
+      "customIndex": 0.6468,
+      "population": 1578309955
+    },
+    {
+      "iso": "KEN",
+      "name": "Kenya",
+      "leYear": 2023,
+      "le": 63.65,
+      "haleYear": 2021,
+      "hale": 58.22,
+      "gniYear": 2023,
+      "gni": 5531.67,
+      "homicideYear": 2022,
+      "homicidesPer100k": 4.872,
+      "customIndex": 0.6457,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 55339003
+    },
+    {
+      "iso": "FSM",
+      "name": "Micronesia, Fed. Sts.",
+      "leYear": 2023,
+      "le": 67.2,
+      "haleYear": 2021,
+      "hale": 57.93,
+      "gniYear": 2021,
+      "gni": 4409.99,
+      "homicideYear": 2019,
+      "homicidesPer100k": 0.907,
+      "customIndex": 0.6452,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 112630
+    },
+    {
+      "iso": "VUT",
+      "name": "Vanuatu",
+      "leYear": 2023,
+      "le": 71.48,
+      "haleYear": 2021,
+      "hale": 58.68,
+      "gniYear": 2022,
+      "gni": 3423.46,
+      "homicideYear": 2020,
+      "homicidesPer100k": 0.335,
+      "customIndex": 0.6425,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 320409
+    },
+    {
+      "iso": "HND",
+      "name": "Honduras",
+      "leYear": 2023,
+      "le": 72.88,
+      "haleYear": 2021,
+      "hale": 60.05,
+      "gniYear": 2023,
+      "gni": 6020.19,
+      "homicideYear": 2023,
+      "homicidesPer100k": 31.442,
+      "customIndex": 0.6409,
+      "region": {
+        "id": "LCN",
+        "name": "Latin America & Caribbean"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 10644851
+    },
+    {
+      "iso": "IDB",
+      "name": "IDA blend",
+      "leYear": "mixed",
+      "le": 62.45,
+      "haleYear": "mixed",
+      "hale": 56.41,
+      "gniYear": "mixed",
+      "gni": 6388.89,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 8.67,
+      "derivedKind": "lendingType",
+      "memberCount": 16,
+      "customIndex": 0.64,
+      "population": 626980843
+    },
+    {
+      "iso": "TLS",
+      "name": "Timor-Leste",
+      "leYear": 2023,
+      "le": 67.69,
+      "haleYear": 2021,
+      "hale": 59.53,
+      "gniYear": 2023,
+      "gni": 3842.49,
+      "homicideYear": 2015,
+      "homicidesPer100k": 4.066,
+      "customIndex": 0.6377,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 1384286
+    },
+    {
+      "iso": "SWZ",
+      "name": "Eswatini",
+      "leYear": 2023,
+      "le": 64.12,
+      "haleYear": 2021,
+      "hale": 47.47,
+      "gniYear": 2023,
+      "gni": 9734.27,
+      "homicideYear": 2021,
+      "homicidesPer100k": 12.515,
+      "customIndex": 0.6344,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 1230506
+    },
+    {
+      "iso": "KIR",
+      "name": "Kiribati",
+      "leYear": 2023,
+      "le": 66.47,
+      "haleYear": 2021,
+      "hale": 53.65,
+      "gniYear": 2023,
+      "gni": 5153.43,
+      "homicideYear": 2012,
+      "homicidesPer100k": 7.125,
+      "customIndex": 0.6316,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 132530
+    },
+    {
+      "iso": "TZA",
+      "name": "Tanzania",
+      "leYear": 2023,
+      "le": 67,
+      "haleYear": 2021,
+      "hale": 58.07,
+      "gniYear": 2023,
+      "gni": 3538.47,
+      "homicideYear": 2020,
+      "homicidesPer100k": 3.749,
+      "customIndex": 0.6246,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 66617606
+    },
+    {
+      "iso": "SSA",
+      "name": "Sub-Saharan Africa (excluding high income)",
+      "leYear": "mixed",
+      "le": 62.29,
+      "haleYear": "mixed",
+      "hale": 55.29,
+      "gniYear": "mixed",
+      "gni": 5519.58,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 10.555,
+      "derivedKind": "adminregion",
+      "memberCount": 31,
+      "customIndex": 0.6227,
+      "population": 848753347
+    },
+    {
+      "iso": "SSF",
+      "name": "Sub-Saharan Africa",
+      "leYear": "mixed",
+      "le": 62.95,
+      "haleYear": "mixed",
+      "hale": 55.75,
+      "gniYear": "mixed",
+      "gni": 5160.75,
+      "homicideYear": "mixed",
+      "homicidesPer100k": 10.286,
+      "derivedKind": "region",
+      "memberCount": 33,
+      "customIndex": 0.6224,
+      "population": 977564812
+    },
+    {
+      "iso": "VCT",
+      "name": "St. Vincent and the Grenadines",
+      "leYear": 2023,
+      "le": 71.23,
+      "haleYear": 2021,
+      "hale": 62.88,
+      "gniYear": 2021,
+      "gni": 15896.39,
+      "homicideYear": 2023,
+      "homicidesPer100k": 51.321,
+      "customIndex": 0.6206,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -3868,332 +4234,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 18135478
+      "population": 101323
     },
     {
-      "iso": "PSE",
-      "name": "West Bank and Gaza",
-      "leYear": 2024,
-      "le": 69.21,
+      "iso": "CMR",
+      "name": "Cameroon",
+      "leYear": 2023,
+      "le": 63.7,
       "haleYear": 2021,
-      "hale": 62.93,
-      "gniYear": 2024,
-      "gni": 4188.63,
-      "homicideYear": 2022,
-      "homicidesPer100k": 0.622,
-      "customIndex": 0.6646,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 5289152
-    },
-    {
-      "iso": "AGO",
-      "name": "Angola",
-      "leYear": 2024,
-      "le": 64.81,
-      "haleYear": 2021,
-      "hale": 53.76,
-      "gniYear": 2024,
-      "gni": 8055.15,
-      "homicideYear": 2016,
-      "homicidesPer100k": 4.098,
-      "customIndex": 0.6608,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 37885849
-    },
-    {
-      "iso": "MMR",
-      "name": "Myanmar",
-      "leYear": 2024,
-      "le": 67.1,
-      "haleYear": 2021,
-      "hale": 59.75,
-      "gniYear": 2021,
-      "gni": 5096.7,
-      "homicideYear": 2023,
-      "homicidesPer100k": 2.575,
-      "customIndex": 0.6598,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 54500091
-    },
-    {
-      "iso": "PAK",
-      "name": "Pakistan",
-      "leYear": 2024,
-      "le": 67.8,
-      "haleYear": 2021,
-      "hale": 56.89,
-      "gniYear": 2024,
-      "gni": 5583.94,
-      "homicideYear": 2023,
-      "homicidesPer100k": 4.335,
-      "customIndex": 0.6569,
-      "region": {
-        "id": "MEA",
-        "name": "Middle East, North Africa, Afghanistan & Pakistan"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 251269164
-    },
-    {
-      "iso": "SEN",
-      "name": "Senegal",
-      "leYear": 2024,
-      "le": 68.92,
-      "haleYear": 2021,
-      "hale": 58.9,
-      "gniYear": 2024,
-      "gni": 4460.76,
-      "homicideYear": 2015,
-      "homicidesPer100k": 0.268,
-      "customIndex": 0.6559,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 18501984
-    },
-    {
-      "iso": "IDX",
-      "name": "IDA only",
-      "leYear": "mixed",
-      "le": 68.64,
-      "haleYear": "mixed",
-      "hale": 58.4,
-      "gniYear": "mixed",
-      "gni": 4705.55,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 5.004,
-      "derivedKind": "lendingType",
-      "memberCount": 42,
-      "customIndex": 0.6513,
-      "population": 970275904
-    },
-    {
-      "iso": "IDA_TOTAL",
-      "name": "IDA total",
-      "leYear": "mixed",
-      "le": 66.25,
-      "haleYear": "mixed",
-      "hale": 57.61,
-      "gniYear": "mixed",
-      "gni": 5402.66,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 6.463,
-      "derivedKind": "lendingType",
-      "memberCount": 58,
-      "customIndex": 0.6488,
-      "population": 1608900159
-    },
-    {
-      "iso": "KEN",
-      "name": "Kenya",
-      "leYear": 2024,
-      "le": 63.83,
-      "haleYear": 2021,
-      "hale": 58.22,
-      "gniYear": 2024,
-      "gni": 5704.47,
-      "homicideYear": 2022,
-      "homicidesPer100k": 4.872,
-      "customIndex": 0.6486,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 56432944
-    },
-    {
-      "iso": "FSM",
-      "name": "Micronesia, Fed. Sts.",
-      "leYear": 2024,
-      "le": 67.36,
-      "haleYear": 2021,
-      "hale": 57.93,
-      "gniYear": 2021,
-      "gni": 4409.99,
-      "homicideYear": 2019,
-      "homicidesPer100k": 0.907,
-      "customIndex": 0.6458,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 113160
-    },
-    {
-      "iso": "VUT",
-      "name": "Vanuatu",
-      "leYear": 2024,
-      "le": 71.65,
-      "haleYear": 2021,
-      "hale": 58.68,
-      "gniYear": 2022,
-      "gni": 3423.46,
-      "homicideYear": 2020,
-      "homicidesPer100k": 0.335,
-      "customIndex": 0.6431,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 327777
-    },
-    {
-      "iso": "HND",
-      "name": "Honduras",
-      "leYear": 2024,
-      "le": 73.04,
-      "haleYear": 2021,
-      "hale": 60.05,
-      "gniYear": 2024,
-      "gni": 6079.26,
-      "homicideYear": 2023,
-      "homicidesPer100k": 31.442,
-      "customIndex": 0.6421,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 10825703
-    },
-    {
-      "iso": "IDB",
-      "name": "IDA blend",
-      "leYear": "mixed",
-      "le": 62.61,
-      "haleYear": "mixed",
-      "hale": 56.41,
-      "gniYear": "mixed",
-      "gni": 6461.79,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 8.68,
-      "derivedKind": "lendingType",
-      "memberCount": 16,
-      "customIndex": 0.6413,
-      "population": 638624255
-    },
-    {
-      "iso": "SWZ",
-      "name": "Eswatini",
-      "leYear": 2024,
-      "le": 64.26,
-      "haleYear": 2021,
-      "hale": 47.47,
-      "gniYear": 2024,
-      "gni": 9632.49,
-      "homicideYear": 2021,
-      "homicidesPer100k": 12.515,
-      "customIndex": 0.6343,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 1242822
-    },
-    {
-      "iso": "KIR",
-      "name": "Kiribati",
-      "leYear": 2024,
-      "le": 66.6,
-      "haleYear": 2021,
-      "hale": 53.65,
+      "hale": 54.01,
       "gniYear": 2023,
-      "gni": 5153.43,
-      "homicideYear": 2012,
-      "homicidesPer100k": 7.125,
-      "customIndex": 0.632,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 134518
-    },
-    {
-      "iso": "TLS",
-      "name": "Timor-Leste",
-      "leYear": 2024,
-      "le": 67.9,
-      "haleYear": 2021,
-      "hale": 59.53,
-      "gniYear": 2024,
-      "gni": 3469.89,
-      "homicideYear": 2015,
-      "homicidesPer100k": 4.066,
-      "customIndex": 0.6304,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 1400638
-    },
-    {
-      "iso": "TZA",
-      "name": "Tanzania",
-      "leYear": 2024,
-      "le": 67.21,
-      "haleYear": 2021,
-      "hale": 58.07,
-      "gniYear": 2024,
-      "gni": 3656.97,
-      "homicideYear": 2020,
-      "homicidesPer100k": 3.749,
-      "customIndex": 0.6279,
+      "gni": 4773.75,
+      "homicideYear": 2022,
+      "homicidesPer100k": 6.76,
+      "customIndex": 0.6181,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4202,20 +4256,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 68560157
+      "population": 28372687
+    },
+    {
+      "iso": "PNG",
+      "name": "Papua New Guinea",
+      "leYear": 2023,
+      "le": 66.13,
+      "haleYear": 2021,
+      "hale": 57.48,
+      "gniYear": 2021,
+      "gni": 3734.73,
+      "homicideYear": 2010,
+      "homicidesPer100k": 9.34,
+      "customIndex": 0.6168,
+      "region": {
+        "id": "EAS",
+        "name": "East Asia & Pacific"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 10389635
     },
     {
       "iso": "RWA",
       "name": "Rwanda",
-      "leYear": 2024,
-      "le": 68.02,
+      "leYear": 2023,
+      "le": 67.79,
       "haleYear": 2021,
       "hale": 58.71,
-      "gniYear": 2024,
-      "gni": 3277.63,
+      "gniYear": 2023,
+      "gni": 2937.46,
       "homicideYear": 2020,
       "homicidesPer100k": 3.612,
-      "customIndex": 0.6242,
+      "customIndex": 0.6146,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4224,52 +4300,42 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 14256567
+      "population": 13954471
     },
     {
-      "iso": "SSF",
-      "name": "Sub-Saharan Africa",
-      "leYear": "mixed",
-      "le": 63.17,
-      "haleYear": "mixed",
-      "hale": 55.75,
-      "gniYear": "mixed",
-      "gni": 5219.85,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 10.257,
-      "derivedKind": "region",
-      "memberCount": 33,
-      "customIndex": 0.624,
-      "population": 999942567
-    },
-    {
-      "iso": "SSA",
-      "name": "Sub-Saharan Africa (excluding high income)",
-      "leYear": "mixed",
-      "le": 62.49,
-      "haleYear": "mixed",
-      "hale": 55.28,
-      "gniYear": "mixed",
-      "gni": 5553.66,
-      "homicideYear": "mixed",
-      "homicidesPer100k": 10.523,
-      "derivedKind": "adminregion",
-      "memberCount": 31,
-      "customIndex": 0.6239,
-      "population": 867761446
-    },
-    {
-      "iso": "VCT",
-      "name": "St. Vincent and the Grenadines",
-      "leYear": 2024,
-      "le": 71.38,
+      "iso": "ZWE",
+      "name": "Zimbabwe",
+      "leYear": 2023,
+      "le": 62.78,
       "haleYear": 2021,
-      "hale": 62.88,
+      "hale": 51.25,
+      "gniYear": 2023,
+      "gni": 5309.41,
+      "homicideYear": 2022,
+      "homicidesPer100k": 6.758,
+      "customIndex": 0.6123,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LMC",
+        "name": "Lower middle income"
+      },
+      "population": 16340822
+    },
+    {
+      "iso": "JAM",
+      "name": "Jamaica",
+      "leYear": 2023,
+      "le": 71.48,
+      "haleYear": 2021,
+      "hale": 61.72,
       "gniYear": 2021,
-      "gni": 15896.39,
+      "gni": 10157.18,
       "homicideYear": 2023,
-      "homicidesPer100k": 51.321,
-      "customIndex": 0.621,
+      "homicidesPer100k": 49.44,
+      "customIndex": 0.6061,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -4278,42 +4344,20 @@
         "id": "UMC",
         "name": "Upper middle income"
       },
-      "population": 100616
+      "population": 2839786
     },
     {
-      "iso": "CMR",
-      "name": "Cameroon",
-      "leYear": 2024,
-      "le": 63.97,
+      "iso": "SLB",
+      "name": "Solomon Islands",
+      "leYear": 2023,
+      "le": 70.53,
       "haleYear": 2021,
-      "hale": 54.01,
-      "gniYear": 2024,
-      "gni": 4880.21,
-      "homicideYear": 2022,
-      "homicidesPer100k": 6.76,
-      "customIndex": 0.6206,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 29123744
-    },
-    {
-      "iso": "PNG",
-      "name": "Papua New Guinea",
-      "leYear": 2024,
-      "le": 66.26,
-      "haleYear": 2021,
-      "hale": 57.48,
-      "gniYear": 2021,
-      "gni": 3734.73,
-      "homicideYear": 2010,
-      "homicidesPer100k": 9.34,
-      "customIndex": 0.6172,
+      "hale": 57.37,
+      "gniYear": 2023,
+      "gni": 2486.71,
+      "homicideYear": 2008,
+      "homicidesPer100k": 3.734,
+      "customIndex": 0.6051,
       "region": {
         "id": "EAS",
         "name": "East Asia & Pacific"
@@ -4322,20 +4366,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 10576502
+      "population": 800005
     },
     {
-      "iso": "ZWE",
-      "name": "Zimbabwe",
-      "leYear": 2024,
-      "le": 63.06,
+      "iso": "NGA",
+      "name": "Nigeria",
+      "leYear": 2023,
+      "le": 54.46,
       "haleYear": 2021,
-      "hale": 51.25,
-      "gniYear": 2024,
-      "gni": 5326.2,
-      "homicideYear": 2022,
-      "homicidesPer100k": 6.758,
-      "customIndex": 0.6135,
+      "hale": 54.95,
+      "gniYear": 2021,
+      "gni": 7481.56,
+      "homicideYear": 2023,
+      "homicidesPer100k": 15.747,
+      "customIndex": 0.6048,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4344,20 +4388,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 16634373
+      "population": 227882945
+    },
+    {
+      "iso": "ZAF",
+      "name": "South Africa",
+      "leYear": 2023,
+      "le": 66.14,
+      "haleYear": 2021,
+      "hale": 52.76,
+      "gniYear": 2023,
+      "gni": 13106.9,
+      "homicideYear": 2022,
+      "homicidesPer100k": 43.72,
+      "customIndex": 0.6048,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "UMC",
+        "name": "Upper middle income"
+      },
+      "population": 63212384
     },
     {
       "iso": "ETH",
       "name": "Ethiopia",
-      "leYear": 2024,
-      "le": 67.6,
+      "leYear": 2023,
+      "le": 67.32,
       "haleYear": 2021,
       "hale": 58.83,
-      "gniYear": 2024,
-      "gni": 3004.36,
+      "gniYear": 2023,
+      "gni": 2771.84,
       "homicideYear": 2012,
       "homicidesPer100k": 8.511,
-      "customIndex": 0.61,
+      "customIndex": 0.6027,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4366,102 +4432,36 @@
         "id": "INX",
         "name": "Not classified"
       },
-      "population": 132059767
+      "population": 128691692
     },
     {
       "iso": "INX",
       "name": "Not classified",
       "leYear": "mixed",
-      "le": 67.6,
+      "le": 67.32,
       "haleYear": "mixed",
       "hale": 58.83,
       "gniYear": "mixed",
-      "gni": 3004.36,
+      "gni": 2771.84,
       "homicideYear": "mixed",
       "homicidesPer100k": 8.511,
       "derivedKind": "incomeLevel",
       "memberCount": 1,
-      "customIndex": 0.61,
-      "population": 132059767
-    },
-    {
-      "iso": "SLB",
-      "name": "Solomon Islands",
-      "leYear": 2024,
-      "le": 70.69,
-      "haleYear": 2021,
-      "hale": 57.37,
-      "gniYear": 2024,
-      "gni": 2554.24,
-      "homicideYear": 2008,
-      "homicidesPer100k": 3.734,
-      "customIndex": 0.6079,
-      "region": {
-        "id": "EAS",
-        "name": "East Asia & Pacific"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 819198
-    },
-    {
-      "iso": "JAM",
-      "name": "Jamaica",
-      "leYear": 2024,
-      "le": 71.61,
-      "haleYear": 2021,
-      "hale": 61.72,
-      "gniYear": 2021,
-      "gni": 10157.18,
-      "homicideYear": 2023,
-      "homicidesPer100k": 49.44,
-      "customIndex": 0.6064,
-      "region": {
-        "id": "LCN",
-        "name": "Latin America & Caribbean"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 2839175
-    },
-    {
-      "iso": "NGA",
-      "name": "Nigeria",
-      "leYear": 2024,
-      "le": 54.64,
-      "haleYear": 2021,
-      "hale": 54.95,
-      "gniYear": 2021,
-      "gni": 7481.56,
-      "homicideYear": 2023,
-      "homicidesPer100k": 15.747,
-      "customIndex": 0.6054,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LMC",
-        "name": "Lower middle income"
-      },
-      "population": 232679478
+      "customIndex": 0.6027,
+      "population": 128691692
     },
     {
       "iso": "BEN",
       "name": "Benin",
-      "leYear": 2024,
-      "le": 60.96,
+      "leYear": 2023,
+      "le": 60.77,
       "haleYear": 2021,
       "hale": 55.72,
-      "gniYear": 2024,
-      "gni": 3818.42,
+      "gniYear": 2023,
+      "gni": 3633.39,
       "homicideYear": 2017,
       "homicidesPer100k": 1.127,
-      "customIndex": 0.6051,
+      "customIndex": 0.6008,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4470,42 +4470,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 14462724
-    },
-    {
-      "iso": "ZAF",
-      "name": "South Africa",
-      "leYear": 2024,
-      "le": 66.31,
-      "haleYear": 2021,
-      "hale": 52.76,
-      "gniYear": 2024,
-      "gni": 12917.88,
-      "homicideYear": 2022,
-      "homicidesPer100k": 43.72,
-      "customIndex": 0.6046,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "UMC",
-        "name": "Upper middle income"
-      },
-      "population": 64007187
+      "population": 14111034
     },
     {
       "iso": "UGA",
       "name": "Uganda",
-      "leYear": 2024,
-      "le": 68.49,
+      "leYear": 2023,
+      "le": 68.25,
       "haleYear": 2021,
       "hale": 57.22,
-      "gniYear": 2024,
-      "gni": 2710.97,
+      "gniYear": 2023,
+      "gni": 2713.62,
       "homicideYear": 2023,
       "homicidesPer100k": 8.973,
-      "customIndex": 0.599,
+      "customIndex": 0.5983,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4514,20 +4492,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 50015092
+      "population": 48656601
     },
     {
       "iso": "ZMB",
       "name": "Zambia",
-      "leYear": 2024,
-      "le": 66.53,
+      "leYear": 2023,
+      "le": 66.35,
       "haleYear": 2021,
       "hale": 52.97,
       "gniYear": 2021,
       "gni": 3198.36,
       "homicideYear": 2015,
       "homicidesPer100k": 5.202,
-      "customIndex": 0.5967,
+      "customIndex": 0.5961,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4536,20 +4514,42 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 21314956
+      "population": 20723965
+    },
+    {
+      "iso": "SDN",
+      "name": "Sudan",
+      "leYear": 2023,
+      "le": 66.33,
+      "haleYear": 2021,
+      "hale": 58.54,
+      "gniYear": 2023,
+      "gni": 2226.32,
+      "homicideYear": 2008,
+      "homicidesPer100k": 5.148,
+      "customIndex": 0.5849,
+      "region": {
+        "id": "SSF",
+        "name": "Sub-Saharan Africa"
+      },
+      "incomeLevel": {
+        "id": "LIC",
+        "name": "Low income"
+      },
+      "population": 50042791
     },
     {
       "iso": "SLE",
       "name": "Sierra Leone",
-      "leYear": 2024,
-      "le": 61.96,
+      "leYear": 2023,
+      "le": 61.79,
       "haleYear": 2021,
       "hale": 53.13,
-      "gniYear": 2024,
-      "gni": 2948.4,
+      "gniYear": 2023,
+      "gni": 3025.84,
       "homicideYear": 2020,
       "homicidesPer100k": 2.224,
-      "customIndex": 0.579,
+      "customIndex": 0.5804,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4558,20 +4558,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 8642022
+      "population": 8460512
     },
     {
       "iso": "GNB",
       "name": "Guinea-Bissau",
-      "leYear": 2024,
-      "le": 64.25,
+      "leYear": 2023,
+      "le": 64.08,
       "haleYear": 2021,
       "hale": 51.45,
-      "gniYear": 2024,
-      "gni": 2789.92,
+      "gniYear": 2023,
+      "gni": 2655.06,
       "homicideYear": 2017,
       "homicidesPer100k": 1.119,
-      "customIndex": 0.5781,
+      "customIndex": 0.5737,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4580,58 +4580,36 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 2201352
+      "population": 2153339
     },
     {
       "iso": "LIC",
       "name": "Low income",
       "leYear": "mixed",
-      "le": 65.82,
+      "le": 65.59,
       "haleYear": "mixed",
-      "hale": 54.98,
+      "hale": 54.99,
       "gniYear": "mixed",
-      "gni": 2221.85,
+      "gni": 2262.41,
       "homicideYear": "mixed",
-      "homicidesPer100k": 4.681,
+      "homicidesPer100k": 4.682,
       "derivedKind": "incomeLevel",
       "memberCount": 14,
-      "customIndex": 0.5727,
-      "population": 324743786
-    },
-    {
-      "iso": "SDN",
-      "name": "Sudan",
-      "leYear": 2024,
-      "le": 66.52,
-      "haleYear": 2021,
-      "hale": 58.54,
-      "gniYear": 2024,
-      "gni": 1815.29,
-      "homicideYear": 2008,
-      "homicidesPer100k": 5.148,
-      "customIndex": 0.5681,
-      "region": {
-        "id": "SSF",
-        "name": "Sub-Saharan Africa"
-      },
-      "incomeLevel": {
-        "id": "LIC",
-        "name": "Low income"
-      },
-      "population": 50448963
+      "customIndex": 0.5734,
+      "population": 316577285
     },
     {
       "iso": "BFA",
       "name": "Burkina Faso",
-      "leYear": 2024,
-      "le": 61.29,
+      "leYear": 2023,
+      "le": 61.09,
       "haleYear": 2021,
       "hale": 54.56,
       "gniYear": 2022,
       "gni": 2221.64,
       "homicideYear": 2017,
       "homicidesPer100k": 1.25,
-      "customIndex": 0.5605,
+      "customIndex": 0.5599,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4640,20 +4618,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 23548781
+      "population": 23025776
     },
     {
       "iso": "AFG",
       "name": "Afghanistan",
-      "leYear": 2024,
-      "le": 66.29,
+      "leYear": 2023,
+      "le": 66.04,
       "haleYear": 2021,
       "hale": 50.45,
       "gniYear": 2023,
       "gni": 2050.87,
       "homicideYear": 2021,
       "homicidesPer100k": 4.032,
-      "customIndex": 0.5539,
+      "customIndex": 0.5531,
       "region": {
         "id": "MEA",
         "name": "Middle East, North Africa, Afghanistan & Pakistan"
@@ -4662,20 +4640,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 42647492
+      "population": 41454761
     },
     {
       "iso": "MWI",
       "name": "Malawi",
-      "leYear": 2024,
-      "le": 67.56,
+      "leYear": 2023,
+      "le": 67.35,
       "haleYear": 2021,
       "hale": 54.67,
       "gniYear": 2023,
       "gni": 1562.09,
       "homicideYear": 2012,
       "homicidesPer100k": 1.776,
-      "customIndex": 0.5501,
+      "customIndex": 0.5495,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4684,20 +4662,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 21655286
+      "population": 21104482
     },
     {
       "iso": "NER",
       "name": "Niger",
-      "leYear": 2024,
-      "le": 61.43,
+      "leYear": 2023,
+      "le": 61.18,
       "haleYear": 2021,
       "hale": 52.61,
-      "gniYear": 2024,
-      "gni": 2066.04,
+      "gniYear": 2023,
+      "gni": 1903.06,
       "homicideYear": 2012,
       "homicidesPer100k": 4.418,
-      "customIndex": 0.5454,
+      "customIndex": 0.5379,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4706,20 +4684,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 27032412
+      "population": 26159867
     },
     {
       "iso": "HTI",
       "name": "Haiti",
-      "leYear": 2024,
-      "le": 65.12,
+      "leYear": 2023,
+      "le": 64.94,
       "haleYear": 2021,
       "hale": 53.94,
-      "gniYear": 2024,
-      "gni": 2994.96,
+      "gniYear": 2023,
+      "gni": 3110.85,
       "homicideYear": 2023,
       "homicidesPer100k": 41.152,
-      "customIndex": 0.5242,
+      "customIndex": 0.5262,
       "region": {
         "id": "LCN",
         "name": "Latin America & Caribbean"
@@ -4728,20 +4706,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 11772557
+      "population": 11637398
     },
     {
       "iso": "LBR",
       "name": "Liberia",
-      "leYear": 2024,
-      "le": 62.32,
+      "leYear": 2023,
+      "le": 62.16,
       "haleYear": 2021,
       "hale": 53.96,
       "gniYear": 2021,
       "gni": 1443.67,
       "homicideYear": 2012,
       "homicidesPer100k": 3.087,
-      "customIndex": 0.5239,
+      "customIndex": 0.5234,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4750,20 +4728,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 5612817
+      "population": 5493031
     },
     {
       "iso": "MOZ",
       "name": "Mozambique",
-      "leYear": 2024,
-      "le": 63.8,
+      "leYear": 2023,
+      "le": 63.61,
       "haleYear": 2021,
       "hale": 49.72,
-      "gniYear": 2024,
-      "gni": 1396.62,
+      "gniYear": 2023,
+      "gni": 1450.48,
       "homicideYear": 2011,
       "homicidesPer100k": 3.59,
-      "customIndex": 0.512,
+      "customIndex": 0.5147,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4772,20 +4750,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 34631766
+      "population": 33635160
     },
     {
       "iso": "BDI",
       "name": "Burundi",
-      "leYear": 2024,
-      "le": 63.82,
+      "leYear": 2023,
+      "le": 63.65,
       "haleYear": 2021,
       "hale": 55.84,
       "gniYear": 2021,
       "gni": 1037.99,
       "homicideYear": 2016,
       "homicidesPer100k": 5.65,
-      "customIndex": 0.5011,
+      "customIndex": 0.5007,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4794,20 +4772,20 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 14047786
+      "population": 13689450
     },
     {
       "iso": "LSO",
       "name": "Lesotho",
-      "leYear": 2024,
-      "le": 57.8,
+      "leYear": 2023,
+      "le": 57.38,
       "haleYear": 2021,
       "hale": 44.63,
       "gniYear": 2023,
       "gni": 3044.23,
       "homicideYear": 2008,
       "homicidesPer100k": 38.24,
-      "customIndex": 0.4806,
+      "customIndex": 0.4791,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4816,20 +4794,20 @@
         "id": "LMC",
         "name": "Lower middle income"
       },
-      "population": 2337423
+      "population": 2311472
     },
     {
       "iso": "CAF",
       "name": "Central African Republic",
-      "leYear": 2024,
-      "le": 57.67,
+      "leYear": 2023,
+      "le": 57.41,
       "haleYear": 2021,
       "hale": 45.43,
-      "gniYear": 2024,
-      "gni": 1181.88,
+      "gniYear": 2023,
+      "gni": 1201.84,
       "homicideYear": 2016,
       "homicidesPer100k": 20.12,
-      "customIndex": 0.4472,
+      "customIndex": 0.4477,
       "region": {
         "id": "SSF",
         "name": "Sub-Saharan Africa"
@@ -4838,7 +4816,7 @@
         "id": "LIC",
         "name": "Low income"
       },
-      "population": 5330690
+      "population": 5152421
     }
   ]
 }
