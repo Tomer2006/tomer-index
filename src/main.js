@@ -1,4 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
+<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
@@ -6,6 +7,9 @@ import {
   renderScaleControl,
 } from "./index-scale.js";
 import { combinedHealthLei } from "./hdi-core.js";
+=======
+import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
+>>>>>>> Stashed changes
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
@@ -206,14 +210,26 @@ function renderTable(rows) {
     const rank = i + 1;
     const tr = document.createElement("tr");
     const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
+    const quality = dataQualityForRow(r, entrySeries);
     tr.className = "leaderboard-row-link";
     tr.dataset.href = href;
     tr.tabIndex = 0;
+<<<<<<< Updated upstream
     tr.setAttribute("aria-label", `Open ${r.name} history`);
+=======
+    tr.setAttribute(
+      "aria-label",
+      quality ? `Open ${r.name} history. ${quality.description}` : `Open ${r.name} history`
+    );
+    const h = r.homicidesPer100k;
+    const hStr =
+      typeof h === "number" && !Number.isNaN(h) ? h.toFixed(1) : "—";
+>>>>>>> Stashed changes
     const idx = r.customIndex ?? r.customHdi ?? 0;
     const health = healthValue(r);
     tr.innerHTML = `
       <td>${rank}</td>
+<<<<<<< Updated upstream
       <td><a class="leaderboard-entry-link" href="${href}">${escapeHtml(r.name)}</a></td>
       <td>${fmtNum(r.le, 1)}</td>
       <td>${fmtNum(r.hale, 1)}</td>
@@ -221,12 +237,28 @@ function renderTable(rows) {
       <td>${typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—"}</td>
       <td>${fmtNum(r.homicidesPer100k, 1)}</td>
       <td>${formatTomer(idx)}</td>
+=======
+      <td class="place-cell"><a class="leaderboard-entry-link" href="${href}">${escapeHtml(
+        r.name
+      )}</a>${dataQualityBadgeHtml(quality)}</td>
+      <td>${r.le.toFixed(1)}</td>
+      <td>${hale}</td>
+      <td>${formatInt(r.gni)}</td>
+      <td>${hStr}</td>
+      <td>${idx.toFixed(3)}</td>
+>>>>>>> Stashed changes
     `;
     frag.appendChild(tr);
   });
   $tbody.appendChild(frag);
 }
 
+<<<<<<< Updated upstream
+=======
+let cache = [];
+let entrySeries = {};
+
+>>>>>>> Stashed changes
 function globalSourceYearText(point) {
   const parts = [
     ["LE", point.leYear],
@@ -482,12 +514,33 @@ function renderGlobalAverageChart(container, series, highlightYear) {
   svg.addEventListener("blur", hidePoint);
 }
 
+<<<<<<< Updated upstream
 function setYear(year) {
   const y = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(year, 10) || YEAR_MAX));
   state.year = y;
   if ($yearSlider) $yearSlider.value = String(y);
   if ($yearOutput) $yearOutput.textContent = String(y);
   refresh();
+=======
+async function loadLocalData() {
+  setStatus("");
+  const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
+  if (!res.ok) {
+    throw new Error(
+      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
+    );
+  }
+  const payload = await res.json();
+  cache = payload.countries ?? [];
+  entrySeries = payload.entrySeries ?? {};
+  setStatus(cache.length ? "" : "No rows in data file.");
+  updateHeaderSortUI();
+  renderTable(getSortedCache());
+  renderGlobalAverageChart(
+    $globalChart,
+    payload.globalAverageSeries ?? { points: [] }
+  );
+>>>>>>> Stashed changes
 }
 
 function chipsHtml(list, key) {

@@ -1,10 +1,14 @@
 import { escapeHtml, formatInt } from "./format.js";
+<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
+=======
+import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
+>>>>>>> Stashed changes
 
 const $title = document.getElementById("entry-title");
 const $kicker = document.getElementById("entry-kicker");
@@ -380,8 +384,9 @@ async function load() {
     throw new Error(`No history stored for ${row.name}. Run: npm run build-data`);
   }
   const rank = String(countries.findIndex((r) => r.iso === iso) + 1);
+  const quality = dataQualityForRow(row, payload.entrySeries ?? {});
   document.title = `${row.name} history - Tomer index`;
-  $title.textContent = row.name;
+  $title.innerHTML = `${escapeHtml(row.name)}${dataQualityBadgeHtml(quality)}`;
   $kicker.textContent = row.derivedKind ? `${row.derivedKind} history` : `${row.iso} history`;
   if ($sub) $sub.textContent = "";
   if ($seriesDef) $seriesDef.textContent = "";

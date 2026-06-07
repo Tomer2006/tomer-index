@@ -56,8 +56,9 @@ async function fetchWorldBankJson(urlString, indicator) {
 /**
  * WDI `date=` upper bound (inclusive). Use current calendar year + 1 so each `npm run build-data`
  * requests the newest country-years the API has (leaderboard uses `latestByCountry` / `latestHaleByIso`
- * per series). Entry history pages are rendered on a fixed 2000-2023 timeline and keep source-year
- * metadata for each metric when the displayed year uses an observation from a nearby source year.
+ * per series). Entry history pages are rendered on a 2000-2023 timeline using the best observation
+ * available as of each year within that window: exact same-year values when present, otherwise
+ * the latest prior value from 2000 onward. Future observations are not pulled backward.
  */
 const WDI_END_YEAR = new Date().getUTCFullYear() + 1;
 const DATE_RANGE = `1960:${WDI_END_YEAR}`;
@@ -125,11 +126,11 @@ function worldAggregateTomerSeries(
   const popM = popByCY.get(WB_WLD);
   const points = [];
   for (let y = yearMin; y <= yearMax; y++) {
-    const leY = observationForTimelineYear(leM, y);
-    const gniY = observationForTimelineYear(gniM, y);
-    const homY = observationForTimelineYear(homM, y);
-    const popY = observationForTimelineYear(popM, y);
-    const hale = haleForTimelineYear(haleWldMap, WB_WLD, y);
+    const leY = observationAsOfYear(leM, y, yearMin);
+    const gniY = observationAsOfYear(gniM, y, yearMin);
+    const homY = observationAsOfYear(homM, y, yearMin);
+    const popY = observationAsOfYear(popM, y, yearMin);
+    const hale = haleAsOfYear(haleWldMap, WB_WLD, y);
     if (!leY || !gniY || !homY || !hale || !popY) continue;
     const p = popY.value;
     if (typeof p !== "number" || !Number.isFinite(p) || p <= 0) continue;
@@ -501,40 +502,19 @@ function rounded(value, digits) {
   return Math.round(value * scale) / scale;
 }
 
-function latestAsOfYear(yearMap, year) {
+function observationAsOfYear(yearMap, year, minSourceYear) {
   if (!yearMap?.size) return null;
   let best = null;
   for (const [candidateYear, row] of yearMap) {
-    if (candidateYear <= year && (!best || candidateYear > best.year)) {
+    if (
+      candidateYear >= minSourceYear &&
+      candidateYear <= year &&
+      (!best || candidateYear > best.year)
+    ) {
       best = { ...row, year: candidateYear };
     }
   }
   return best;
-}
-
-function firstAfterYear(yearMap, year) {
-  if (!yearMap?.size) return null;
-  let best = null;
-  for (const [candidateYear, row] of yearMap) {
-    if (candidateYear > year && (!best || candidateYear < best.year)) {
-      best = { ...row, year: candidateYear };
-    }
-  }
-  return best;
-}
-
-function observationForTimelineYear(yearMap, year) {
-  return latestAsOfYear(yearMap, year) ?? firstAfterYear(yearMap, year);
-}
-
-function firstHaleAfterYear(haleHistory, iso, year) {
-  const rows = haleHistory.get(iso);
-  if (!rows?.length) return null;
-  return rows.find((row) => row.year > year) ?? null;
-}
-
-function haleForTimelineYear(haleHistory, iso, year) {
-  return haleAsOfYear(haleHistory, iso, year) ?? firstHaleAfterYear(haleHistory, iso, year);
 }
 
 function annualRange(yearMin, yearMax) {
@@ -552,35 +532,51 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
   const points = [];
 
   for (const y of years) {
-    const leY = observationForTimelineYear(leM, y);
-    const gniY = observationForTimelineYear(gniM, y);
-    const homY = observationForTimelineYear(homM, y);
-    const popY = observationForTimelineYear(popM, y);
-    const hale = haleForTimelineYear(haleHistory, iso, y);
-    if (!leY || !gniY || !homY || !hale) continue;
+    const leY = observationAsOfYear(leM, y, yearMin);
+    const gniY = observationAsOfYear(gniM, y, yearMin);
+    const homY = observationAsOfYear(homM, y, yearMin);
+    const popY = observationAsOfYear(popM, y, yearMin);
+    const hale = haleAsOfYear(haleHistory, iso, y);
+    const point = { year: y };
 
-    const idx = customIndexHealthIncomeSafetyFull(
-      leY.value,
-      gniY.value,
-      homY.value,
-      hale.value
-    );
+    if (leY) {
+      point.le = rounded(leY.value, 2);
+      point.leYear = leY.year;
+    }
+    if (hale) {
+      point.hale = rounded(hale.value, 2);
+      point.haleYear = hale.year;
+    }
+    if (gniY) {
+      point.gni = rounded(gniY.value, 2);
+      point.gniYear = gniY.year;
+    }
+    if (homY) {
+      point.homicidesPer100k = rounded(homY.value, 3);
+      point.homicideYear = homY.year;
+    }
     const pop = popY?.value;
-    points.push({
-      year: y,
-      le: rounded(leY.value, 2),
-      leYear: leY.year,
-      hale: rounded(hale.value, 2),
-      haleYear: hale.year,
-      gni: rounded(gniY.value, 2),
-      gniYear: gniY.year,
-      homicidesPer100k: rounded(homY.value, 3),
-      homicideYear: homY.year,
-      customIndex: rounded(idx, 4),
-      ...(typeof pop === "number" && Number.isFinite(pop) && pop > 0
-        ? { population: Math.round(pop) }
-        : {}),
-    });
+    if (typeof pop === "number" && Number.isFinite(pop) && pop > 0) {
+      point.population = Math.round(pop);
+    }
+
+    if (leY && gniY && homY && hale) {
+      const idx = customIndexHealthIncomeSafetyFull(
+        leY.value,
+        gniY.value,
+        homY.value,
+        hale.value
+      );
+      point.customIndex = rounded(idx, 4);
+    }
+
+    const hasMetric =
+      Number.isFinite(point.le) ||
+      Number.isFinite(point.hale) ||
+      Number.isFinite(point.gni) ||
+      Number.isFinite(point.homicidesPer100k) ||
+      Number.isFinite(point.customIndex);
+    if (hasMetric) points.push(point);
   }
 
   return points;
@@ -617,11 +613,11 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
   for (const y of years) {
     const buckets = new Map();
     for (const [iso, meta] of countryMeta) {
-      const leY = observationForTimelineYear(leByCY.get(iso), y);
-      const gniY = observationForTimelineYear(gniByCY.get(iso), y);
-      const homY = observationForTimelineYear(homByCY.get(iso), y);
-      const popY = observationForTimelineYear(popByCY.get(iso), y);
-      const hale = haleForTimelineYear(haleHistory, iso, y);
+      const leY = observationAsOfYear(leByCY.get(iso), y, yearMin);
+      const gniY = observationAsOfYear(gniByCY.get(iso), y, yearMin);
+      const homY = observationAsOfYear(homByCY.get(iso), y, yearMin);
+      const popY = observationAsOfYear(popByCY.get(iso), y, yearMin);
+      const hale = haleAsOfYear(haleHistory, iso, y);
       const pop = popY?.value;
       if (!leY || !gniY || !homY || !hale) continue;
       if (typeof pop !== "number" || !Number.isFinite(pop) || pop <= 0) continue;
@@ -647,7 +643,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Values are computed from the real country observations available for each displayed year: latest observation on or before the year, or the earliest later observation when no prior value exists. Metric source years are preserved in the data file for country rows; derived rows aggregate those observations.",
+            "Population-weighted annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Each plotted year includes countries with observations available as of that year within the 2000-2023 window: exact same-year values when present, otherwise the latest prior value from 2000 onward. Future observations are not pulled backward.",
           points: [],
         });
       }
@@ -730,7 +726,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each value is a real source observation: latest observation on or before the displayed year, or the earliest later observation when no prior value exists. Source years are stored on each point for life expectancy, HALE, GNI, and homicides.",
+          "Country annual timeline for 2000-2023. World Bank supplies life expectancy, GNI per capita (PPP), intentional homicides/100k, and population; WHO GHO supplies HALE only. Each metric is stored whenever it has an observation available as of that year within the 2000-2023 window: exact same-year values when present, otherwise the latest prior value from 2000 onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.",
         points,
       };
     }
@@ -754,7 +750,7 @@ async function main() {
     firstP && lastP
       ? `${firstP.year} ${fmt4(firstP.value)} → ${lastP.year} ${fmt4(
           lastP.value
-        )}. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each displayed year uses the latest available observation on or before that year, or the earliest later observation when no prior value exists. Pop. = WLD world total.`
+        )}. World Bank WLD: life expectancy, GNI per capita (PPP), intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each plotted year uses exact same-year values when present, otherwise the latest prior value from 2000 onward. Pop. = WLD world total.`
       : "";
 
   const payload = {
@@ -783,7 +779,7 @@ async function main() {
     indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
     globalAverageSeries: {
       definition:
-        "Worldwide published timeline, not a sample of individual countries. Every displayed year from 2000-2023 uses real source observations: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only. When a same-year observation is unavailable, the point uses the latest observation on or before that year, or the earliest later observation when no prior value exists. Source years are stored on each point.",
+        "Worldwide published timeline, not a sample of individual countries. Each plotted year from 2000-2023 uses observations available as of that year within the 2000-2023 window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from 2000 onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.",
       chartTitle: "Worldwide aggregate (WLD + global HALE)",
       footNote,
       points: worldSeries,

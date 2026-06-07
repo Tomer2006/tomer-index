@@ -1,4 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
+<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
@@ -10,6 +11,9 @@ import {
   incomeIndexFromGni,
   safetyIndexFromHomicidesPer100k,
 } from "./hdi-core.js";
+=======
+import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
+>>>>>>> Stashed changes
 
 const $picks = document.getElementById("compare-picks");
 const $btnAdd = document.getElementById("btn-add");
@@ -159,9 +163,38 @@ function sortedOptionsHtml() {
   return [
     `<option value="">— Select —</option>`,
     ...sorted.map(
-      (r) => `<option value="${r.iso}">${escapeHtml(r.name)}</option>`
+      (r) => `<option value="${r.iso}">${escapeHtml(optionLabel(r))}</option>`
     ),
   ].join("");
+}
+
+function optionLabel(row) {
+  const quality = dataQualityForRow(row, entrySeries);
+  return quality ? `${row.name} (${quality.label.toLowerCase()})` : row.name;
+}
+
+function qualityForIso(iso) {
+  const row = cache.find((r) => r.iso === iso);
+  return row ? dataQualityForRow(row, entrySeries) : null;
+}
+
+function createDataQualityBadge(quality) {
+  const badge = document.createElement("span");
+  badge.className = "data-quality-badge";
+  badge.textContent = quality.label;
+  badge.title = quality.description;
+  badge.setAttribute("aria-label", quality.description);
+  return badge;
+}
+
+function updatePickDataLabels() {
+  $picks.querySelectorAll(".compare-pick").forEach((wrap) => {
+    const label = wrap.querySelector(".compare-label");
+    const select = wrap.querySelector("select.compare-select");
+    label?.querySelector(".data-quality-badge")?.remove();
+    const quality = qualityForIso(select?.value ?? "");
+    if (label && quality) label.appendChild(createDataQualityBadge(quality));
+  });
 }
 
 /** Keep `selections` aligned with the pickers in the DOM (order = columns). */
@@ -172,6 +205,7 @@ function syncSelectionsFromDom() {
 
 function refreshCompare() {
   syncSelectionsFromDom();
+  updatePickDataLabels();
   renderCompareOut();
 }
 
@@ -251,6 +285,8 @@ function renderPicks() {
 
     $picks.appendChild(wrap);
   });
+
+  updatePickDataLabels();
 }
 
 $picks.addEventListener("change", (e) => {
@@ -320,6 +356,7 @@ function renderCompareOut() {
 
   const headCells = filled
     .map(
+<<<<<<< Updated upstream
       (r, i) =>
         `<th scope="col">
           <span class="compare-head-name">${escapeHtml(r.name)}</span>
@@ -327,6 +364,12 @@ function renderCompareOut() {
             compareSeriesColors[i % compareSeriesColors.length]
           }"></span>
         </th>`
+=======
+      (r) =>
+        `<th scope="col"><span class="compare-country-heading">${escapeHtml(
+          r.name
+        )}</span>${dataQualityBadgeHtml(dataQualityForRow(r, entrySeries))}</th>`
+>>>>>>> Stashed changes
     )
     .join("");
 
