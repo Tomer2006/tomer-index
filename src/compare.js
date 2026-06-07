@@ -259,7 +259,7 @@ function sourceYearText(point, metric) {
         : [];
   const summary = sourceYearSummary(point, keys, point.year);
   if (!summary) return "";
-  return `Source ${keys.length === 1 ? "year" : "years"}: ${summary}`;
+  return `Source ${keys.length === 1 ? "year has" : "years have"} data: ${summary}`;
 }
 
 function compareValueHtml(row, metric, text) {
@@ -270,13 +270,6 @@ function compareValueHtml(row, metric, text) {
         ? [metric.sourceYearKey]
         : [];
   return `${escapeHtml(text)}${sourceYearBadgeHtml(row, keys, year)}`;
-}
-
-function displayYearBadgeHtml(displayYear) {
-  const title = escapeHtml(`Display year: ${displayYear}`);
-  return ` <span class="source-year-badge" title="${title}" aria-label="${title}">${escapeHtml(
-    String(displayYear)
-  )}</span>`;
 }
 
 function clientToSvgPoint(svg, clientX, clientY) {
@@ -466,9 +459,7 @@ function renderCompareOut() {
   const tomerTexts = filled.map((r) =>
     compareValueHtml(r, compareMetricDefs[0], formatTomer(r.customIndex ?? r.customHdi))
   );
-  const rankTexts = filled.map((r) =>
-    `${escapeHtml(rankForCountryInRows(r.iso, rankedRows))}${displayYearBadgeHtml(year)}`
-  );
+  const rankTexts = filled.map((r) => escapeHtml(rankForCountryInRows(r.iso, rankedRows)));
 
   const headCells = filled
     .map(

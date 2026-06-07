@@ -337,9 +337,9 @@ function globalSourceYearText(point) {
     ["GNI", point.gniYear],
     ["Homicides", point.homicideYear],
   ]
-    .filter(([, year]) => typeof year === "number" && year !== point.year)
+    .filter(([, year]) => typeof year === "number" && year === point.year)
     .map(([label, year]) => `${label} ${year}`);
-  return parts.length ? `Source years: ${parts.join(", ")}` : "";
+  return parts.length ? `Source years with data: ${parts.join(", ")}` : "";
 }
 
 function clientToSvgPoint(svg, clientX, clientY) {

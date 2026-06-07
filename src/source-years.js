@@ -9,11 +9,8 @@ const METRIC_LABELS = {
 
 function sourceYearPart(row, key, displayYear) {
   const value = row?.[key];
-  if (typeof value === "number") {
+  if (typeof value === "number" && value === displayYear) {
     return { label: METRIC_LABELS[key] ?? "Source", value: String(value) };
-  }
-  if (value === "mixed") {
-    return { label: METRIC_LABELS[key] ?? "Source", value: "mixed" };
   }
   return null;
 }
@@ -35,7 +32,9 @@ export function sourceYearBadgeHtml(row, keys, displayYear) {
   const parts = sourceYearParts(row, keyList, displayYear);
   if (!parts.length) return "";
   const summary = parts.map((part) => `${part.label} ${part.value}`).join(", ");
-  const title = escapeHtml(`Source ${parts.length === 1 ? "year" : "years"}: ${summary}`);
+  const title = escapeHtml(
+    `Source ${parts.length === 1 ? "year has" : "years have"} data: ${summary}`
+  );
   return ` <span class="source-year-badge" title="${title}" aria-label="${title}">${escapeHtml(
     summary
   )}</span>`;
