@@ -296,6 +296,9 @@ function renderCards(rows) {
       const idx = r.customIndex ?? r.customHdi;
       const health = healthValue(r);
       const source = sourceYearSummary(r, SOURCE_KEYS, state.year);
+      const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
+      const gniText =
+        typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
       return `
         <article class="leaderboard-card" data-href="${href}" tabindex="0" aria-label="Open ${escapeHtml(
           r.name
@@ -312,14 +315,16 @@ function renderCards(rows) {
             </div>
           </div>
           <dl class="leaderboard-card-grid">
-            <div><dt>Tomer</dt><dd>${formatTomer(idx)}</dd></div>
-            <div><dt>Life exp.</dt><dd>${fmtNum(r.le, 1)}</dd></div>
-            <div><dt>HALE</dt><dd>${fmtNum(r.hale, 1)}</dd></div>
-            <div><dt>Health</dt><dd>${Number.isFinite(health) ? formatTomer(health) : "-"}</dd></div>
-            <div><dt>GNI pc</dt><dd>${
-              typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-"
-            }</dd></div>
-            <div><dt>Homicides</dt><dd>${fmtNum(r.homicidesPer100k, 1)}</dd></div>
+            <div><dt>Tomer</dt><dd>${formatTomer(idx)}${tomerSourceBadge(r)}</dd></div>
+            <div><dt>Life exp.</dt><dd>${metricCell(r, fmtNum(r.le, 1), "leYear")}</dd></div>
+            <div><dt>HALE</dt><dd>${metricCell(r, fmtNum(r.hale, 1), "haleYear")}</dd></div>
+            <div><dt>Health</dt><dd>${metricCell(r, healthText, ["leYear", "haleYear"])}</dd></div>
+            <div><dt>GNI pc</dt><dd>${metricCell(r, gniText, "gniYear")}</dd></div>
+            <div><dt>Homicides</dt><dd>${metricCell(
+              r,
+              fmtNum(r.homicidesPer100k, 1),
+              "homicideYear"
+            )}</dd></div>
           </dl>
         </article>
       `;
