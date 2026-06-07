@@ -1,5 +1,4 @@
 import { escapeHtml, formatInt } from "./format.js";
-<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
@@ -7,9 +6,9 @@ import {
   renderScaleControl,
 } from "./index-scale.js";
 import { combinedHealthLei } from "./hdi-core.js";
-=======
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
->>>>>>> Stashed changes
+import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
+import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
@@ -18,11 +17,22 @@ const $scaleControl = document.getElementById("scale-control");
 const $yearSlider = document.getElementById("year-slider");
 const $yearOutput = document.getElementById("year-output");
 const $searchInput = document.getElementById("search-input");
+const $typeChips = document.querySelector("#type-filter .chips");
 const $regionChips = document.querySelector("#region-filter .chips");
 const $incomeChips = document.querySelector("#income-filter .chips");
 const $filterReset = document.getElementById("filter-reset");
+const $includeAggregates = document.getElementById("include-aggregates");
+const $qualityFilter = document.getElementById("quality-filter");
+const $cards = document.getElementById("leaderboard-cards");
 
 const COLS = 8;
+const SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear"];
+const TYPE_FILTERS = [
+  { id: "country", name: "Country" },
+  { id: "region", name: "Region" },
+  { id: "income", name: "Income group" },
+  { id: "derived", name: "Derived group" },
+];
 
 function healthValue(r) {
   if (typeof r.le !== "number" || !Number.isFinite(r.le)) return NaN;
@@ -35,14 +45,19 @@ const YEAR_MAX = 2023;
 const state = {
   year: YEAR_MAX,
   search: "",
+  types: new Set(),
   regions: new Set(),
   incomes: new Set(),
+  quality: "all",
+  includeAggregates: true,
   sortKey: "tomer",
   bestFirst: true,
 };
 
 let payload = null;
 let latestRows = [];
+let entrySeries = {};
+let qualityByIso = {};
 let regionsList = [];
 let incomesList = [];
 
@@ -109,7 +124,6 @@ function rowsForYear(year) {
 
   const out = [];
   const meta = new Map(latestRows.map((r) => [r.iso, r]));
-  const entrySeries = payload.entrySeries ?? {};
   for (const iso of Object.keys(entrySeries)) {
     const point = entrySeries[iso].points.find((p) => p.year === year);
     if (!point) continue;
@@ -136,9 +150,29 @@ function rowsForYear(year) {
   return out;
 }
 
+function rowType(row) {
+  if (!row.derivedKind) return "country";
+  if (row.derivedKind === "region" || row.derivedKind === "adminregion") return "region";
+  if (row.derivedKind === "incomeLevel") return "income";
+  return "derived";
+}
+
+function rowTypeLabel(row) {
+  return TYPE_FILTERS.find((type) => type.id === rowType(row))?.name ?? "Derived group";
+}
+
+function rowQuality(row) {
+  return dataQualityForRow(row, entrySeries, qualityByIso);
+}
+
 function filterRows(rows) {
   const q = state.search.trim().toLowerCase();
   return rows.filter((r) => {
+    if (!state.includeAggregates && r.derivedKind) return false;
+    if (state.types.size && !state.types.has(rowType(r))) return false;
+    const quality = rowQuality(r);
+    if (state.quality === "complete" && quality) return false;
+    if (state.quality === "incomplete" && !quality) return false;
     if (q) {
       const hay = [
         r.name,
@@ -146,6 +180,7 @@ function filterRows(rows) {
         r.region?.name,
         r.incomeLevel?.name,
         r.derivedKind,
+        rowTypeLabel(r),
       ]
         .filter(Boolean)
         .join(" ")
@@ -192,6 +227,14 @@ function fmtNum(v, digits = 1) {
   return typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
 }
 
+function metricCell(row, html, sourceKeys = []) {
+  return `${html}${sourceYearBadgeHtml(row, sourceKeys, state.year)}`;
+}
+
+function tomerSourceBadge(row) {
+  return sourceYearBadgeHtml(row, SOURCE_KEYS, state.year);
+}
+
 function renderTable(rows) {
   $tbody.replaceChildren();
   if (!rows.length) {
@@ -210,55 +253,80 @@ function renderTable(rows) {
     const rank = i + 1;
     const tr = document.createElement("tr");
     const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
-    const quality = dataQualityForRow(r, entrySeries);
+    const quality = rowQuality(r);
     tr.className = "leaderboard-row-link";
     tr.dataset.href = href;
     tr.tabIndex = 0;
-<<<<<<< Updated upstream
-    tr.setAttribute("aria-label", `Open ${r.name} history`);
-=======
     tr.setAttribute(
       "aria-label",
       quality ? `Open ${r.name} history. ${quality.description}` : `Open ${r.name} history`
     );
-    const h = r.homicidesPer100k;
-    const hStr =
-      typeof h === "number" && !Number.isNaN(h) ? h.toFixed(1) : "—";
->>>>>>> Stashed changes
-    const idx = r.customIndex ?? r.customHdi ?? 0;
+    const idx = r.customIndex ?? r.customHdi;
     const health = healthValue(r);
+    const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
+    const gniText =
+      typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
     tr.innerHTML = `
       <td>${rank}</td>
-<<<<<<< Updated upstream
-      <td><a class="leaderboard-entry-link" href="${href}">${escapeHtml(r.name)}</a></td>
-      <td>${fmtNum(r.le, 1)}</td>
-      <td>${fmtNum(r.hale, 1)}</td>
-      <td>${Number.isFinite(health) ? formatTomer(health) : "—"}</td>
-      <td>${typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—"}</td>
-      <td>${fmtNum(r.homicidesPer100k, 1)}</td>
-      <td>${formatTomer(idx)}</td>
-=======
       <td class="place-cell"><a class="leaderboard-entry-link" href="${href}">${escapeHtml(
         r.name
       )}</a>${dataQualityBadgeHtml(quality)}</td>
-      <td>${r.le.toFixed(1)}</td>
-      <td>${hale}</td>
-      <td>${formatInt(r.gni)}</td>
-      <td>${hStr}</td>
-      <td>${idx.toFixed(3)}</td>
->>>>>>> Stashed changes
+      <td>${metricCell(r, fmtNum(r.le, 1), "leYear")}</td>
+      <td>${metricCell(r, fmtNum(r.hale, 1), "haleYear")}</td>
+      <td>${metricCell(r, healthText, ["leYear", "haleYear"])}</td>
+      <td>${metricCell(r, gniText, "gniYear")}</td>
+      <td>${metricCell(r, fmtNum(r.homicidesPer100k, 1), "homicideYear")}</td>
+      <td>${formatTomer(idx)}${tomerSourceBadge(r)}</td>
     `;
     frag.appendChild(tr);
   });
   $tbody.appendChild(frag);
 }
 
-<<<<<<< Updated upstream
-=======
-let cache = [];
-let entrySeries = {};
+function renderCards(rows) {
+  if (!$cards) return;
+  if (!rows.length) {
+    $cards.innerHTML = '<p class="compare-hint">No matches.</p>';
+    return;
+  }
+  $cards.innerHTML = rows
+    .map((r, i) => {
+      const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
+      const quality = rowQuality(r);
+      const idx = r.customIndex ?? r.customHdi;
+      const health = healthValue(r);
+      const source = sourceYearSummary(r, SOURCE_KEYS, state.year);
+      return `
+        <article class="leaderboard-card" data-href="${href}" tabindex="0" aria-label="Open ${escapeHtml(
+          r.name
+        )} history">
+          <div class="leaderboard-card-head">
+            <span class="leaderboard-card-rank">#${i + 1}</span>
+            <div>
+              <h2 class="leaderboard-card-title">${escapeHtml(r.name)}${dataQualityBadgeHtml(
+                quality
+              )}</h2>
+              <p class="leaderboard-card-meta">${escapeHtml(rowTypeLabel(r))}${
+                source ? ` &middot; ${escapeHtml(source)}` : ""
+              }</p>
+            </div>
+          </div>
+          <dl class="leaderboard-card-grid">
+            <div><dt>Tomer</dt><dd>${formatTomer(idx)}</dd></div>
+            <div><dt>Life exp.</dt><dd>${fmtNum(r.le, 1)}</dd></div>
+            <div><dt>HALE</dt><dd>${fmtNum(r.hale, 1)}</dd></div>
+            <div><dt>Health</dt><dd>${Number.isFinite(health) ? formatTomer(health) : "-"}</dd></div>
+            <div><dt>GNI pc</dt><dd>${
+              typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-"
+            }</dd></div>
+            <div><dt>Homicides</dt><dd>${fmtNum(r.homicidesPer100k, 1)}</dd></div>
+          </dl>
+        </article>
+      `;
+    })
+    .join("");
+}
 
->>>>>>> Stashed changes
 function globalSourceYearText(point) {
   const parts = [
     ["LE", point.leYear],
@@ -514,33 +582,12 @@ function renderGlobalAverageChart(container, series, highlightYear) {
   svg.addEventListener("blur", hidePoint);
 }
 
-<<<<<<< Updated upstream
 function setYear(year) {
   const y = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(year, 10) || YEAR_MAX));
   state.year = y;
   if ($yearSlider) $yearSlider.value = String(y);
   if ($yearOutput) $yearOutput.textContent = String(y);
   refresh();
-=======
-async function loadLocalData() {
-  setStatus("");
-  const res = await fetch(`${import.meta.env.BASE_URL}data/countries.json`);
-  if (!res.ok) {
-    throw new Error(
-      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
-    );
-  }
-  const payload = await res.json();
-  cache = payload.countries ?? [];
-  entrySeries = payload.entrySeries ?? {};
-  setStatus(cache.length ? "" : "No rows in data file.");
-  updateHeaderSortUI();
-  renderTable(getSortedCache());
-  renderGlobalAverageChart(
-    $globalChart,
-    payload.globalAverageSeries ?? { points: [] }
-  );
->>>>>>> Stashed changes
 }
 
 function chipsHtml(list, key) {
@@ -556,6 +603,7 @@ function chipsHtml(list, key) {
 }
 
 function renderFilterChips() {
+  if ($typeChips) $typeChips.innerHTML = chipsHtml(TYPE_FILTERS, "type");
   if ($regionChips) $regionChips.innerHTML = chipsHtml(regionsList, "region");
   if ($incomeChips) $incomeChips.innerHTML = chipsHtml(incomesList, "income");
   syncChipState();
@@ -565,16 +613,65 @@ function syncChipState() {
   document.querySelectorAll(".chip").forEach((chip) => {
     const key = chip.dataset.key;
     const id = chip.dataset.id;
+    const quality = chip.dataset.quality;
     const active =
+      (key === "type" && state.types.has(id)) ||
       (key === "region" && state.regions.has(id)) ||
-      (key === "income" && state.incomes.has(id));
+      (key === "income" && state.incomes.has(id)) ||
+      (quality && quality === state.quality);
     chip.classList.toggle("is-active", !!active);
   });
+  if ($includeAggregates) $includeAggregates.checked = state.includeAggregates;
+}
+
+function readCsvSet(params, key) {
+  return new Set(
+    (params.get(key) ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+}
+
+function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  state.year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(params.get("year"), 10) || YEAR_MAX));
+  state.search = params.get("q") ?? "";
+  state.types = readCsvSet(params, "type");
+  state.regions = readCsvSet(params, "region");
+  state.incomes = readCsvSet(params, "income");
+  state.quality = ["all", "complete", "incomplete"].includes(params.get("quality"))
+    ? params.get("quality")
+    : "all";
+  state.includeAggregates = params.get("aggregates") !== "0";
+  const sort = params.get("sort");
+  if (sort) state.sortKey = sort;
+  state.bestFirst = params.get("dir") !== "asc";
+}
+
+function syncUrl() {
+  if (!payload) return;
+  const params = new URLSearchParams();
+  if (state.year !== YEAR_MAX) params.set("year", String(state.year));
+  if (state.search.trim()) params.set("q", state.search.trim());
+  if (state.types.size) params.set("type", [...state.types].join(","));
+  if (state.regions.size) params.set("region", [...state.regions].join(","));
+  if (state.incomes.size) params.set("income", [...state.incomes].join(","));
+  if (state.quality !== "all") params.set("quality", state.quality);
+  if (!state.includeAggregates) params.set("aggregates", "0");
+  if (state.sortKey !== "tomer") params.set("sort", state.sortKey);
+  if (!state.bestFirst) params.set("dir", "asc");
+  const query = params.toString();
+  const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", next);
 }
 
 function refresh() {
+  syncUrl();
+  const rows = getDisplayRows();
   updateHeaderSortUI();
-  renderTable(getDisplayRows());
+  renderTable(rows);
+  renderCards(rows);
   renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
   syncChipState();
 }
@@ -613,6 +710,21 @@ $tbody.addEventListener("keydown", (e) => {
   window.location.href = href;
 });
 
+$cards?.addEventListener("click", (e) => {
+  const card = e.target.closest(".leaderboard-card[data-href]");
+  const href = card?.dataset.href;
+  if (href) window.location.href = href;
+});
+
+$cards?.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const card = e.target.closest(".leaderboard-card[data-href]");
+  const href = card?.dataset.href;
+  if (!href) return;
+  e.preventDefault();
+  window.location.href = href;
+});
+
 $yearSlider?.addEventListener("input", (e) => {
   setYear(e.target.value);
 });
@@ -625,9 +737,17 @@ $searchInput?.addEventListener("input", (e) => {
 document.addEventListener("click", (e) => {
   const chip = e.target.closest(".chip");
   if (!chip) return;
+  if (chip.dataset.quality) {
+    state.quality = chip.dataset.quality;
+    refresh();
+    return;
+  }
   const key = chip.dataset.key;
   const id = chip.dataset.id;
-  if (key === "region") {
+  if (key === "type") {
+    if (state.types.has(id)) state.types.delete(id);
+    else state.types.add(id);
+  } else if (key === "region") {
     if (state.regions.has(id)) state.regions.delete(id);
     else state.regions.add(id);
   } else if (key === "income") {
@@ -637,10 +757,18 @@ document.addEventListener("click", (e) => {
   refresh();
 });
 
+$includeAggregates?.addEventListener("change", (e) => {
+  state.includeAggregates = !!e.target.checked;
+  refresh();
+});
+
 $filterReset?.addEventListener("click", () => {
   state.search = "";
+  state.types.clear();
   state.regions.clear();
   state.incomes.clear();
+  state.quality = "all";
+  state.includeAggregates = true;
   if ($searchInput) $searchInput.value = "";
   refresh();
 });
@@ -649,17 +777,15 @@ renderScaleControl($scaleControl);
 onScaleChange(() => refresh());
 
 async function loadAndCache() {
-  const res = await fetch(
-    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
-    { cache: "no-cache" }
-  );
-  if (!res.ok) {
-    throw new Error(
-      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
-    );
-  }
-  payload = await res.json();
+  const [leaderboardPayload, seriesPayload] = await Promise.all([
+    loadLeaderboardData(),
+    loadSeriesData(),
+  ]);
+  payload = leaderboardPayload;
   latestRows = payload.countries ?? [];
+  entrySeries = seriesPayload.entrySeries ?? {};
+  qualityByIso = payload.qualityByIso ?? {};
+  applyUrlState();
 
   const regionMap = new Map();
   const incomeMap = new Map();
@@ -673,6 +799,8 @@ async function loadAndCache() {
   setStatus(latestRows.length ? "" : "No rows in data file.");
   if ($yearSlider) $yearSlider.value = String(state.year);
   if ($yearOutput) $yearOutput.textContent = String(state.year);
+  if ($searchInput) $searchInput.value = state.search;
+  if ($includeAggregates) $includeAggregates.checked = state.includeAggregates;
   renderFilterChips();
   refresh();
 }

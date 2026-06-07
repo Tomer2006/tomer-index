@@ -1,5 +1,4 @@
 import { escapeHtml, formatInt } from "./format.js";
-<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
@@ -11,9 +10,9 @@ import {
   incomeIndexFromGni,
   safetyIndexFromHomicidesPer100k,
 } from "./hdi-core.js";
-=======
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
->>>>>>> Stashed changes
+import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
+import { sourceYearBadgeHtml } from "./source-years.js";
 
 const $picks = document.getElementById("compare-picks");
 const $btnAdd = document.getElementById("btn-add");
@@ -24,14 +23,17 @@ const $scaleControl = document.getElementById("scale-control");
 const $yearSlider = document.getElementById("compare-year-slider");
 const $yearOutput = document.getElementById("compare-year-output");
 const $presetChips = document.getElementById("compare-preset-chips");
+const $selectedChips = document.getElementById("compare-selected-chips");
 
 const YEAR_MIN = 2000;
 const YEAR_MAX = 2023;
 
 let cache = [];
 let entrySeries = {};
+let qualityByIso = {};
 /** Currently picked ISO3 codes (ordered), `""` for empty pickers. */
 let selections = [""];
+let pickSearches = [""];
 let slotSeq = 0;
 let year = YEAR_MAX;
 
@@ -158,8 +160,18 @@ function pillarBarsHtml(row) {
   `;
 }
 
-function sortedOptionsHtml() {
-  const sorted = [...cache].sort((a, b) => a.name.localeCompare(b.name));
+function sortedOptionsHtml(query = "") {
+  const q = query.trim().toLowerCase();
+  const sorted = [...cache]
+    .filter((row) => {
+      if (!q) return true;
+      return [row.name, row.iso, row.region?.name, row.incomeLevel?.name, row.derivedKind]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
   return [
     `<option value="">— Select —</option>`,
     ...sorted.map(
@@ -169,13 +181,13 @@ function sortedOptionsHtml() {
 }
 
 function optionLabel(row) {
-  const quality = dataQualityForRow(row, entrySeries);
+  const quality = dataQualityForRow(row, entrySeries, qualityByIso);
   return quality ? `${row.name} (${quality.label.toLowerCase()})` : row.name;
 }
 
 function qualityForIso(iso) {
   const row = cache.find((r) => r.iso === iso);
-  return row ? dataQualityForRow(row, entrySeries) : null;
+  return row ? dataQualityForRow(row, entrySeries, qualityByIso) : null;
 }
 
 function createDataQualityBadge(quality) {
@@ -189,7 +201,7 @@ function createDataQualityBadge(quality) {
 
 function updatePickDataLabels() {
   $picks.querySelectorAll(".compare-pick").forEach((wrap) => {
-    const label = wrap.querySelector(".compare-label");
+    const label = wrap.querySelector(".compare-label-head");
     const select = wrap.querySelector("select.compare-select");
     label?.querySelector(".data-quality-badge")?.remove();
     const quality = qualityForIso(select?.value ?? "");
@@ -205,8 +217,10 @@ function syncSelectionsFromDom() {
 
 function refreshCompare() {
   syncSelectionsFromDom();
+  renderSelectedChips();
   updatePickDataLabels();
   renderCompareOut();
+  syncUrl();
 }
 
 function compactNumber(n) {
@@ -228,6 +242,16 @@ function sourceYearText(point, metric) {
     : "";
 }
 
+function compareValueHtml(row, metric, text) {
+  const keys =
+    metric.key === "customIndex"
+      ? ["leYear", "haleYear", "gniYear", "homicideYear"]
+      : metric.sourceYearKey
+        ? [metric.sourceYearKey]
+        : [];
+  return `${escapeHtml(text)}${sourceYearBadgeHtml(row, keys, year)}`;
+}
+
 function clientToSvgPoint(svg, clientX, clientY) {
   const point = svg.createSVGPoint();
   point.x = clientX;
@@ -247,7 +271,6 @@ function svgToClientPoint(svg, x, y) {
 }
 
 function renderPicks() {
-  const options = sortedOptionsHtml();
   $picks.replaceChildren();
 
   selections.forEach((iso, i) => {
@@ -258,15 +281,41 @@ function renderPicks() {
     const label = document.createElement("label");
     label.className = "compare-label";
     label.setAttribute("for", id);
-    label.textContent = `Entry ${i + 1}`;
+
+    const labelHead = document.createElement("span");
+    labelHead.className = "compare-label-head";
+    labelHead.textContent = `Entry ${i + 1}`;
+
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "compare-pick-search";
+    search.placeholder = "Search entries";
+    search.autocomplete = "off";
+    search.value = pickSearches[i] ?? "";
 
     const select = document.createElement("select");
     select.className = "compare-select";
     select.id = id;
-    select.innerHTML = options;
+    select.innerHTML = sortedOptionsHtml(search.value);
+    if (iso && !select.querySelector(`option[value="${CSS.escape(iso)}"]`)) {
+      const row = cache.find((entry) => entry.iso === iso);
+      if (row) select.insertAdjacentHTML(
+        "beforeend",
+        `<option value="${row.iso}">${escapeHtml(optionLabel(row))}</option>`
+      );
+    }
     select.value = iso;
 
-    label.appendChild(select);
+    search.addEventListener("input", () => {
+      pickSearches[i] = search.value;
+      const current = select.value;
+      select.innerHTML = sortedOptionsHtml(search.value);
+      if (current && select.querySelector(`option[value="${CSS.escape(current)}"]`)) {
+        select.value = current;
+      }
+    });
+
+    label.append(labelHead, search, select);
     wrap.appendChild(label);
 
     if (selections.length > 1) {
@@ -277,6 +326,7 @@ function renderPicks() {
       remove.textContent = "✕";
       remove.addEventListener("click", () => {
         selections.splice(i, 1);
+        pickSearches.splice(i, 1);
         renderPicks();
         refreshCompare();
       });
@@ -287,6 +337,28 @@ function renderPicks() {
   });
 
   updatePickDataLabels();
+  renderSelectedChips();
+}
+
+function renderSelectedChips() {
+  if (!$selectedChips) return;
+  const filled = selections
+    .map((iso, i) => ({ iso, i, row: cache.find((r) => r.iso === iso) }))
+    .filter((item) => item.iso && item.row);
+  if (!filled.length) {
+    $selectedChips.innerHTML = "";
+    return;
+  }
+  $selectedChips.innerHTML = filled
+    .map(
+      ({ i, row }) => `
+        <button type="button" class="chip compare-selected-chip" data-remove-index="${i}">
+          ${escapeHtml(row.name)}
+          <span aria-hidden="true">x</span>
+        </button>
+      `
+    )
+    .join("");
 }
 
 $picks.addEventListener("change", (e) => {
@@ -353,23 +425,31 @@ function renderCompareOut() {
 
   const multi = filled.length >= 2;
   const green = (cols) => (multi ? cols : new Set());
+  const leTexts = filled.map((r) => compareValueHtml(r, compareMetricDefs[1], num(r.le, 1)));
+  const haleTexts = filled.map((r) => compareValueHtml(r, compareMetricDefs[2], num(r.hale, 1)));
+  const healthTexts = filled.map((r, i) => {
+    const value = Number.isFinite(healthVals[i]) ? formatTomer(healthVals[i]) : "-";
+    return `${value}${sourceYearBadgeHtml(r, ["leYear", "haleYear"], year)}`;
+  });
+  const gniTexts = filled.map((r) => compareValueHtml(r, compareMetricDefs[3], intOrDash(r.gni)));
+  const homicideTexts = filled.map((r) =>
+    compareValueHtml(r, compareMetricDefs[4], num(r.homicidesPer100k, 1))
+  );
+  const tomerTexts = filled.map((r) =>
+    compareValueHtml(r, compareMetricDefs[0], formatTomer(r.customIndex ?? r.customHdi))
+  );
 
   const headCells = filled
     .map(
-<<<<<<< Updated upstream
       (r, i) =>
         `<th scope="col">
-          <span class="compare-head-name">${escapeHtml(r.name)}</span>
+          <span class="compare-head-name">${escapeHtml(r.name)}${dataQualityBadgeHtml(
+            dataQualityForRow(r, entrySeries, qualityByIso)
+          )}</span>
           <span class="compare-head-swatch" style="--series-color: ${
             compareSeriesColors[i % compareSeriesColors.length]
           }"></span>
         </th>`
-=======
-      (r) =>
-        `<th scope="col"><span class="compare-country-heading">${escapeHtml(
-          r.name
-        )}</span>${dataQualityBadgeHtml(dataQualityForRow(r, entrySeries))}</th>`
->>>>>>> Stashed changes
     )
     .join("");
 
@@ -408,32 +488,32 @@ function renderCompareOut() {
           )}
           ${row(
             "Life exp. (years)",
-            filled.map((r) => num(r.le, 1)),
+            leTexts,
             green(bestLe)
           )}
           ${row(
             "HALE (years)",
-            filled.map((r) => num(r.hale, 1)),
+            haleTexts,
             green(bestHale)
           )}
           ${row(
             "Health pillar",
-            healthVals.map((v) => (Number.isFinite(v) ? formatTomer(v) : "—")),
+            healthTexts,
             green(bestHealth)
           )}
           ${row(
             "GNI pc (PPP)",
-            filled.map((r) => intOrDash(r.gni)),
+            gniTexts,
             green(bestGni)
           )}
           ${row(
             "Homicides /100k",
-            filled.map((r) => num(r.homicidesPer100k, 1)),
+            homicideTexts,
             green(bestHom)
           )}
           ${row(
             "Tomer index",
-            filled.map((r) => formatTomer(r.customIndex ?? r.customHdi ?? 0)),
+            tomerTexts,
             green(bestTomer)
           )}
           <tr class="pillar-bars-row">
@@ -768,6 +848,7 @@ function hasDuplicateIsos(list) {
 
 $btnAdd.addEventListener("click", () => {
   selections.push("");
+  pickSearches.push("");
   renderPicks();
   refreshCompare();
   const selects = $picks.querySelectorAll("select.compare-select");
@@ -776,6 +857,20 @@ $btnAdd.addEventListener("click", () => {
 
 $btnClear?.addEventListener("click", () => {
   selections = [""];
+  pickSearches = [""];
+  renderPicks();
+  refreshCompare();
+});
+
+$selectedChips?.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-remove-index]");
+  if (!btn) return;
+  const i = parseInt(btn.dataset.removeIndex, 10);
+  if (Number.isNaN(i)) return;
+  selections.splice(i, 1);
+  pickSearches.splice(i, 1);
+  if (!selections.length) selections = [""];
+  if (!pickSearches.length) pickSearches = [""];
   renderPicks();
   refreshCompare();
 });
@@ -802,6 +897,7 @@ function applyPreset(preset) {
   const isos = presetIsos(preset);
   if (!isos.length) return;
   selections = isos;
+  pickSearches = isos.map(() => "");
   renderPicks();
   refreshCompare();
 }
@@ -820,19 +916,41 @@ function renderPresetChips() {
   });
 }
 
-async function load() {
-  const res = await fetch(
-    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
-    { cache: "no-cache" }
-  );
-  if (!res.ok) {
-    throw new Error(
-      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
-    );
+function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(params.get("year"), 10) || YEAR_MAX));
+  const picked = (params.get("picks") ?? "")
+    .split(",")
+    .map((value) => value.trim().toUpperCase())
+    .filter(Boolean);
+  if (picked.length) {
+    selections = picked;
+    pickSearches = picked.map(() => "");
   }
-  const payload = await res.json();
-  cache = payload.countries ?? [];
-  entrySeries = payload.entrySeries ?? {};
+}
+
+function syncUrl() {
+  if (!cache.length) return;
+  const params = new URLSearchParams();
+  if (year !== YEAR_MAX) params.set("year", String(year));
+  const picked = selections.filter(Boolean);
+  if (picked.length) params.set("picks", picked.join(","));
+  const query = params.toString();
+  const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", next);
+}
+
+async function load() {
+  const [leaderboardPayload, seriesPayload] = await Promise.all([
+    loadLeaderboardData(),
+    loadSeriesData(),
+  ]);
+  cache = leaderboardPayload.countries ?? [];
+  qualityByIso = leaderboardPayload.qualityByIso ?? {};
+  entrySeries = seriesPayload.entrySeries ?? {};
+  applyUrlState();
+  if ($yearSlider) $yearSlider.value = String(year);
+  if ($yearOutput) $yearOutput.textContent = String(year);
   $status.textContent = cache.length ? "" : "No countries in data file.";
   renderPresetChips();
   renderPicks();

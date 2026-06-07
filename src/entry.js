@@ -1,14 +1,13 @@
 import { escapeHtml, formatInt } from "./format.js";
-<<<<<<< Updated upstream
 import {
   formatTomer,
   formatTomerAxis,
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
-=======
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
->>>>>>> Stashed changes
+import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
+import { sourceYearBadgeHtml } from "./source-years.js";
 
 const $title = document.getElementById("entry-title");
 const $kicker = document.getElementById("entry-kicker");
@@ -137,20 +136,24 @@ function renderLatest(row, rank, series) {
       </div>
       <div class="entry-stats" role="list">
         ${statHtml("Rank", rank)}
-        ${statHtml("Life exp.", row.le.toFixed(1))}
-        ${statHtml("HALE", hale)}
-        ${statHtml("GNI pc", formatInt(row.gni))}
-        ${statHtml("Homicides", h)}
-        ${statHtml("Tomer", formatTomer(idx))}
+        ${statHtml("Life exp.", row.le.toFixed(1), sourceYearBadgeHtml(row, "leYear", 2023))}
+        ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", 2023))}
+        ${statHtml("GNI pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", 2023))}
+        ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", 2023))}
+        ${statHtml(
+          "Tomer",
+          formatTomer(idx),
+          sourceYearBadgeHtml(row, ["leYear", "haleYear", "gniYear", "homicideYear"], 2023)
+        )}
       </div>
     </section>
   `;
 }
 
-function statHtml(label, value) {
+function statHtml(label, value, badge = "") {
   return `
     <div class="entry-stat" role="listitem">
-      <span class="entry-stat-label">${escapeHtml(label)}</span>
+      <span class="entry-stat-label">${escapeHtml(label)}${badge}</span>
       <strong>${escapeHtml(value)}</strong>
     </div>
   `;
@@ -365,26 +368,24 @@ async function load() {
   if (!iso) {
     throw new Error("Missing entry id.");
   }
-  const res = await fetch(
-    `${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`,
-    { cache: "no-cache" }
-  );
-  if (!res.ok) {
-    throw new Error(
-      `Missing public/data/countries.json (${res.status}). Run: npm run build-data`
-    );
-  }
-  const payload = await res.json();
-  const countries = payload.countries ?? [];
+  const [leaderboardPayload, seriesPayload] = await Promise.all([
+    loadLeaderboardData(),
+    loadSeriesData(),
+  ]);
+  const countries = leaderboardPayload.countries ?? [];
   const row = countries.find((r) => r.iso === iso);
   if (!row) throw new Error(`No leaderboard entry found for ${iso}.`);
 
-  const series = payload.entrySeries?.[iso];
+  const series = seriesPayload.entrySeries?.[iso];
   if (!series?.points?.length) {
     throw new Error(`No history stored for ${row.name}. Run: npm run build-data`);
   }
   const rank = String(countries.findIndex((r) => r.iso === iso) + 1);
-  const quality = dataQualityForRow(row, payload.entrySeries ?? {});
+  const quality = dataQualityForRow(
+    row,
+    seriesPayload.entrySeries ?? {},
+    leaderboardPayload.qualityByIso ?? {}
+  );
   document.title = `${row.name} history - Tomer index`;
   $title.innerHTML = `${escapeHtml(row.name)}${dataQualityBadgeHtml(quality)}`;
   $kicker.textContent = row.derivedKind ? `${row.derivedKind} history` : `${row.iso} history`;

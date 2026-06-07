@@ -4,6 +4,9 @@ import {
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
+import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
+import { loadMapData } from "./data-loader.js";
+import { sourceYearBadgeHtml } from "./source-years.js";
 import { geoEquirectangular, geoPath } from "d3-geo";
 
 const $status = document.getElementById("status");
@@ -13,6 +16,7 @@ const $tooltip = document.getElementById("map-tooltip");
 const $legend = document.getElementById("map-legend");
 const $year = document.getElementById("map-year-slider");
 const $yearOut = document.getElementById("map-year-output");
+const $detail = document.getElementById("map-detail");
 
 const YEAR_MIN = 2000;
 const YEAR_MAX = 2023;
@@ -37,6 +41,7 @@ const state = {
   /** Visible-year value range — drives the color stretch. */
   domainMin: 0,
   domainMax: 1,
+  selectedIso: "",
 };
 
 function featurePath(feature) {
@@ -85,6 +90,8 @@ function renderLegend() {
     <span class="map-legend-label">${formatTomer(state.domainMin)}</span>
     <span class="map-legend-bar">${stops.join("")}</span>
     <span class="map-legend-label">${formatTomer(state.domainMax)}</span>
+    <span class="map-legend-key map-legend-key-incomplete">Incomplete</span>
+    <span class="map-legend-key map-legend-key-empty">No data</span>
   `;
 }
 
@@ -179,13 +186,24 @@ function renderMap() {
     const path = document.createElementNS(ns, "path");
     path.setAttribute("d", d);
     const entry = state.byIso.get(iso);
+    const quality = entry ? dataQualityForRow(entry.row, state.payload?.entrySeries ?? {}, state.payload?.qualityByIso ?? {}) : null;
     path.setAttribute(
       "fill",
       entry ? colorForValue(entry.value) : "#2a3142"
     );
-    path.setAttribute("class", "map-country");
+    path.setAttribute(
+      "class",
+      `map-country${entry ? "" : " is-no-data"}${quality ? " is-incomplete" : ""}${
+        state.selectedIso === iso ? " is-selected" : ""
+      }`
+    );
     path.dataset.iso = iso;
     path.dataset.name = f.properties?.name ?? iso;
+    const title = document.createElementNS(ns, "title");
+    title.textContent = entry
+      ? `${entry.row.name}: ${formatTomer(entry.value)}${quality ? " (incomplete data)" : ""}`
+      : `${path.dataset.name}: no data`;
+    path.appendChild(title);
     g.appendChild(path);
   }
 }
@@ -198,8 +216,13 @@ function showTooltip(iso, name, clientX, clientY) {
   } else {
     const point = entry.point ?? entry.row;
     const idx = entry.value;
+    const quality = dataQualityForRow(
+      entry.row,
+      state.payload?.entrySeries ?? {},
+      state.payload?.qualityByIso ?? {}
+    );
     $tooltip.innerHTML = `
-      <strong>${escapeHtml(entry.row.name)}</strong>
+      <strong>${escapeHtml(entry.row.name)}${dataQualityBadgeHtml(quality)}</strong>
       <span class="muted">${state.year}</span>
       <div class="map-tooltip-grid">
         <span>Tomer</span><span>${escapeHtml(formatTomer(idx))}</span>
@@ -228,6 +251,51 @@ function hideTooltip() {
   if ($tooltip) $tooltip.hidden = true;
 }
 
+function renderDetail(iso) {
+  if (!$detail) return;
+  const entry = state.byIso.get(iso);
+  if (!entry) {
+    const name = state.worldFeatures?.find((feature) => feature.id === iso)?.properties?.name ?? iso;
+    $detail.innerHTML = `
+      <div class="map-detail-head">
+        <h2 class="map-detail-title">${escapeHtml(name)}</h2>
+        <span class="map-detail-pill">No data</span>
+      </div>
+      <p class="compare-hint">No Tomer index point is available for ${state.year}.</p>
+    `;
+    return;
+  }
+  const point = entry.point ?? entry.row;
+  const quality = dataQualityForRow(
+    entry.row,
+    state.payload?.entrySeries ?? {},
+    state.payload?.qualityByIso ?? {}
+  );
+  const href = `./entry.html?iso=${encodeURIComponent(entry.row.iso)}`;
+  $detail.innerHTML = `
+    <div class="map-detail-head">
+      <div>
+        <h2 class="map-detail-title">${escapeHtml(entry.row.name)}${dataQualityBadgeHtml(
+          quality
+        )}</h2>
+        <p class="map-detail-sub muted">${state.year}</p>
+      </div>
+      <a class="btn map-detail-link" href="${href}">History</a>
+    </div>
+    <dl class="map-detail-grid">
+      <div><dt>Tomer</dt><dd>${formatTomer(entry.value)}${sourceYearBadgeHtml(
+        point,
+        ["leYear", "haleYear", "gniYear", "homicideYear"],
+        state.year
+      )}</dd></div>
+      <div><dt>Life exp.</dt><dd>${typeof point.le === "number" ? point.le.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "leYear", state.year)}</dd></div>
+      <div><dt>HALE</dt><dd>${typeof point.hale === "number" ? point.hale.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "haleYear", state.year)}</dd></div>
+      <div><dt>GNI pc</dt><dd>${typeof point.gni === "number" ? formatInt(point.gni) : "-"}${sourceYearBadgeHtml(point, "gniYear", state.year)}</dd></div>
+      <div><dt>Hom./100k</dt><dd>${typeof point.homicidesPer100k === "number" ? point.homicidesPer100k.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "homicideYear", state.year)}</dd></div>
+    </dl>
+  `;
+}
+
 function bindMapInteractions() {
   $svg.addEventListener("pointermove", (e) => {
     const target = e.target.closest(".map-country");
@@ -242,8 +310,10 @@ function bindMapInteractions() {
     const target = e.target.closest(".map-country");
     if (!target) return;
     const iso = target.dataset.iso;
-    if (!state.byIso.has(iso)) return;
-    window.location.href = `./entry.html?iso=${encodeURIComponent(iso)}`;
+    state.selectedIso = iso;
+    renderMap();
+    renderDetail(iso);
+    syncUrl();
   });
 }
 
@@ -253,25 +323,44 @@ function setYear(y) {
   if ($yearOut) $yearOut.textContent = String(state.year);
   buildIsoMap();
   renderMap();
+  if (state.selectedIso) renderDetail(state.selectedIso);
+  syncUrl();
+}
+
+function applyUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  state.year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(params.get("year"), 10) || YEAR_MAX));
+  state.selectedIso = (params.get("iso") ?? "").trim().toUpperCase();
+}
+
+function syncUrl() {
+  if (!state.payload) return;
+  const params = new URLSearchParams();
+  if (state.year !== YEAR_MAX) params.set("year", String(state.year));
+  if (state.selectedIso) params.set("iso", state.selectedIso);
+  const query = params.toString();
+  const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+  window.history.replaceState(null, "", next);
 }
 
 async function load() {
-  const [worldRes, dataRes] = await Promise.all([
+  const [worldRes, mapPayload] = await Promise.all([
     fetch(`${import.meta.env.BASE_URL}data/world.geojson`, { cache: "no-cache" }),
-    fetch(`${import.meta.env.BASE_URL}data/countries.json?v=${__DATA_VERSION__}`, {
-      cache: "no-cache",
-    }),
+    loadMapData(),
   ]);
   if (!worldRes.ok) throw new Error(`Map data missing (${worldRes.status}). Run: npm run build-world`);
-  if (!dataRes.ok) throw new Error(`Country data missing (${dataRes.status}). Run: npm run build-data`);
   const world = await worldRes.json();
   state.worldFeatures = world.features ?? [];
-  state.payload = await dataRes.json();
+  state.payload = mapPayload;
+  applyUrlState();
+  if ($year) $year.value = String(state.year);
+  if ($yearOut) $yearOut.textContent = String(state.year);
   $status.textContent = "";
   computeFixedDomain();
   buildIsoMap();
   renderLegend();
   renderMap();
+  if (state.selectedIso) renderDetail(state.selectedIso);
   bindMapInteractions();
 }
 

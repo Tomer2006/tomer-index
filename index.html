@@ -42,8 +42,16 @@
               <span class="control-label">Search</span>
               <input type="search" id="search-input" placeholder="Country, region, group…" autocomplete="off" />
             </label>
+            <label class="toggle-control">
+              <input type="checkbox" id="include-aggregates" checked />
+              <span>Include aggregates</span>
+            </label>
           </div>
           <div class="control-row">
+            <fieldset class="filter-chips" id="type-filter">
+              <legend class="control-label">Type</legend>
+              <div class="chips" data-filter-key="type"></div>
+            </fieldset>
             <fieldset class="filter-chips" id="region-filter">
               <legend class="control-label">Region</legend>
               <div class="chips" data-filter-key="region"></div>
@@ -53,6 +61,20 @@
               <div class="chips" data-filter-key="income"></div>
             </fieldset>
             <button type="button" id="filter-reset" class="btn filter-reset">Reset</button>
+          </div>
+          <div class="control-row">
+            <fieldset class="filter-chips data-quality-filter" id="quality-filter">
+              <legend class="control-label">Data quality</legend>
+              <div class="chips">
+                <button type="button" class="chip is-active" data-quality="all">All</button>
+                <button type="button" class="chip" data-quality="complete">Complete</button>
+                <button type="button" class="chip" data-quality="incomplete">Incomplete</button>
+              </div>
+            </fieldset>
+            <p class="data-quality-note">
+              <span class="data-quality-badge">Incomplete data</span>
+              means at least one yearly point is missing an index input. Hover the badge for details.
+            </p>
           </div>
         </section>
         <div class="table-wrap">
@@ -104,6 +126,7 @@
             <tbody id="tbody"></tbody>
           </table>
         </div>
+        <div id="leaderboard-cards" class="leaderboard-cards" aria-live="polite"></div>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>

@@ -59,8 +59,9 @@ export function dataQualityForSeries(series) {
   };
 }
 
-export function dataQualityForRow(row, entrySeries) {
+export function dataQualityForRow(row, entrySeries, qualityByIso = null) {
   if (!row?.iso) return null;
+  if (qualityByIso?.[row.iso]) return qualityByIso[row.iso];
   return dataQualityForSeries(entrySeries?.[row.iso]);
 }
 
