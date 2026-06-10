@@ -1,14 +1,22 @@
 import { escapeHtml, formatInt } from "./format.js";
-import {
-  formatTomer,
-  formatTomerAxis,
-  onScaleChange,
-  renderScaleControl,
-} from "./index-scale.js";
+import { formatTomer, onScaleChange, renderScaleControl } from "./index-scale.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
 import { YEAR_MAX } from "./site-years.js";
+import { metricDefs, metricValue } from "./metric-defs.js";
+import {
+  bindPointerYear,
+  chartFrame,
+  createTooltip,
+  hitRectEl,
+  hoverDotEl,
+  hoverLineEl,
+  linePath,
+  nearestByYear,
+  positionTooltip,
+  svgEl,
+} from "./line-chart.js";
 
 const $title = document.getElementById("entry-title");
 const $kicker = document.getElementById("entry-kicker");
@@ -24,58 +32,9 @@ const iso = params.get("iso")?.trim() ?? "";
 
 const state = { row: null, rank: "", series: null };
 
-const metricDefs = [
-  {
-    key: "customIndex",
-    label: "Tomer index",
-    axis: (v) => formatTomerAxis(v),
-    value: (v) => formatTomer(v),
-  },
-  {
-    key: "le",
-    sourceYearKey: "leYear",
-    label: "Life expectancy",
-    axis: (v) => v.toFixed(0),
-    value: (v) => `${v.toFixed(1)} years`,
-  },
-  {
-    key: "hale",
-    sourceYearKey: "haleYear",
-    label: "HALE",
-    axis: (v) => v.toFixed(0),
-    value: (v) => `${v.toFixed(1)} years`,
-  },
-  {
-    key: "gni",
-    sourceYearKey: "gniYear",
-    label: "GNI pc (PPP)",
-    axis: (v) => compactNumber(v),
-    value: (v) => formatInt(v),
-  },
-  {
-    key: "homicidesPer100k",
-    sourceYearKey: "homicideYear",
-    label: "Homicides /100k",
-    axis: (v) => v.toFixed(1),
-    value: (v) => v.toFixed(2),
-  },
-];
-
-function compactNumber(n) {
-  return new Intl.NumberFormat(undefined, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(n);
-}
-
 function setStatus(msg, isError = false) {
   $status.textContent = msg;
   $status.classList.toggle("error", isError);
-}
-
-function metricValue(row, key) {
-  const v = row?.[key];
-  return typeof v === "number" && Number.isFinite(v) ? v : NaN;
 }
 
 function latestNumericPoint(points, key) {
@@ -83,24 +42,6 @@ function latestNumericPoint(points, key) {
     if (Number.isFinite(metricValue(points[i], key))) return points[i];
   }
   return null;
-}
-
-function clientToSvgPoint(svg, clientX, clientY) {
-  const point = svg.createSVGPoint();
-  point.x = clientX;
-  point.y = clientY;
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return { x: 0, y: 0 };
-  return point.matrixTransform(matrix.inverse());
-}
-
-function svgToClientPoint(svg, x, y) {
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return { x: 0, y: 0 };
-  return point.matrixTransform(matrix);
 }
 
 function sourceYearText(point, metric) {
@@ -141,11 +82,7 @@ function renderLatest(row, rank, series) {
         ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", YEAR_MAX))}
         ${statHtml("GNI pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
         ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", YEAR_MAX))}
-        ${statHtml(
-          "Tomer",
-          formatTomer(idx),
-          sourceYearBadgeHtml(row, ["leYear", "haleYear", "gniYear", "homicideYear"], YEAR_MAX)
-        )}
+        ${statHtml("Tomer", formatTomer(idx))}
       </div>
     </section>
   `;
@@ -175,109 +112,48 @@ function renderMetricChart(card, points, metric) {
   const valLo = Math.min(...values);
   const valHi = Math.max(...values);
   const padV = (valHi - valLo) * 0.08 || Math.max(Math.abs(valHi) * 0.02, 0.02);
-  const y0 = valLo - padV;
-  const y1 = valHi + padV;
-  const yearLo = first.year;
-  const yearHi = last.year;
 
-  const w = 720;
-  const h = 245;
-  const padL = 58;
-  const padR = 24;
-  const padT = 18;
-  const padB = 42;
-  const innerW = w - padL - padR;
-  const innerH = h - padT - padB;
-  const xAt = (year) => padL + ((year - yearLo) / (yearHi - yearLo || 1)) * innerW;
-  const yAt = (value) => padT + innerH - ((value - y0) / (y1 - y0 || 1)) * innerH;
-  const d = series
-    .map((p, i) => `${i === 0 ? "M" : "L"}${xAt(p.year)},${yAt(metricValue(p, metric.key))}`)
-    .join(" ");
+  const { svg, xAt, yAt, innerW, innerH, padL, padT } = chartFrame({
+    w: 720,
+    h: 245,
+    padL: 58,
+    padR: 24,
+    padT: 18,
+    padB: 42,
+    y0: valLo - padV,
+    y1: valHi + padV,
+    yearLo: first.year,
+    yearHi: last.year,
+    yLabel: metric.axis,
+    className: "metric-chart-svg",
+    ariaLabel: `${metric.label} from ${first.year} to ${last.year}`,
+  });
 
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  svg.setAttribute("class", "metric-chart-svg");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", `${metric.label} from ${first.year} to ${last.year}`);
-
-  for (let i = 0; i <= 4; i++) {
-    const t = i / 4;
-    const value = y0 + (1 - t) * (y1 - y0);
-    const gy = padT + t * innerH;
-    const line = document.createElementNS(ns, "line");
-    line.setAttribute("x1", String(padL));
-    line.setAttribute("x2", String(padL + innerW));
-    line.setAttribute("y1", String(gy));
-    line.setAttribute("y2", String(gy));
-    line.setAttribute("class", "global-series-grid");
-    svg.appendChild(line);
-
-    const label = document.createElementNS(ns, "text");
-    label.setAttribute("x", String(padL - 8));
-    label.setAttribute("y", String(gy + 4));
-    label.setAttribute("text-anchor", "end");
-    label.setAttribute("class", "global-series-axis");
-    label.textContent = metric.axis(value);
-    svg.appendChild(label);
-  }
-
-  for (let i = 0; i <= 2; i++) {
-    const t = i / 2;
-    const year = Math.round(yearLo + t * (yearHi - yearLo));
-    const label = document.createElementNS(ns, "text");
-    label.setAttribute("x", String(xAt(year)));
-    label.setAttribute("y", String(h - 12));
-    label.setAttribute("text-anchor", "middle");
-    label.setAttribute("class", "global-series-axis");
-    label.textContent = String(year);
-    svg.appendChild(label);
-  }
-
-  const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", d);
-  path.setAttribute("class", "global-series-line");
-  path.setAttribute("fill", "none");
+  const path = svgEl("path", {
+    d: linePath(series, xAt, yAt, (p) => p.year, (p) => metricValue(p, metric.key)),
+    class: "global-series-line",
+    fill: "none",
+  });
   svg.appendChild(path);
 
   for (const p of [first, last]) {
-    const dot = document.createElementNS(ns, "circle");
-    dot.setAttribute("cx", String(xAt(p.year)));
-    dot.setAttribute("cy", String(yAt(metricValue(p, metric.key))));
-    dot.setAttribute("r", p === last ? "4" : "3");
-    dot.setAttribute("class", p === last ? "global-series-dot" : "global-series-dot global-series-dot-start");
-    svg.appendChild(dot);
+    svg.appendChild(
+      svgEl("circle", {
+        cx: xAt(p.year),
+        cy: yAt(metricValue(p, metric.key)),
+        r: p === last ? "4" : "3",
+        class: p === last ? "global-series-dot" : "global-series-dot global-series-dot-start",
+      })
+    );
   }
 
   const chart = document.createElement("div");
   chart.className = "metric-chart";
 
-  const hoverLine = document.createElementNS(ns, "line");
-  hoverLine.setAttribute("y1", String(padT));
-  hoverLine.setAttribute("y2", String(padT + innerH));
-  hoverLine.setAttribute("class", "metric-hover-line");
-  hoverLine.style.display = "none";
-  svg.appendChild(hoverLine);
-
-  const hoverDot = document.createElementNS(ns, "circle");
-  hoverDot.setAttribute("r", "4.5");
-  hoverDot.setAttribute("class", "metric-hover-dot");
-  hoverDot.style.display = "none";
-  svg.appendChild(hoverDot);
-
-  const hit = document.createElementNS(ns, "rect");
-  hit.setAttribute("x", String(padL));
-  hit.setAttribute("y", String(padT));
-  hit.setAttribute("width", String(innerW));
-  hit.setAttribute("height", String(innerH));
-  hit.setAttribute("class", "metric-chart-hit");
-  svg.appendChild(hit);
-
-  const tooltip = document.createElement("div");
-  tooltip.className = "metric-tooltip";
-  tooltip.hidden = true;
-  tooltip.setAttribute("role", "status");
-  chart.appendChild(tooltip);
+  const hoverLine = hoverLineEl(svg, padT, innerH);
+  const hoverDot = hoverDotEl(svg);
+  hitRectEl(svg, padL, padT, innerW, innerH);
+  const tooltip = createTooltip(chart);
 
   function showPoint(point) {
     document.querySelectorAll(".metric-tooltip").forEach((el) => {
@@ -304,13 +180,7 @@ function renderMetricChart(card, points, metric) {
       ${source ? `<small>${escapeHtml(source)}</small>` : ""}
     `;
     tooltip.hidden = false;
-
-    const chartRect = chart.getBoundingClientRect();
-    const screenPoint = svgToClientPoint(svg, x, y);
-    const left = Math.max(72, Math.min(screenPoint.x - chartRect.left, chartRect.width - 72));
-    const top = Math.max(28, screenPoint.y - chartRect.top);
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
+    positionTooltip(tooltip, chart, svg, x, y);
   }
 
   function hidePoint() {
@@ -319,24 +189,14 @@ function renderMetricChart(card, points, metric) {
     tooltip.hidden = true;
   }
 
-  svg.addEventListener("pointermove", (e) => {
-    const svgPoint = clientToSvgPoint(svg, e.clientX, e.clientY);
-    const clampedX = Math.max(padL, Math.min(svgPoint.x, padL + innerW));
-    const yearAtPointer = yearLo + ((clampedX - padL) / innerW) * (yearHi - yearLo || 1);
-    let closest = series[0];
-    let best = Infinity;
-    for (const point of series) {
-      const delta = Math.abs(point.year - yearAtPointer);
-      if (delta < best) {
-        closest = point;
-        best = delta;
-      }
+  bindPointerYear(
+    svg,
+    { padL, innerW, yearLo: first.year, yearHi: last.year },
+    {
+      onMove: (year) => showPoint(nearestByYear(series, year)),
+      onLeave: hidePoint,
     }
-    showPoint(closest);
-  });
-
-  svg.addEventListener("pointerleave", hidePoint);
-  svg.addEventListener("blur", hidePoint);
+  );
 
   chart.appendChild(svg);
   card.appendChild(chart);

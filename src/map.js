@@ -5,7 +5,7 @@ import {
   renderScaleControl,
 } from "./index-scale.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
-import { loadMapData } from "./data-loader.js";
+import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { geoEquirectangular, geoPath } from "d3-geo";
@@ -18,6 +18,8 @@ const $legend = document.getElementById("map-legend");
 const $year = document.getElementById("map-year-slider");
 const $yearOut = document.getElementById("map-year-output");
 const $detail = document.getElementById("map-detail");
+const $search = document.getElementById("map-search");
+const $searchList = document.getElementById("map-search-list");
 
 const W = 960;
 const H = 500;
@@ -315,6 +317,39 @@ function bindMapInteractions() {
   });
 }
 
+function populateSearchList() {
+  if (!$searchList || !state.payload) return;
+  $searchList.innerHTML = (state.payload.countries ?? [])
+    .map((row) => `<option value="${escapeHtml(`${row.name} (${row.iso})`)}"></option>`)
+    .join("");
+}
+
+/** Resolve search text to an ISO3: "Name (ISO)", exact name/ISO, or unique partial. */
+function isoFromSearch(text) {
+  const q = text.trim();
+  if (!q) return "";
+  const countries = state.payload?.countries ?? [];
+  const m = q.match(/\(([A-Za-z]{3})\)\s*$/);
+  if (m) return m[1].toUpperCase();
+  const lower = q.toLowerCase();
+  const exact = countries.find(
+    (r) => r.name.toLowerCase() === lower || r.iso.toLowerCase() === lower
+  );
+  if (exact) return exact.iso;
+  const partial = countries.filter((r) => r.name.toLowerCase().includes(lower));
+  return partial.length === 1 ? partial[0].iso : "";
+}
+
+function selectFromSearch() {
+  const iso = isoFromSearch($search?.value ?? "");
+  if (!iso) return;
+  if (!(state.payload?.countries ?? []).some((r) => r.iso === iso)) return;
+  state.selectedIso = iso;
+  renderMap();
+  renderDetail(iso);
+  syncUrl();
+}
+
 function setYear(y) {
   state.year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(y, 10) || YEAR_MAX));
   if ($year) $year.value = String(state.year);
@@ -342,14 +377,21 @@ function syncUrl() {
 }
 
 async function load() {
-  const [worldRes, mapPayload] = await Promise.all([
+  // Reuses the same data files as the leaderboard pages so the browser
+  // cache is shared when navigating between pages.
+  const [worldRes, leaderboardPayload, seriesPayload] = await Promise.all([
     fetch(`${import.meta.env.BASE_URL}data/world.geojson`, { cache: "no-cache" }),
-    loadMapData(),
+    loadLeaderboardData(),
+    loadSeriesData(),
   ]);
   if (!worldRes.ok) throw new Error(`Map data missing (${worldRes.status}). Run: npm run build-world`);
   const world = await worldRes.json();
   state.worldFeatures = world.features ?? [];
-  state.payload = mapPayload;
+  state.payload = {
+    countries: (leaderboardPayload.countries ?? []).filter((row) => !row.derivedKind),
+    entrySeries: seriesPayload.entrySeries ?? {},
+    qualityByIso: leaderboardPayload.qualityByIso ?? {},
+  };
   applyUrlState();
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
@@ -358,6 +400,7 @@ async function load() {
   buildIsoMap();
   renderLegend();
   renderMap();
+  populateSearchList();
   if (state.selectedIso) renderDetail(state.selectedIso);
   bindMapInteractions();
 }
@@ -369,6 +412,7 @@ onScaleChange(() => {
 });
 
 $year?.addEventListener("input", (e) => setYear(e.target.value));
+$search?.addEventListener("change", selectFromSearch);
 
 load().catch((e) => {
   console.error(e);

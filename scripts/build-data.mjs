@@ -1,5 +1,7 @@
 /**
- * Fetches World Bank indicators plus WHO GHO HALE and writes public/data/countries.json.
+ * Fetches World Bank indicators plus WHO GHO HALE and writes the web data
+ * files (public/data/leaderboard.json + series.json, minified) plus a full
+ * pretty-printed archive payload (data-archive/countries.json, not shipped).
  * Run: npm run build-data (needs network once; commit the JSON for offline builds).
  */
 import { writeFile, mkdir } from "node:fs/promises";
@@ -21,10 +23,10 @@ import { YEAR_MAX, YEAR_MIN } from "../src/site-years.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const DATA_DIR = join(ROOT, "public", "data");
-const OUT = join(DATA_DIR, "countries.json");
+const ARCHIVE_DIR = join(ROOT, "data-archive");
+const OUT = join(ARCHIVE_DIR, "countries.json");
 const LEADERBOARD_OUT = join(DATA_DIR, "leaderboard.json");
 const SERIES_OUT = join(DATA_DIR, "series.json");
-const MAP_OUT = join(DATA_DIR, "map-data.json");
 
 const WB_BASE = "https://api.worldbank.org";
 const WB_LE = "SP.DYN.LE00.IN";
@@ -859,23 +861,14 @@ async function main() {
     yearWindow: payload.yearWindow,
     entrySeries,
   };
-  const countryIso = new Set(countries.filter((row) => !row.derivedKind).map((row) => row.iso));
-  const mapPayload = {
-    generatedAt: payload.generatedAt,
-    yearWindow: payload.yearWindow,
-    qualityByIso,
-    countries: countries.filter((row) => !row.derivedKind),
-    entrySeries: Object.fromEntries(
-      Object.entries(entrySeries).filter(([iso]) => countryIso.has(iso))
-    ),
-  };
-
   await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(ARCHIVE_DIR, { recursive: true });
+  // Archive payload stays pretty-printed for inspection; the web files are
+  // minified because they ship to the browser.
   await writeFile(OUT, JSON.stringify(payload, null, 2), "utf8");
-  await writeFile(LEADERBOARD_OUT, JSON.stringify(leaderboardPayload, null, 2), "utf8");
-  await writeFile(SERIES_OUT, JSON.stringify(seriesPayload, null, 2), "utf8");
-  await writeFile(MAP_OUT, JSON.stringify(mapPayload, null, 2), "utf8");
-  console.log(`Wrote ${countries.length} leaderboard rows → ${OUT}`);
+  await writeFile(LEADERBOARD_OUT, JSON.stringify(leaderboardPayload), "utf8");
+  await writeFile(SERIES_OUT, JSON.stringify(seriesPayload), "utf8");
+  console.log(`Wrote ${countries.length} leaderboard rows → ${LEADERBOARD_OUT}`);
 }
 
 main().catch((e) => {

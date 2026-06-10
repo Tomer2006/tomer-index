@@ -7,13 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function dataVersion() {
   try {
-    const files = [
-      "countries.json",
-      "leaderboard.json",
-      "series.json",
-      "map-data.json",
-      "world.geojson",
-    ];
+    const files = ["leaderboard.json", "series.json", "world.geojson"];
     const mtime = Math.max(
       ...files.map((file) => statSync(resolve(__dirname, "public/data", file)).mtimeMs)
     );

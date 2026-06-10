@@ -68,7 +68,7 @@ export function dataQualityForRow(row, entrySeries, qualityByIso = null) {
 export function dataQualityBadgeHtml(quality) {
   if (!quality) return "";
   const description = escapeHtml(quality.description);
-  return ` <span class="data-quality-badge" title="${description}" aria-label="${description}">${escapeHtml(
+  return ` <span class="data-quality-badge" tabindex="0" data-tip="${description}" aria-label="${description}">${escapeHtml(
     quality.label
   )}</span>`;
 }

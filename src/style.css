@@ -419,6 +419,10 @@ a {
   border-radius: 12px;
 }
 
+.map-search-control {
+  flex: 0 1 260px;
+}
+
 .map-legend {
   display: flex;
   align-items: center;
@@ -617,7 +621,7 @@ a {
 
 .compare-presets {
   flex: 2 1 320px;
-  min-width: 280px;
+  min-width: 240px;
 }
 
 .compare-preset-chip {
@@ -1321,8 +1325,43 @@ table {
   font-size: 0.64rem;
   font-weight: 650;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   vertical-align: middle;
+}
+
+/* Tooltip that also works for touch (tap focuses) and keyboard users. */
+.data-quality-badge[data-tip],
+.source-year-badge[data-tip] {
+  position: relative;
+  cursor: help;
+}
+
+.data-quality-badge[data-tip]:hover::after,
+.data-quality-badge[data-tip]:focus::after,
+.source-year-badge[data-tip]:hover::after,
+.source-year-badge[data-tip]:focus::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  z-index: 30;
+  width: max-content;
+  max-width: 240px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 
 .compare-label .data-quality-badge {

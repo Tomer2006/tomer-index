@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tomer index</title>
+    <meta
+      name="description"
+      content="Tomer index — an HDI-style composite of health, income, and safety for every country, 2000–2023. Interactive leaderboard, world map, and country comparisons."
+    />
+    <meta property="og:title" content="Tomer index" />
+    <meta
+      property="og:description"
+      content="An HDI-style composite of health, income, and safety for every country, 2000–2023."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tomer index" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -74,7 +86,7 @@
             </fieldset>
             <p class="data-quality-note">
               <span class="data-quality-badge">Incomplete data</span>
-              means at least one yearly point is missing an index input. Hover the badge for details.
+              means at least one yearly point is missing an index input. Hover or tap a badge for details.
             </p>
           </div>
         </section>
@@ -82,11 +94,7 @@
           <table class="leaderboard-table">
             <thead>
               <tr>
-                <th scope="col">
-                  <button type="button" class="th-sort" data-sort="tomer">
-                    <span class="th-sort-label">Rank</span><span class="th-sort-icon" aria-hidden="true"></span>
-                  </button>
-                </th>
+                <th scope="col">Rank</th>
                 <th scope="col">
                   <button type="button" class="th-sort" data-sort="name">
                     <span class="th-sort-label">Place</span><span class="th-sort-icon" aria-hidden="true"></span>
@@ -127,7 +135,7 @@
             <tbody id="tbody"></tbody>
           </table>
         </div>
-        <div id="leaderboard-cards" class="leaderboard-cards" aria-live="polite"></div>
+        <div id="leaderboard-cards" class="leaderboard-cards"></div>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>

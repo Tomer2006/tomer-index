@@ -10,6 +10,7 @@ const METRIC_LABELS = {
 function sourceYearPart(row, key, displayYear) {
   const value = row?.[key];
   if (typeof value === "number") {
+    if (typeof displayYear === "number" && value === displayYear) return null;
     return { label: METRIC_LABELS[key] ?? "Source", value: String(value) };
   }
   if (value === "mixed") {
@@ -35,14 +36,8 @@ export function sourceYearBadgeHtml(row, keys, displayYear) {
   const parts = sourceYearParts(row, keyList, displayYear);
   if (!parts.length) return "";
   const summary = parts.map((part) => `${part.label} ${part.value}`).join(", ");
-  const title = escapeHtml(`Source ${parts.length === 1 ? "year" : "years"}: ${summary}`);
-  return ` <span class="source-year-badge" title="${title}" aria-label="${title}">${escapeHtml(
+  const tip = escapeHtml(`Source ${parts.length === 1 ? "year" : "years"}: ${summary}`);
+  return ` <span class="source-year-badge" tabindex="0" data-tip="${tip}" aria-label="${tip}">${escapeHtml(
     summary
   )}</span>`;
-}
-
-export function staleMetricClass(row, keys, displayYear) {
-  return sourceYearSummary(row, Array.isArray(keys) ? keys : [keys], displayYear)
-    ? " has-source-note"
-    : "";
 }

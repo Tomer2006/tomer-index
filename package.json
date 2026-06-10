@@ -8,7 +8,8 @@
     "build-data": "node scripts/build-data.mjs",
     "build-world": "node scripts/build-world.mjs",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test \"test/*.test.mjs\""
   },
   "devDependencies": {
     "topojson-client": "^3.1.0",

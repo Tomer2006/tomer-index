@@ -2,6 +2,7 @@ import { escapeHtml, formatInt } from "./format.js";
 import {
   formatTomer,
   formatTomerAxis,
+  getScale,
   onScaleChange,
   renderScaleControl,
 } from "./index-scale.js";
@@ -10,6 +11,19 @@ import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
+import { TOMER_SOURCE_KEYS } from "./metric-defs.js";
+import {
+  bindPointerYear,
+  chartFrame,
+  createTooltip,
+  hitRectEl,
+  hoverDotEl,
+  hoverLineEl,
+  linePath,
+  nearestByYear,
+  positionTooltip,
+  svgEl,
+} from "./line-chart.js";
 
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
@@ -27,7 +41,6 @@ const $qualityFilter = document.getElementById("quality-filter");
 const $cards = document.getElementById("leaderboard-cards");
 
 const COLS = 8;
-const SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear"];
 const TYPE_FILTERS = [
   { id: "country", name: "Country" },
   { id: "region", name: "Region" },
@@ -55,9 +68,29 @@ const state = {
 let payload = null;
 let latestRows = [];
 let entrySeries = {};
+let seriesPromise = null;
 let qualityByIso = {};
 let regionsList = [];
 let incomesList = [];
+/** ISO → Tomer rank for the current year, over the full unfiltered row set. */
+let rankByIso = new Map();
+let lastChartKey = "";
+
+/**
+ * series.json is ~1.4 MB and only needed for years before YEAR_MAX, so it is
+ * fetched on demand instead of with the initial page load.
+ */
+function ensureSeries() {
+  if (!seriesPromise) {
+    seriesPromise = loadSeriesData().then((seriesPayload) => {
+      entrySeries = seriesPayload.entrySeries ?? {};
+    });
+    seriesPromise.catch(() => {
+      seriesPromise = null;
+    });
+  }
+  return seriesPromise;
+}
 
 function sortValue(r, key) {
   switch (key) {
@@ -230,7 +263,7 @@ function metricCell(row, html, sourceKeys = []) {
 }
 
 function tomerSourceBadge(row) {
-  return sourceYearBadgeHtml(row, SOURCE_KEYS, state.year);
+  return sourceYearBadgeHtml(row, TOMER_SOURCE_KEYS, state.year);
 }
 
 function renderTable(rows) {
@@ -247,8 +280,8 @@ function renderTable(rows) {
   }
 
   const frag = document.createDocumentFragment();
-  rows.forEach((r, i) => {
-    const rank = i + 1;
+  rows.forEach((r) => {
+    const rank = rankByIso.get(r.iso) ?? "—";
     const tr = document.createElement("tr");
     const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
     const quality = rowQuality(r);
@@ -288,12 +321,13 @@ function renderCards(rows) {
     return;
   }
   $cards.innerHTML = rows
-    .map((r, i) => {
+    .map((r) => {
       const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
+      const rank = rankByIso.get(r.iso) ?? "—";
       const quality = rowQuality(r);
       const idx = r.customIndex ?? r.customHdi;
       const health = healthValue(r);
-      const source = sourceYearSummary(r, SOURCE_KEYS, state.year);
+      const source = sourceYearSummary(r, TOMER_SOURCE_KEYS, state.year);
       const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
       const gniText =
         typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
@@ -302,7 +336,7 @@ function renderCards(rows) {
           r.name
         )} history">
           <div class="leaderboard-card-head">
-            <span class="leaderboard-card-rank">#${i + 1}</span>
+            <span class="leaderboard-card-rank">#${rank}</span>
             <div>
               <h2 class="leaderboard-card-title">${escapeHtml(r.name)}${dataQualityBadgeHtml(
                 quality
@@ -342,24 +376,6 @@ function globalSourceYearText(point) {
   return parts.length ? `Source years: ${parts.join(", ")}` : "";
 }
 
-function clientToSvgPoint(svg, clientX, clientY) {
-  const point = svg.createSVGPoint();
-  point.x = clientX;
-  point.y = clientY;
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return { x: 0, y: 0 };
-  return point.matrixTransform(matrix.inverse());
-}
-
-function svgToClientPoint(svg, x, y) {
-  const point = svg.createSVGPoint();
-  point.x = x;
-  point.y = y;
-  const matrix = svg.getScreenCTM();
-  if (!matrix) return { x: 0, y: 0 };
-  return point.matrixTransform(matrix);
-}
-
 function renderGlobalAverageChart(container, series, highlightYear) {
   container.replaceChildren();
   const pts = series?.points;
@@ -367,155 +383,90 @@ function renderGlobalAverageChart(container, series, highlightYear) {
     const p = document.createElement("p");
     p.className = "global-series-empty muted";
     p.textContent =
-      "No time series in data. Run npm run build-data to refresh public/data/countries.json.";
+      "No time series in data. Run npm run build-data to refresh public/data/leaderboard.json.";
     container.appendChild(p);
     return;
   }
-
-  const w = 880;
-  const h = 300;
-  const padL = 52;
-  const padR = 28;
-  const padT = 20;
-  const padB = 48;
-  const innerW = w - padL - padR;
-  const innerH = h - padT - padB;
 
   const yearLo = Math.min(...pts.map((p) => p.year));
   const yearHi = Math.max(...pts.map((p) => p.year));
   const valLo = Math.min(...pts.map((p) => p.value));
   const valHi = Math.max(...pts.map((p) => p.value));
   const padV = (valHi - valLo) * 0.08 || 0.02;
-  const y0 = valLo - padV;
-  const y1 = valHi + padV;
 
-  const xAt = (year) => {
-    const span = yearHi - yearLo || 1;
-    return padL + ((year - yearLo) / span) * innerW;
-  };
-  const yAt = (v) => padT + innerH - ((v - y0) / (y1 - y0 || 1)) * innerH;
-
-  const d = pts
-    .map((p, i) => {
-      const x = xAt(p.year);
-      const y = yAt(p.value);
-      return `${i === 0 ? "M" : "L"}${x},${y}`;
-    })
-    .join(" ");
+  const { svg, xAt, yAt, innerW, innerH, padL, padT } = chartFrame({
+    w: 880,
+    h: 300,
+    padL: 52,
+    padR: 28,
+    padT: 20,
+    padB: 48,
+    y0: valLo - padV,
+    y1: valHi + padV,
+    yearLo,
+    yearHi,
+    yLabel: formatTomerAxis,
+    className: "global-series-svg",
+  });
 
   const last = pts[pts.length - 1];
   const first = pts[0];
-  const fmt = (v) => formatTomer(v);
 
-  const ns = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  svg.setAttribute("class", "global-series-svg");
-  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-  const gridTicks = 4;
-  for (let i = 0; i <= gridTicks; i++) {
-    const t = i / gridTicks;
-    const v = y0 + (1 - t) * (y1 - y0);
-    const gy = padT + t * innerH;
-    const line = document.createElementNS(ns, "line");
-    line.setAttribute("x1", String(padL));
-    line.setAttribute("x2", String(padL + innerW));
-    line.setAttribute("y1", String(gy));
-    line.setAttribute("y2", String(gy));
-    line.setAttribute("class", "global-series-grid");
-    svg.appendChild(line);
-    const lab = document.createElementNS(ns, "text");
-    lab.setAttribute("x", String(padL - 8));
-    lab.setAttribute("y", String(gy + 4));
-    lab.setAttribute("text-anchor", "end");
-    lab.setAttribute("class", "global-series-axis");
-    lab.textContent = formatTomerAxis(v);
-    svg.appendChild(lab);
-  }
-
-  for (let i = 0; i <= 2; i++) {
-    const t = i / 2;
-    const yr = Math.round(yearLo + t * (yearHi - yearLo));
-    const gx = xAt(yr);
-    const lab = document.createElementNS(ns, "text");
-    lab.setAttribute("x", String(gx));
-    lab.setAttribute("y", String(h - 12));
-    lab.setAttribute("text-anchor", "middle");
-    lab.setAttribute("class", "global-series-axis");
-    lab.textContent = String(yr);
-    svg.appendChild(lab);
-  }
-
-  const path = document.createElementNS(ns, "path");
-  path.setAttribute("d", d);
-  path.setAttribute("class", "global-series-line");
-  path.setAttribute("fill", "none");
-  svg.appendChild(path);
-
-  const cLast = document.createElementNS(ns, "circle");
-  cLast.setAttribute("cx", String(xAt(last.year)));
-  cLast.setAttribute("cy", String(yAt(last.value)));
-  cLast.setAttribute("r", "4");
-  cLast.setAttribute("class", "global-series-dot");
-  svg.appendChild(cLast);
-
-  const cFirst = document.createElementNS(ns, "circle");
-  cFirst.setAttribute("cx", String(xAt(first.year)));
-  cFirst.setAttribute("cy", String(yAt(first.value)));
-  cFirst.setAttribute("r", "3");
-  cFirst.setAttribute("class", "global-series-dot global-series-dot-start");
-  svg.appendChild(cFirst);
+  svg.appendChild(
+    svgEl("path", {
+      d: linePath(pts, xAt, yAt, (p) => p.year, (p) => p.value),
+      class: "global-series-line",
+      fill: "none",
+    })
+  );
+  svg.appendChild(
+    svgEl("circle", {
+      cx: xAt(last.year),
+      cy: yAt(last.value),
+      r: 4,
+      class: "global-series-dot",
+    })
+  );
+  svg.appendChild(
+    svgEl("circle", {
+      cx: xAt(first.year),
+      cy: yAt(first.value),
+      r: 3,
+      class: "global-series-dot global-series-dot-start",
+    })
+  );
 
   if (typeof highlightYear === "number") {
     const hp = pts.find((p) => p.year === highlightYear);
     if (hp) {
       const hx = xAt(hp.year);
-      const vline = document.createElementNS(ns, "line");
-      vline.setAttribute("x1", String(hx));
-      vline.setAttribute("x2", String(hx));
-      vline.setAttribute("y1", String(padT));
-      vline.setAttribute("y2", String(padT + innerH));
-      vline.setAttribute("class", "global-series-highlight-line");
-      svg.appendChild(vline);
-      const dot = document.createElementNS(ns, "circle");
-      dot.setAttribute("cx", String(hx));
-      dot.setAttribute("cy", String(yAt(hp.value)));
-      dot.setAttribute("r", "5");
-      dot.setAttribute("class", "global-series-highlight-dot");
-      svg.appendChild(dot);
+      svg.appendChild(
+        svgEl("line", {
+          x1: hx,
+          x2: hx,
+          y1: padT,
+          y2: padT + innerH,
+          class: "global-series-highlight-line",
+        })
+      );
+      svg.appendChild(
+        svgEl("circle", {
+          cx: hx,
+          cy: yAt(hp.value),
+          r: 5,
+          class: "global-series-highlight-dot",
+        })
+      );
     }
   }
 
-  const hoverLine = document.createElementNS(ns, "line");
-  hoverLine.setAttribute("y1", String(padT));
-  hoverLine.setAttribute("y2", String(padT + innerH));
-  hoverLine.setAttribute("class", "metric-hover-line");
-  hoverLine.style.display = "none";
-  svg.appendChild(hoverLine);
-
-  const hoverDot = document.createElementNS(ns, "circle");
-  hoverDot.setAttribute("r", "4.5");
-  hoverDot.setAttribute("class", "metric-hover-dot");
-  hoverDot.style.display = "none";
-  svg.appendChild(hoverDot);
-
-  const hit = document.createElementNS(ns, "rect");
-  hit.setAttribute("x", String(padL));
-  hit.setAttribute("y", String(padT));
-  hit.setAttribute("width", String(innerW));
-  hit.setAttribute("height", String(innerH));
-  hit.setAttribute("class", "metric-chart-hit");
-  svg.appendChild(hit);
-
-  const tooltip = document.createElement("div");
-  tooltip.className = "metric-tooltip";
-  tooltip.hidden = true;
-  tooltip.setAttribute("role", "status");
+  const hoverLine = hoverLineEl(svg, padT, innerH);
+  const hoverDot = hoverDotEl(svg);
+  hitRectEl(svg, padL, padT, innerW, innerH);
 
   const chart = document.createElement("div");
   chart.className = "global-series-chart-inner";
-  chart.appendChild(tooltip);
+  const tooltip = createTooltip(chart);
   chart.appendChild(svg);
   container.appendChild(chart);
 
@@ -531,16 +482,11 @@ function renderGlobalAverageChart(container, series, highlightYear) {
     const source = globalSourceYearText(point);
     tooltip.innerHTML = `
       <strong>${point.year}</strong>
-      <span>Tomer index: ${fmt(point.value)}</span>
+      <span>Tomer index: ${formatTomer(point.value)}</span>
       ${source ? `<small>${escapeHtml(source)}</small>` : ""}
     `;
     tooltip.hidden = false;
-    const chartRect = chart.getBoundingClientRect();
-    const screenPoint = svgToClientPoint(svg, x, y);
-    const left = Math.max(72, Math.min(screenPoint.x - chartRect.left, chartRect.width - 72));
-    const top = Math.max(28, screenPoint.y - chartRect.top);
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
+    positionTooltip(tooltip, chart, svg, x, y);
   }
 
   function hidePoint() {
@@ -549,40 +495,15 @@ function renderGlobalAverageChart(container, series, highlightYear) {
     tooltip.hidden = true;
   }
 
-  svg.addEventListener("pointermove", (e) => {
-    const svgPoint = clientToSvgPoint(svg, e.clientX, e.clientY);
-    const clampedX = Math.max(padL, Math.min(svgPoint.x, padL + innerW));
-    const yearAtPointer = yearLo + ((clampedX - padL) / innerW) * (yearHi - yearLo || 1);
-    let closest = pts[0];
-    let best = Infinity;
-    for (const point of pts) {
-      const delta = Math.abs(point.year - yearAtPointer);
-      if (delta < best) {
-        closest = point;
-        best = delta;
-      }
+  bindPointerYear(
+    svg,
+    { padL, innerW, yearLo, yearHi },
+    {
+      onMove: (year) => showPoint(nearestByYear(pts, year)),
+      onClick: (year) => setYear(nearestByYear(pts, year).year),
+      onLeave: hidePoint,
     }
-    showPoint(closest);
-  });
-
-  svg.addEventListener("click", (e) => {
-    const svgPoint = clientToSvgPoint(svg, e.clientX, e.clientY);
-    const clampedX = Math.max(padL, Math.min(svgPoint.x, padL + innerW));
-    const yearAtPointer = yearLo + ((clampedX - padL) / innerW) * (yearHi - yearLo || 1);
-    let closest = pts[0];
-    let best = Infinity;
-    for (const point of pts) {
-      const delta = Math.abs(point.year - yearAtPointer);
-      if (delta < best) {
-        closest = point;
-        best = delta;
-      }
-    }
-    setYear(closest.year);
-  });
-
-  svg.addEventListener("pointerleave", hidePoint);
-  svg.addEventListener("blur", hidePoint);
+  );
 }
 
 function setYear(year) {
@@ -590,6 +511,18 @@ function setYear(year) {
   state.year = y;
   if ($yearSlider) $yearSlider.value = String(y);
   if ($yearOutput) $yearOutput.textContent = String(y);
+  if (y !== YEAR_MAX && !Object.keys(entrySeries).length) {
+    setStatus("Loading yearly history…");
+    ensureSeries()
+      .then(() => {
+        setStatus("");
+        refresh();
+      })
+      .catch((e) => {
+        console.error(e);
+        setStatus(e instanceof Error ? e.message : "Could not load yearly history.", true);
+      });
+  }
   refresh();
 }
 
@@ -669,13 +602,28 @@ function syncUrl() {
   window.history.replaceState(null, "", next);
 }
 
+function computeRanks() {
+  const ranked = sortedRows(rowsForYear(state.year), "tomer", true);
+  rankByIso = new Map();
+  ranked.forEach((r, i) => {
+    if (Number.isFinite(sortValue(r, "tomer"))) rankByIso.set(r.iso, i + 1);
+  });
+}
+
 function refresh() {
   syncUrl();
+  computeRanks();
   const rows = getDisplayRows();
   updateHeaderSortUI();
   renderTable(rows);
   renderCards(rows);
-  renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
+  // The world chart only depends on the year and the display scale — skip
+  // the SVG rebuild when a search/filter keystroke triggered the refresh.
+  const chartKey = `${state.year}|${getScale()}`;
+  if (chartKey !== lastChartKey) {
+    renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
+    lastChartKey = chartKey;
+  }
   syncChipState();
 }
 
@@ -780,15 +728,12 @@ renderScaleControl($scaleControl);
 onScaleChange(() => refresh());
 
 async function loadAndCache() {
-  const [leaderboardPayload, seriesPayload] = await Promise.all([
-    loadLeaderboardData(),
-    loadSeriesData(),
-  ]);
-  payload = leaderboardPayload;
+  payload = await loadLeaderboardData();
   latestRows = payload.countries ?? [];
-  entrySeries = seriesPayload.entrySeries ?? {};
   qualityByIso = payload.qualityByIso ?? {};
   applyUrlState();
+  // Deep links to a past year need the per-year history right away.
+  if (state.year !== YEAR_MAX) await ensureSeries();
 
   const regionMap = new Map();
   const incomeMap = new Map();

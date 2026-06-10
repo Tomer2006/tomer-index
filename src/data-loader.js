@@ -11,17 +11,9 @@ async function fetchJson(file) {
 }
 
 export function loadLeaderboardData() {
-  return fetchJson("leaderboard.json", "leaderboard data");
+  return fetchJson("leaderboard.json");
 }
 
 export function loadSeriesData() {
-  return fetchJson("series.json", "series data");
-}
-
-export function loadMapData() {
-  return fetchJson("map-data.json", "map data");
-}
-
-export function loadLegacyCountriesData() {
-  return fetchJson("countries.json", "country data");
+  return fetchJson("series.json");
 }
