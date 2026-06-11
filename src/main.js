@@ -258,12 +258,17 @@ function fmtNum(v, digits = 1) {
   return typeof v === "number" && Number.isFinite(v) ? v.toFixed(digits) : "—";
 }
 
+/**
+ * One uniform structure for every metric cell: the value on its own line and
+ * the source-year badge in a fixed slot below it (see .metric-cell), so cells
+ * never differ between inline and wrapped layouts as badge widths vary.
+ */
 function metricCell(row, html, sourceKeys = []) {
-  return `${html}${sourceYearCellHtml(row, sourceKeys, state.year)}`;
-}
-
-function tomerSourceBadge(row) {
-  return sourceYearCellHtml(row, TOMER_SOURCE_KEYS, state.year);
+  return `<span class="metric-cell"><span class="metric-cell-value">${html}</span>${sourceYearCellHtml(
+    row,
+    sourceKeys,
+    state.year
+  )}</span>`;
 }
 
 function renderTable(rows) {
@@ -294,9 +299,9 @@ function renderTable(rows) {
     );
     const idx = r.customIndex ?? r.customHdi;
     const health = healthValue(r);
-    const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
+    const healthText = Number.isFinite(health) ? formatTomer(health) : "—";
     const gniText =
-      typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
+      typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—";
     tr.innerHTML = `
       <td>${rank}</td>
       <td class="place-cell"><a class="leaderboard-entry-link" href="${href}">${escapeHtml(
@@ -307,7 +312,7 @@ function renderTable(rows) {
       <td>${metricCell(r, healthText, ["leYear", "haleYear"])}</td>
       <td>${metricCell(r, gniText, "gniYear")}</td>
       <td>${metricCell(r, fmtNum(r.homicidesPer100k, 1), "homicideYear")}</td>
-      <td>${formatTomer(idx)}${tomerSourceBadge(r)}</td>
+      <td>${metricCell(r, formatTomer(idx), TOMER_SOURCE_KEYS)}</td>
     `;
     frag.appendChild(tr);
   });
@@ -327,9 +332,9 @@ function renderCards(rows) {
       const quality = rowQuality(r);
       const idx = r.customIndex ?? r.customHdi;
       const health = healthValue(r);
-      const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
+      const healthText = Number.isFinite(health) ? formatTomer(health) : "—";
       const gniText =
-        typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
+        typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "—";
       return `
         <article class="leaderboard-card" data-href="${href}" tabindex="0" aria-label="Open ${escapeHtml(
           r.name
@@ -344,7 +349,7 @@ function renderCards(rows) {
             </div>
           </div>
           <dl class="leaderboard-card-grid">
-            <div><dt>Tomer</dt><dd>${formatTomer(idx)}${tomerSourceBadge(r)}</dd></div>
+            <div><dt>Tomer</dt><dd>${metricCell(r, formatTomer(idx), TOMER_SOURCE_KEYS)}</dd></div>
             <div><dt>Life exp.</dt><dd>${metricCell(r, fmtNum(r.le, 1), "leYear")}</dd></div>
             <div><dt>HALE</dt><dd>${metricCell(r, fmtNum(r.hale, 1), "haleYear")}</dd></div>
             <div><dt>Health</dt><dd>${metricCell(r, healthText, ["leYear", "haleYear"])}</dd></div>

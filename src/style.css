@@ -1330,14 +1330,30 @@ table {
   vertical-align: middle;
 }
 
-/* Year that matches the displayed year: keep it visible but quiet, so the
-   pill styling stays reserved for carried-forward and mixed source years. */
+/* Year that matches the displayed year: same footprint as the pill (border
+   kept, made invisible) but quiet, so the highlight stays reserved for
+   carried-forward and mixed source years. */
 .source-year-badge.is-current {
   border-color: transparent;
   background: transparent;
-  padding-inline: 0.1rem;
   color: var(--muted);
   font-weight: 550;
+}
+
+/* Uniform leaderboard metric cells: value on the first line, source-year
+   badge in a fixed slot below. Keeps every numeric column on the same
+   two-line rhythm instead of badges sitting inline on some rows and
+   wrapping on others. */
+.leaderboard-table .metric-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.18rem;
+  min-height: 2.45em;
+}
+
+.leaderboard-table .metric-cell .source-year-badge {
+  margin-left: 0;
 }
 
 /* Tooltip that also works for touch (tap focuses) and keyboard users. */
