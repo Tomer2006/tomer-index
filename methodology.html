@@ -120,10 +120,13 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
           <p>
             The leaderboard supports any year from <strong>2000 to 2023</strong>.
             For each displayed year we use the latest source observation on or
-            before that year; if no prior observation exists, we fall back to
-            the earliest later one. The actual source year for each metric is
-            stored on every data point and surfaced in entry-page tooltips, so
-            you can see when a value was carried forward from another year.
+            before that year, looking back as far as 2000; later observations
+            are never pulled backward, and the data pipeline does not ingest
+            observations newer than 2023 at all (early vintages are still being
+            revised). The actual source year for each metric is stored on every
+            data point and shown next to every value on the leaderboard —
+            muted when it matches the displayed year, highlighted when the
+            value was carried forward from an earlier year.
           </p>
           <p>
             Notable gaps: World Bank's

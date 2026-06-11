@@ -62,13 +62,13 @@ async function fetchWorldBankJson(urlString, indicator) {
 }
 
 /**
- * WDI `date=` upper bound (inclusive). Use current calendar year + 1 so each `npm run build-data`
- * requests the newest country-years the API has (leaderboard uses `latestByCountry` / `latestHaleByIso`
- * per series). Entry history pages are rendered on a configured timeline using the best observation
- * available as of each year within that window: exact same-year values when present, otherwise
- * the latest prior value from 2000 onward. Future observations are not pulled backward.
+ * WDI `date=` upper bound (inclusive). Capped at the site's YEAR_MAX so observations newer
+ * than the display window (e.g. fresh 2024/2025 vintages that are still being revised) can
+ * never reach any output — not even through the latest-observation fallback paths
+ * (`latestByCountry` → `mergeRows` → `customHdi`, and the derived-group inputs). Bumping
+ * YEAR_MAX in src/site-years.js widens the fetch automatically.
  */
-const WDI_END_YEAR = new Date().getUTCFullYear() + 1;
+const WDI_END_YEAR = YEAR_MAX;
 const DATE_RANGE = `1960:${WDI_END_YEAR}`;
 const DATE_RANGE_POP = `1960:${WDI_END_YEAR}`;
 const SERIES_YEAR_MIN = YEAR_MIN;
@@ -720,7 +720,12 @@ async function main() {
   const homRows = worldBankData.intentionalHomicidesPer100k.rows;
   const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
-  const haleRows = await fetchAllWhoHale();
+  // Same cap as the WDI fetch: drop observations past the display window at the
+  // source so every downstream consumer (latest rows, histories) is bounded.
+  const haleRows = (await fetchAllWhoHale()).filter((r) => {
+    const y = typeof r.TimeDim === "number" ? r.TimeDim : parseInt(String(r.TimeDim), 10);
+    return Number.isFinite(y) && y <= SERIES_YEAR_MAX;
+  });
   console.log("Fetching WHO global HALE (GLOBAL / SEX_BTSX) for WLD time series …");
   const haleWldMap = await fetchHaleWldMapFromGlobalWho();
 
