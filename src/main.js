@@ -9,7 +9,7 @@ import {
 import { combinedHealthLei } from "./hdi-core.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
-import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
+import { sourceYearCellHtml } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { TOMER_SOURCE_KEYS } from "./metric-defs.js";
 import {
@@ -259,11 +259,11 @@ function fmtNum(v, digits = 1) {
 }
 
 function metricCell(row, html, sourceKeys = []) {
-  return `${html}${sourceYearBadgeHtml(row, sourceKeys, state.year)}`;
+  return `${html}${sourceYearCellHtml(row, sourceKeys, state.year)}`;
 }
 
 function tomerSourceBadge(row) {
-  return sourceYearBadgeHtml(row, TOMER_SOURCE_KEYS, state.year);
+  return sourceYearCellHtml(row, TOMER_SOURCE_KEYS, state.year);
 }
 
 function renderTable(rows) {
@@ -327,7 +327,6 @@ function renderCards(rows) {
       const quality = rowQuality(r);
       const idx = r.customIndex ?? r.customHdi;
       const health = healthValue(r);
-      const source = sourceYearSummary(r, TOMER_SOURCE_KEYS, state.year);
       const healthText = Number.isFinite(health) ? formatTomer(health) : "-";
       const gniText =
         typeof r.gni === "number" && Number.isFinite(r.gni) ? formatInt(r.gni) : "-";
@@ -341,9 +340,7 @@ function renderCards(rows) {
               <h2 class="leaderboard-card-title">${escapeHtml(r.name)}${dataQualityBadgeHtml(
                 quality
               )}</h2>
-              <p class="leaderboard-card-meta">${escapeHtml(rowTypeLabel(r))}${
-                source ? ` &middot; ${escapeHtml(source)}` : ""
-              }</p>
+              <p class="leaderboard-card-meta">${escapeHtml(rowTypeLabel(r))}</p>
             </div>
           </div>
           <dl class="leaderboard-card-grid">

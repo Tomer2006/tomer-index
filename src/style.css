@@ -1330,6 +1330,16 @@ table {
   vertical-align: middle;
 }
 
+/* Year that matches the displayed year: keep it visible but quiet, so the
+   pill styling stays reserved for carried-forward and mixed source years. */
+.source-year-badge.is-current {
+  border-color: transparent;
+  background: transparent;
+  padding-inline: 0.1rem;
+  color: var(--muted);
+  font-weight: 550;
+}
+
 /* Tooltip that also works for touch (tap focuses) and keyboard users. */
 .data-quality-badge[data-tip],
 .source-year-badge[data-tip] {
