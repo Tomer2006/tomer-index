@@ -24,6 +24,19 @@ const $searchList = document.getElementById("map-search-list");
 const W = 960;
 const H = 500;
 
+// A perceptually ordered Plasma palette. Discrete bands are easier to compare
+// across small neighboring countries than nearly identical continuous shades.
+const MAP_COLORS = [
+  "#3b0f70",
+  "#5c01a6",
+  "#8b0aa5",
+  "#b83289",
+  "#db5c68",
+  "#f48849",
+  "#febd2a",
+  "#f0f921",
+];
+
 /** d3-geo equirectangular projection scaled to fit the SVG viewBox.
  *  d3's path generator handles antimeridian splitting and clipping
  *  automatically, which our naive projector did not. */
@@ -38,9 +51,10 @@ const state = {
   payload: null,
   /** Map<iso3, { value: number, row?: object, point?: object }>. */
   byIso: new Map(),
-  /** Visible-year value range — drives the color stretch. */
+  /** Visible-year value range and quantile breaks for the color bands. */
   domainMin: 0,
   domainMax: 1,
+  colorBreaks: [],
   selectedIso: "",
 };
 
@@ -48,48 +62,60 @@ function featurePath(feature) {
   return pathGen(feature) ?? "";
 }
 
-/**
- * Stretches a Tomer index value to a 0–1 ramp position using the visible
- * year's [min, max] so the full red→amber→green palette covers the actual
- * spread of countries instead of squishing the entire world into the
- * green half. Domain is recomputed from `state.byIso` whenever the year
- * changes.
- */
-function rampPosition(v) {
-  if (typeof v !== "number" || !Number.isFinite(v)) return null;
-  const { domainMin, domainMax } = state;
-  const span = domainMax - domainMin;
-  if (!span) return 0.5;
-  const t = (v - domainMin) / span;
-  return Math.max(0, Math.min(1, t));
-}
-
-/** Saturated red → amber → green ramp. Hue 0° → 60° → 130°, lightness fixed-ish. */
-function colorAtRampT(t) {
-  const hue = 0 + t * 130;
-  const sat = 78 - 8 * Math.abs(0.5 - t) * 2;
-  const light = 38 + 12 * t;
-  return `hsl(${hue.toFixed(1)} ${sat.toFixed(0)}% ${light.toFixed(0)}%)`;
-}
-
 function colorForValue(v) {
-  const t = rampPosition(v);
-  if (t == null) return "#2a3142";
-  return colorAtRampT(t);
+  if (typeof v !== "number" || !Number.isFinite(v)) return "#2a3142";
+  const band = state.colorBreaks.findIndex((limit) => v <= limit);
+  return MAP_COLORS[band === -1 ? MAP_COLORS.length - 1 : band];
+}
+
+function quantile(sorted, p) {
+  if (!sorted.length) return null;
+  const position = (sorted.length - 1) * p;
+  const lower = Math.floor(position);
+  const fraction = position - lower;
+  const next = sorted[lower + 1];
+  return next == null
+    ? sorted[lower]
+    : sorted[lower] + fraction * (next - sorted[lower]);
+}
+
+function computeColorScale() {
+  const values = [...state.byIso.values()]
+    .map((entry) => entry.value)
+    .filter((value) => typeof value === "number" && Number.isFinite(value))
+    .sort((a, b) => a - b);
+
+  if (!values.length) {
+    state.domainMin = 0;
+    state.domainMax = 1;
+    state.colorBreaks = [];
+    return;
+  }
+
+  state.domainMin = values[0];
+  state.domainMax = values[values.length - 1];
+  state.colorBreaks = MAP_COLORS.slice(1).map((_, index) =>
+    quantile(values, (index + 1) / MAP_COLORS.length)
+  );
 }
 
 function renderLegend() {
   if (!$legend) return;
-  const stops = [];
-  const N = 12;
-  for (let i = 0; i < N; i++) {
-    const t = i / (N - 1);
-    stops.push(`<i class="map-legend-stop" style="background:${colorAtRampT(t)}"></i>`);
-  }
+  const stops = MAP_COLORS.map((color, index) => {
+    const lower = index === 0 ? state.domainMin : state.colorBreaks[index - 1];
+    const upper = index === MAP_COLORS.length - 1 ? state.domainMax : state.colorBreaks[index];
+    const label = `${formatTomer(lower)} to ${formatTomer(upper)}`;
+    return `<i class="map-legend-stop" style="background:${color}" title="${label}"></i>`;
+  });
   $legend.innerHTML = `
-    <span class="map-legend-label">${formatTomer(state.domainMin)}</span>
-    <span class="map-legend-bar">${stops.join("")}</span>
-    <span class="map-legend-label">${formatTomer(state.domainMax)}</span>
+    <span class="map-legend-scale" role="img" aria-label="Relative color scale from ${formatTomer(
+      state.domainMin
+    )} to ${formatTomer(state.domainMax)} for ${state.year}">
+      <span class="map-legend-label">Lower ${formatTomer(state.domainMin)}</span>
+      <span class="map-legend-bar">${stops.join("")}</span>
+      <span class="map-legend-label">Higher ${formatTomer(state.domainMax)}</span>
+    </span>
+    <span class="map-legend-note">8 relative groups for ${state.year}</span>
     <span class="map-legend-key map-legend-key-incomplete">Incomplete</span>
     <span class="map-legend-key map-legend-key-empty">No data</span>
   `;
@@ -105,7 +131,9 @@ function buildIsoMap() {
 
   for (const iso of Object.keys(series)) {
     const point = series[iso].points.find((p) => p.year === state.year);
-    if (!point) continue;
+    if (!point || typeof point.customIndex !== "number" || !Number.isFinite(point.customIndex)) {
+      continue;
+    }
     const row = latest.get(iso);
     if (!row || row.derivedKind) continue;
     map.set(iso, { value: point.customIndex, row, point });
@@ -115,8 +143,10 @@ function buildIsoMap() {
     for (const [iso, row] of latest) {
       if (row.derivedKind) continue;
       if (!map.has(iso)) {
+        const value = row.customIndex ?? row.customHdi;
+        if (typeof value !== "number" || !Number.isFinite(value)) continue;
         map.set(iso, {
-          value: row.customIndex ?? row.customHdi,
+          value,
           row,
           point: null,
         });
@@ -125,44 +155,6 @@ function buildIsoMap() {
   }
 
   state.byIso = map;
-}
-
-/**
- * Computes a single [min, max] domain across every year and every country
- * timeline. Sharing one domain means a value of e.g. 0.7 in 2000 lands on
- * the same color as 0.7 in 2023 — colors are directly comparable across
- * the slider. Called once after the data file loads.
- */
-function computeFixedDomain() {
-  if (!state.payload) return;
-  const latest = new Map(
-    (state.payload.countries ?? []).map((c) => [c.iso, c])
-  );
-  const series = state.payload.entrySeries ?? {};
-  let lo = Infinity;
-  let hi = -Infinity;
-  for (const iso of Object.keys(series)) {
-    const row = latest.get(iso);
-    if (!row || row.derivedKind) continue;
-    for (const point of series[iso].points) {
-      const v = point.customIndex;
-      // Skip exact-zero points: those are the safety pillar's homicide
-      // floor (h ≥ 60/100k) collapsing the geometric mean to 0, not a
-      // realistic Tomer value. Including them squashes the visible
-      // domain back to [0, 1] and erases color contrast for everyone.
-      if (typeof v === "number" && Number.isFinite(v) && v > 0) {
-        if (v < lo) lo = v;
-        if (v > hi) hi = v;
-      }
-    }
-  }
-  if (Number.isFinite(lo) && lo < 1) {
-    state.domainMin = lo;
-    state.domainMax = 1;
-  } else {
-    state.domainMin = 0;
-    state.domainMax = 1;
-  }
 }
 
 function renderMap() {
@@ -355,6 +347,8 @@ function setYear(y) {
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
   buildIsoMap();
+  computeColorScale();
+  renderLegend();
   renderMap();
   if (state.selectedIso) renderDetail(state.selectedIso);
   syncUrl();
@@ -396,8 +390,8 @@ async function load() {
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
   $status.textContent = "";
-  computeFixedDomain();
   buildIsoMap();
+  computeColorScale();
   renderLegend();
   renderMap();
   populateSearchList();
