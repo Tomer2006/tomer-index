@@ -46,6 +46,11 @@ function latestNumericPoint(points, key) {
 
 function sourceYearText(point, metric) {
   const sourceYear = metric.sourceYearKey ? point?.[metric.sourceYearKey] : null;
+  if (metric.key === "hale" && point?.haleEstimated) {
+    return typeof sourceYear === "number"
+      ? `Estimated from life expectancy; latest reported HALE is ${sourceYear}`
+      : "Estimated from life expectancy";
+  }
   if (metric.key === "gni" && point?.incomeSource === "GDP") {
     return typeof sourceYear === "number" ? `GDP fallback, source year ${sourceYear}` : "GDP fallback";
   }

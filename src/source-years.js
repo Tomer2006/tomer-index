@@ -15,13 +15,18 @@ function yearPart(row, key) {
       : row?.incomeSource === "mixed"
         ? "GNI/GDP"
         : "GNI";
+  const metricLabel =
+    key === "gniYear"
+      ? incomeLabel
+      : key === "haleYear" && row?.haleEstimated
+        ? "HALE est."
+        : METRIC_LABELS[key] ?? "Source";
   if (typeof value === "number") {
-    const label = key === "gniYear" ? incomeLabel : METRIC_LABELS[key] ?? "Source";
-    return { label, value: String(value), year: value };
+    return { label: metricLabel, value: String(value), year: value };
   }
   if (value === "mixed") {
     return {
-      label: key === "gniYear" ? incomeLabel : METRIC_LABELS[key] ?? "Source",
+      label: metricLabel,
       value: "mixed",
       year: null,
     };

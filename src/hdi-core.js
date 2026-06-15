@@ -200,14 +200,66 @@ export function haleHistoryByIso(rows) {
  * @param {number} year
  * @returns {{ year: number, value: number } | null}
  */
-export function haleAsOfYear(haleHistory, iso, year) {
+export function haleAsOfYear(haleHistory, iso, year, minSourceYear = -Infinity) {
   const arr = haleHistory.get(iso);
   if (!arr?.length) return null;
   let best = null;
   for (const row of arr) {
-    if (row.year <= year && (!best || row.year > best.year)) best = row;
+    if (
+      row.year >= minSourceYear &&
+      row.year <= year &&
+      (!best || row.year > best.year)
+    ) {
+      best = row;
+    }
   }
   return best;
+}
+
+/**
+ * HALE for a displayed year. Exact WHO observations are returned unchanged.
+ * Otherwise preserve the latest observed LE - HALE gap and apply it to the
+ * current life-expectancy value.
+ */
+export function adjustedHaleAsOfYear(
+  haleHistory,
+  iso,
+  year,
+  lifeExpectancyByYear,
+  minSourceYear = -Infinity
+) {
+  const reported = haleAsOfYear(haleHistory, iso, year, minSourceYear);
+  if (!reported) return null;
+  if (reported.year === year) return reported;
+
+  function lifeExpectancyAsOf(targetYear) {
+    if (!lifeExpectancyByYear?.size) return null;
+    let best = null;
+    for (const [candidateYear, row] of lifeExpectancyByYear) {
+      if (
+        candidateYear >= minSourceYear &&
+        candidateYear <= targetYear &&
+        (!best || candidateYear > best.year)
+      ) {
+        best = { ...row, year: candidateYear };
+      }
+    }
+    return best;
+  }
+
+  const baselineLe = lifeExpectancyAsOf(reported.year);
+  const currentLe = lifeExpectancyAsOf(year);
+  if (!baselineLe || !currentLe) return reported;
+
+  const unhealthyYears = Math.max(0, baselineLe.value - reported.value);
+  const value = Math.max(20, Math.min(currentLe.value, currentLe.value - unhealthyYears));
+  return {
+    year: reported.year,
+    value,
+    estimated: true,
+    adjustmentYear: currentLe.year,
+    baselineLifeExpectancyYear: baselineLe.year,
+  };
 }
 
 /**

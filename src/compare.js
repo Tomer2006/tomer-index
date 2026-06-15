@@ -84,6 +84,7 @@ function snapshotForYear(iso) {
     leYear: point.leYear,
     hale: point.hale,
     haleYear: point.haleYear,
+    haleEstimated: point.haleEstimated,
     gni: point.gni,
     gniYear: point.gniYear,
     incomeSource: point.incomeSource,

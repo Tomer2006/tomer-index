@@ -14,7 +14,7 @@ import {
   byCountryYear,
   incomeRowsWithGdpFallback,
   haleHistoryByIso,
-  haleAsOfYear,
+  adjustedHaleAsOfYear,
   customIndexHealthIncomeSafety,
   customIndexHealthIncomeSafetyFull,
 } from "../src/hdi-core.js";
@@ -71,8 +71,8 @@ async function fetchWorldBankJson(urlString, indicator) {
  * YEAR_MAX in src/site-years.js widens the fetch automatically.
  */
 const WDI_END_YEAR = YEAR_MAX;
-const DATE_RANGE = `1960:${WDI_END_YEAR}`;
-const DATE_RANGE_POP = `1960:${WDI_END_YEAR}`;
+const DATE_RANGE = `${YEAR_MIN}:${WDI_END_YEAR}`;
+const DATE_RANGE_POP = `${YEAR_MIN}:${WDI_END_YEAR}`;
 const SERIES_YEAR_MIN = YEAR_MIN;
 const SERIES_YEAR_MAX = YEAR_MAX;
 const SERIES_RANGE_LABEL = `${SERIES_YEAR_MIN}-${SERIES_YEAR_MAX}`;
@@ -146,7 +146,7 @@ function worldAggregateTomerSeries(
     const gniY = observationAsOfYear(gniM, y, yearMin);
     const homY = observationAsOfYear(homM, y, yearMin);
     const popY = observationAsOfYear(popM, y, yearMin);
-    const hale = haleAsOfYear(haleWldMap, WB_WLD, y);
+    const hale = adjustedHaleAsOfYear(haleWldMap, WB_WLD, y, leM, yearMin);
     if (!leY || !gniY || !homY || !hale || !popY) continue;
     const p = popY.value;
     if (typeof p !== "number" || !Number.isFinite(p) || p <= 0) continue;
@@ -161,6 +161,7 @@ function worldAggregateTomerSeries(
       value: Math.round(idx * 10000) / 10000,
       leYear: leY.year,
       haleYear: hale.year,
+      haleEstimated: hale.estimated || undefined,
       gniYear: gniY.year,
       incomeSource: gniY.incomeSource,
       homicideYear: homY.year,
@@ -563,7 +564,7 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
     const gniY = observationAsOfYear(gniM, y, yearMin);
     const homY = observationAsOfYear(homM, y, yearMin);
     const popY = observationAsOfYear(popM, y, yearMin);
-    const hale = haleAsOfYear(haleHistory, iso, y);
+    const hale = adjustedHaleAsOfYear(haleHistory, iso, y, leM, yearMin);
     const point = { year: y };
 
     if (leY) {
@@ -573,6 +574,7 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
     if (hale) {
       point.hale = rounded(hale.value, 2);
       point.haleYear = hale.year;
+      if (hale.estimated) point.haleEstimated = true;
     }
     if (gniY) {
       point.gni = rounded(gniY.value, 2);
@@ -625,6 +627,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
       members: 0,
       gniMembers: 0,
       gdpMembers: 0,
+      estimatedHaleMembers: 0,
     };
     buckets.set(def.iso, bucket);
   }
@@ -636,6 +639,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
   bucket.members += 1;
   if (values.incomeSource === "GDP") bucket.gdpMembers += 1;
   else bucket.gniMembers += 1;
+  if (values.haleEstimated) bucket.estimatedHaleMembers += 1;
 }
 
 function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
@@ -649,7 +653,13 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       const gniY = observationAsOfYear(gniByCY.get(iso), y, yearMin);
       const homY = observationAsOfYear(homByCY.get(iso), y, yearMin);
       const popY = observationAsOfYear(popByCY.get(iso), y, yearMin);
-      const hale = haleAsOfYear(haleHistory, iso, y);
+      const hale = adjustedHaleAsOfYear(
+        haleHistory,
+        iso,
+        y,
+        leByCY.get(iso),
+        yearMin
+      );
       const pop = popY?.value;
       if (!leY || !gniY || !homY || !hale) continue;
       if (typeof pop !== "number" || !Number.isFinite(pop) || pop <= 0) continue;
@@ -657,6 +667,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       const values = {
         le: leY.value,
         hale: hale.value,
+        haleEstimated: hale.estimated,
         gni: gniY.value,
         incomeSource: gniY.incomeSource,
         hom: homY.value,
@@ -676,7 +687,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Each plotted year includes countries with observations available as of that year within the ${SERIES_RANGE_LABEL} window: exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
+            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
           points: [],
         });
       }
@@ -684,6 +695,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
         year: y,
         le: rounded(le, 2),
         hale: rounded(hale, 2),
+        haleEstimated: bucket.estimatedHaleMembers > 0 || undefined,
         gni: rounded(gni, 2),
         incomeSource:
           bucket.gniMembers && bucket.gdpMembers
@@ -731,6 +743,7 @@ function rowsForDisplayYear(rows, entrySeries, displayYear) {
         leYear: point.leYear ?? row.leYear,
         hale: point.hale,
         haleYear: point.haleYear ?? row.haleYear,
+        haleEstimated: point.haleEstimated ?? false,
         gni: point.gni,
         gniYear: point.gniYear ?? row.gniYear,
         incomeSource: point.incomeSource ?? row.incomeSource,
@@ -813,7 +826,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, and population; WHO GHO supplies HALE only. Each metric is stored whenever it has an observation available as of that year within the ${SERIES_RANGE_LABEL} window: exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.`,
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, and population; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
@@ -838,7 +851,7 @@ async function main() {
     firstP && lastP
       ? `${firstP.year} ${fmt4(firstP.value)} → ${lastP.year} ${fmt4(
           lastP.value
-        )}. World Bank WLD: life expectancy, GNI per capita (PPP), GDP per capita (PPP) only when annual GNI is missing, intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Each plotted year uses exact same-year values when present, otherwise the latest prior value from 2000 onward. Pop. = WLD world total.`
+        )}. World Bank WLD: life expectancy, GNI per capita (PPP), GDP per capita (PPP) only when annual GNI is missing, intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Missing HALE years are adjusted by life-expectancy movement; other missing inputs use the latest prior value from ${SERIES_YEAR_MIN} onward. Pop. = WLD world total.`
       : "";
 
   const payload = {
@@ -857,7 +870,7 @@ async function main() {
       worldBank:
         "All non-HALE inputs come from World Bank: life expectancy, GNI per capita (PPP), GDP per capita (PPP) only as an annual fallback when GNI is missing, intentional homicides/100k, population, and country/group metadata.",
       whoGho:
-        "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes.",
+        "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes. Missing annual HALE values are estimated by preserving the latest reported life-expectancy-minus-HALE gap and applying it to current life expectancy.",
     },
     derivedRows:
       "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for all non-HALE metrics and WHO GHO for HALE only. GNI per capita (PPP) is preferred for income; GDP per capita (PPP) is substituted only for country-years without GNI. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total.",
@@ -868,7 +881,7 @@ async function main() {
     indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
     globalAverageSeries: {
       definition:
-        `Worldwide published timeline, not a sample of individual countries. Each plotted year from ${SERIES_RANGE_LABEL} uses observations available as of that year within the ${SERIES_RANGE_LABEL} window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, NY.GDP.PCAP.PP.KD only when annual GNI is missing, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact same-year values are used when present; otherwise the latest prior value from ${SERIES_YEAR_MIN} onward is used. World Bank supplies all non-HALE inputs; WHO GHO supplies HALE only.`,
+        `Worldwide published timeline, not a sample of individual countries. Each plotted year from ${SERIES_RANGE_LABEL} uses observations available as of that year within the ${SERIES_RANGE_LABEL} window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, NY.GDP.PCAP.PP.KD only when annual GNI is missing, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward is used.`,
       chartTitle: "Worldwide aggregate (WLD + global HALE)",
       footNote,
       points: worldSeries,

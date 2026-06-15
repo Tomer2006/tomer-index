@@ -167,6 +167,7 @@ function rowsForYear(year) {
       leYear: point.leYear,
       hale: point.hale,
       haleYear: point.haleYear,
+      haleEstimated: point.haleEstimated,
       gni: point.gni,
       gniYear: point.gniYear,
       incomeSource: point.incomeSource,
@@ -370,7 +371,7 @@ function renderCards(rows) {
 function globalSourceYearText(point) {
   const parts = [
     ["LE", point.leYear],
-    ["HALE", point.haleYear],
+    [point.haleEstimated ? "HALE est." : "HALE", point.haleYear],
     [point.incomeSource === "GDP" ? "GDP" : "GNI", point.gniYear],
     ["Homicides", point.homicideYear],
   ]

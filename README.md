@@ -2,7 +2,7 @@
 
 A static site that ranks every country (plus World Bank regions, income
 groups, and other aggregates) on an HDI-style composite of **health**,
-**income**, and **safety** for the years **2000–2023**.
+**income**, and **safety** for the years **2000–2024**.
 
 ```
 Health = ½·LEI(life expectancy) + ½·LEI(HALE)        LEI goalposts: 20–85 years
@@ -11,6 +11,10 @@ Safety = (60 − homicides per 100k) / 60, clamped
 
 Tomer  = Health^(4/9) · Income^(4/9) · Safety^(1/9)
 ```
+
+When WHO HALE is unavailable for a year, HALE is estimated from that year's
+life expectancy while preserving the latest reported `life expectancy - HALE`
+gap. Estimated values are labeled in the UI.
 
 See [methodology.html](methodology.html) for the full write-up and rationale.
 
@@ -43,7 +47,7 @@ committed so builds work offline.
   only), `VC.IHR.PSRC.P5`, `SP.POP.TOTL`,
   country metadata, plus WHO GHO `WHOSIS_000002` for HALE) and writes:
   - `public/data/leaderboard.json` — latest rows, world series, quality flags (minified)
-  - `public/data/series.json` — per-entry yearly history 2000–2023 (minified; the
+  - `public/data/series.json` — per-entry yearly history 2000–2024 (minified; the
     leaderboard lazy-loads this only when the year slider leaves the latest year)
   - `data-archive/countries.json` — full pretty-printed payload for inspection
     (gitignored, not shipped)

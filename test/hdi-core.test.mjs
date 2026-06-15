@@ -13,6 +13,7 @@ import {
   byCountryYear,
   haleHistoryByIso,
   haleAsOfYear,
+  adjustedHaleAsOfYear,
   mergeRows,
 } from "../src/hdi-core.js";
 
@@ -140,6 +141,28 @@ test("haleAsOfYear returns the latest observation on or before the year", () => 
   assert.deepEqual(haleAsOfYear(history, "JPN", 2021), { year: 2021, value: 73.8 });
   assert.equal(haleAsOfYear(history, "JPN", 1999), null);
   assert.equal(haleAsOfYear(history, "EUR", 2021), null);
+});
+
+test("adjustedHaleAsOfYear preserves the latest reported unhealthy-life gap", () => {
+  const history = haleHistoryByIso([
+    { SpatialDimType: "COUNTRY", SpatialDim: "AAA", Dim1: "SEX_BTSX", TimeDim: 2021, NumericValue: 70 },
+  ]);
+  const lifeExpectancy = new Map([
+    [2021, { value: 80, name: "Alpha" }],
+    [2024, { value: 82, name: "Alpha" }],
+  ]);
+
+  assert.deepEqual(adjustedHaleAsOfYear(history, "AAA", 2021, lifeExpectancy, 2000), {
+    year: 2021,
+    value: 70,
+  });
+  assert.deepEqual(adjustedHaleAsOfYear(history, "AAA", 2024, lifeExpectancy, 2000), {
+    year: 2021,
+    value: 72,
+    estimated: true,
+    adjustmentYear: 2024,
+    baselineLifeExpectancyYear: 2021,
+  });
 });
 
 test("mergeRows requires all four inputs and sorts by index descending", () => {
