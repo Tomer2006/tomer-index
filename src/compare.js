@@ -1,5 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
-import { formatTomer, onScaleChange, renderScaleControl } from "./index-scale.js";
+import { formatTomer } from "./index-scale.js";
 import {
   combinedHealthLei,
   incomeIndexFromGni,
@@ -28,7 +28,6 @@ const $btnAdd = document.getElementById("btn-add");
 const $btnClear = document.getElementById("btn-clear");
 const $compareOut = document.getElementById("compare-out");
 const $status = document.getElementById("status");
-const $scaleControl = document.getElementById("scale-control");
 const $yearSlider = document.getElementById("compare-year-slider");
 const $yearOutput = document.getElementById("compare-year-output");
 const $presetChips = document.getElementById("compare-preset-chips");
@@ -844,11 +843,6 @@ async function load() {
   renderPicks();
   refreshCompare();
 }
-
-renderScaleControl($scaleControl);
-onScaleChange(() => {
-  renderCompareOut();
-});
 
 load().catch((e) => {
   console.error(e);

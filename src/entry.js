@@ -1,5 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
-import { formatTomer, onScaleChange, renderScaleControl } from "./index-scale.js";
+import { formatTomer } from "./index-scale.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
@@ -25,7 +25,6 @@ const $status = document.getElementById("status");
 const $latest = document.getElementById("entry-latest");
 const $seriesDef = document.getElementById("entry-series-def");
 const $charts = document.getElementById("entry-charts");
-const $scaleControl = document.getElementById("scale-control");
 
 const params = new URLSearchParams(window.location.search);
 const iso = params.get("iso")?.trim() ?? "";
@@ -267,14 +266,6 @@ async function load() {
   renderLatest(row, rank, series);
   renderCharts(series);
 }
-
-renderScaleControl($scaleControl);
-onScaleChange(() => {
-  if (state.row && state.series) {
-    renderLatest(state.row, state.rank, state.series);
-    renderCharts(state.series);
-  }
-});
 
 load().catch((e) => {
   console.error(e);

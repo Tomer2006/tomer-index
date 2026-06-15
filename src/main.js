@@ -1,11 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
-import {
-  formatTomer,
-  formatTomerAxis,
-  getScale,
-  onScaleChange,
-  renderScaleControl,
-} from "./index-scale.js";
+import { formatTomer, formatTomerAxis } from "./index-scale.js";
 import { combinedHealthLei } from "./hdi-core.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
@@ -28,7 +22,6 @@ import {
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
 const $globalChart = document.getElementById("global-series-chart");
-const $scaleControl = document.getElementById("scale-control");
 const $yearSlider = document.getElementById("year-slider");
 const $yearOutput = document.getElementById("year-output");
 const $searchInput = document.getElementById("search-input");
@@ -623,9 +616,9 @@ function refresh() {
   updateHeaderSortUI();
   renderTable(rows);
   renderCards(rows);
-  // The world chart only depends on the year and the display scale — skip
+  // The world chart only depends on the year, so skip
   // the SVG rebuild when a search/filter keystroke triggered the refresh.
-  const chartKey = `${state.year}|${getScale()}`;
+  const chartKey = String(state.year);
   if (chartKey !== lastChartKey) {
     renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
     lastChartKey = chartKey;
@@ -729,9 +722,6 @@ $filterReset?.addEventListener("click", () => {
   if ($searchInput) $searchInput.value = "";
   refresh();
 });
-
-renderScaleControl($scaleControl);
-onScaleChange(() => refresh());
 
 async function loadAndCache() {
   payload = await loadLeaderboardData();

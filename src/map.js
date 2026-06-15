@@ -1,9 +1,5 @@
 import { escapeHtml, formatInt } from "./format.js";
-import {
-  formatTomer,
-  onScaleChange,
-  renderScaleControl,
-} from "./index-scale.js";
+import { formatTomer } from "./index-scale.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
@@ -11,7 +7,6 @@ import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { geoEquirectangular, geoPath } from "d3-geo";
 
 const $status = document.getElementById("status");
-const $scaleControl = document.getElementById("scale-control");
 const $svg = document.getElementById("map-svg");
 const $tooltip = document.getElementById("map-tooltip");
 const $legend = document.getElementById("map-legend");
@@ -398,12 +393,6 @@ async function load() {
   if (state.selectedIso) renderDetail(state.selectedIso);
   bindMapInteractions();
 }
-
-renderScaleControl($scaleControl);
-onScaleChange(() => {
-  renderLegend();
-  renderMap();
-});
 
 $year?.addEventListener("input", (e) => setYear(e.target.value));
 $search?.addEventListener("change", selectFromSearch);
