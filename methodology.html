@@ -54,14 +54,17 @@
           <pre><code>LEI(years) = (clamp(years, 20, 85) − 20) / (85 − 20)
 Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
 
-          <h3>Income (GNI per capita, log-scaled)</h3>
+          <h3>Income (GNI preferred, GDP fallback; log-scaled)</h3>
           <p>
-            World Bank GNI per capita in 2021-PPP dollars is log-transformed and
-            mapped to 0–1 between $100 and $75,000 — the same goalposts UNDP uses
-            for HDI. Log scaling means each doubling of income adds a fixed
-            amount, not a fixed fraction.
+            World Bank GNI per capita in 2021-PPP dollars is preferred for each
+            country-year. When that annual GNI observation is unavailable, GDP
+            per capita in the same constant 2021-PPP units is used as a fallback.
+            The selected value is mapped to 0–1 between $100 and $75,000 — the
+            same goalposts UNDP uses for HDI. Log scaling means each doubling of
+            income adds a fixed amount, not a fixed fraction.
           </p>
-          <pre><code>Income = (ln(clamp(GNI, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</code></pre>
+          <pre><code>Income value = GNI PPP if available, otherwise GDP PPP
+Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</code></pre>
 
           <h3>Safety (homicide-only inversion)</h3>
           <p>
@@ -100,7 +103,13 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
             </li>
             <li>
               <strong>GNI per capita, PPP (constant 2021 international $)</strong> —
-              World Bank <code>NY.GNP.PCAP.PP.KD</code>.
+              World Bank <code>NY.GNP.PCAP.PP.KD</code>, the preferred income
+              measure.
+            </li>
+            <li>
+              <strong>GDP per capita, PPP (constant 2021 international $)</strong> —
+              World Bank <code>NY.GDP.PCAP.PP.KD</code>, used only for
+              country-years without a GNI observation.
             </li>
             <li>
               <strong>Intentional homicides per 100,000</strong> — World Bank
@@ -129,10 +138,9 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
             value was carried forward from an earlier year.
           </p>
           <p>
-            Notable gaps: World Bank's
-            <code>NY.GNP.PCAP.PP.KD</code> series for some countries (most
-            visibly China) only publishes one or two years, so those entries
-            show a flat GNI line over their timeline.
+            GNI is selected before GDP independently for each country-year.
+            The source badge identifies whether a displayed income value is
+            GNI, GDP, or a mixed population-weighted aggregate.
           </p>
 
           <h2>Derived rows</h2>
@@ -149,9 +157,10 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
               other-crime rates may be over-rated for "safety".
             </li>
             <li>
-              GNI is reported in constant 2021 PPP, so cross-year movement
-              within a country reflects real growth — but countries with sparse
-              source data effectively have a constant GNI in the chart.
+              Both income series use constant 2021 PPP, so cross-year movement
+              within a country reflects real growth. GNI and GDP are related but
+              not identical measures, so fallback transitions can create a break
+              in an otherwise continuous income series.
             </li>
             <li>
               The Tomer index is not endorsed by UNDP, the World Bank, or WHO.

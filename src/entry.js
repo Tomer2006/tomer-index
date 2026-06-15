@@ -46,6 +46,9 @@ function latestNumericPoint(points, key) {
 
 function sourceYearText(point, metric) {
   const sourceYear = metric.sourceYearKey ? point?.[metric.sourceYearKey] : null;
+  if (metric.key === "gni" && point?.incomeSource === "GDP") {
+    return typeof sourceYear === "number" ? `GDP fallback, source year ${sourceYear}` : "GDP fallback";
+  }
   return typeof sourceYear === "number" && sourceYear !== point.year
     ? `Source year ${sourceYear}`
     : "";
@@ -80,7 +83,7 @@ function renderLatest(row, rank, series) {
         ${statHtml("Rank", rank)}
         ${statHtml("Life exp.", row.le.toFixed(1), sourceYearBadgeHtml(row, "leYear", YEAR_MAX))}
         ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", YEAR_MAX))}
-        ${statHtml("GNI pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
+        ${statHtml("Income pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
         ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", YEAR_MAX))}
         ${statHtml("Tomer", formatTomer(idx))}
       </div>

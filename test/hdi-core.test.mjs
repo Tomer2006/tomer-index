@@ -8,12 +8,43 @@ import {
   incomeIndexFromGni,
   customIndexHealthIncomeSafety,
   customIndexHealthIncomeSafetyFull,
+  incomeRowsWithGdpFallback,
   latestByCountry,
   byCountryYear,
   haleHistoryByIso,
   haleAsOfYear,
   mergeRows,
 } from "../src/hdi-core.js";
+
+function wbRow(iso, year, value, name = iso) {
+  return {
+    countryiso3code: iso,
+    date: String(year),
+    value,
+    country: { value: name },
+  };
+}
+
+test("income rows prefer annual GNI and use GDP only for missing country-years", () => {
+  const rows = incomeRowsWithGdpFallback(
+    [wbRow("AAA", 2022, 12000), wbRow("BBB", 2023, 9000)],
+    [wbRow("AAA", 2022, 18000), wbRow("AAA", 2023, 19000), wbRow("CCC", 2023, 7000)]
+  );
+  const byYear = byCountryYear(rows);
+
+  assert.deepEqual(byYear.get("AAA").get(2022), {
+    value: 12000,
+    name: "AAA",
+    incomeSource: "GNI",
+  });
+  assert.deepEqual(byYear.get("AAA").get(2023), {
+    value: 19000,
+    name: "AAA",
+    incomeSource: "GDP",
+  });
+  assert.equal(latestByCountry(rows).get("BBB").incomeSource, "GNI");
+  assert.equal(latestByCountry(rows).get("CCC").incomeSource, "GDP");
+});
 
 const closeTo = (actual, expected, eps = 1e-9) =>
   assert.ok(Math.abs(actual - expected) < eps, `expected ${actual} ≈ ${expected}`);

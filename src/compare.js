@@ -86,6 +86,7 @@ function snapshotForYear(iso) {
     haleYear: point.haleYear,
     gni: point.gni,
     gniYear: point.gniYear,
+    incomeSource: point.incomeSource,
     homicidesPer100k: point.homicidesPer100k,
     homicideYear: point.homicideYear,
     customIndex: point.customIndex,
@@ -464,7 +465,7 @@ function renderCompareOut() {
             green(bestHealth)
           )}
           ${row(
-            "GNI pc (PPP)",
+            "Income pc (PPP)",
             gniTexts,
             green(bestGni)
           )}

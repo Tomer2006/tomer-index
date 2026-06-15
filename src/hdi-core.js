@@ -95,6 +95,30 @@ export function isCountryRow(row) {
   return typeof iso === "string" && /^[A-Z]{3}$/.test(iso);
 }
 
+/**
+ * Build one annual PPP-income series, preferring GNI and using GDP only for
+ * country-years where GNI has no published value.
+ */
+export function incomeRowsWithGdpFallback(gniRows, gdpRows) {
+  const selected = new Map();
+
+  function addRows(rows, incomeSource, overwrite) {
+    for (const row of rows) {
+      if (!isCountryRow(row) || row.value == null) continue;
+      const year = parseInt(String(row.date), 10);
+      const value = Number(row.value);
+      if (Number.isNaN(year) || !Number.isFinite(value)) continue;
+      const key = `${row.countryiso3code}:${year}`;
+      if (!overwrite && selected.has(key)) continue;
+      selected.set(key, { ...row, incomeSource });
+    }
+  }
+
+  addRows(gdpRows, "GDP", false);
+  addRows(gniRows, "GNI", true);
+  return [...selected.values()];
+}
+
 /** @param {object[]} rows World Bank API rows */
 export function latestByCountry(rows) {
   const map = new Map();
@@ -107,7 +131,9 @@ export function latestByCountry(rows) {
     const name = r.country?.value ?? iso;
     const prev = map.get(iso);
     if (!prev || year > prev.year) {
-      map.set(iso, { year, value, name });
+      const observation = { year, value, name };
+      if (r.incomeSource) observation.incomeSource = r.incomeSource;
+      map.set(iso, observation);
     }
   }
   return map;
@@ -128,7 +154,9 @@ export function byCountryYear(rows) {
     const value = Number(r.value);
     const name = r.country?.value ?? iso;
     if (!map.has(iso)) map.set(iso, new Map());
-    map.get(iso).set(year, { value, name });
+    const observation = { value, name };
+    if (r.incomeSource) observation.incomeSource = r.incomeSource;
+    map.get(iso).set(year, observation);
   }
   return map;
 }
@@ -211,6 +239,7 @@ export function mergeRows(leMap, gniMap, homicideMap, haleMap) {
       hale: hale.value,
       gniYear: gni.year,
       gni: gni.value,
+      incomeSource: gni.incomeSource,
       homicideYear: hom.year,
       homicidesPer100k: hom.value,
       customIndex: score,

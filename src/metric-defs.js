@@ -41,7 +41,7 @@ export const metricDefs = [
   {
     key: "gni",
     sourceYearKey: "gniYear",
-    label: "GNI pc (PPP)",
+    label: "Income pc (PPP)",
     axis: (v) => compactNumber(v),
     value: (v) => formatInt(v),
   },

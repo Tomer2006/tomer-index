@@ -6,7 +6,7 @@ groups, and other aggregates) on an HDI-style composite of **health**,
 
 ```
 Health = ½·LEI(life expectancy) + ½·LEI(HALE)        LEI goalposts: 20–85 years
-Income = log-scaled GNI per capita (PPP), $100–$75,000 goalposts
+Income = log-scaled GNI per capita (PPP), with GDP PPP fallback, $100–$75,000 goalposts
 Safety = (60 − homicides per 100k) / 60, clamped
 
 Tomer  = Health^(4/9) · Income^(4/9) · Safety^(1/9)
@@ -39,7 +39,8 @@ The site is fully static; all data is prebuilt JSON in `public/data/` and
 committed so builds work offline.
 
 - `npm run build-data` — fetches live APIs (World Bank indicators
-  `SP.DYN.LE00.IN`, `NY.GNP.PCAP.PP.KD`, `VC.IHR.PSRC.P5`, `SP.POP.TOTL`,
+  `SP.DYN.LE00.IN`, `NY.GNP.PCAP.PP.KD`, `NY.GDP.PCAP.PP.KD` (GNI fallback
+  only), `VC.IHR.PSRC.P5`, `SP.POP.TOTL`,
   country metadata, plus WHO GHO `WHOSIS_000002` for HALE) and writes:
   - `public/data/leaderboard.json` — latest rows, world series, quality flags (minified)
   - `public/data/series.json` — per-entry yearly history 2000–2023 (minified; the

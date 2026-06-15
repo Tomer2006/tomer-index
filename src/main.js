@@ -169,6 +169,7 @@ function rowsForYear(year) {
       haleYear: point.haleYear,
       gni: point.gni,
       gniYear: point.gniYear,
+      incomeSource: point.incomeSource,
       homicidesPer100k: point.homicidesPer100k,
       homicideYear: point.homicideYear,
       customIndex: point.customIndex,
@@ -353,7 +354,7 @@ function renderCards(rows) {
             <div><dt>Life exp.</dt><dd>${metricCell(r, fmtNum(r.le, 1), "leYear")}</dd></div>
             <div><dt>HALE</dt><dd>${metricCell(r, fmtNum(r.hale, 1), "haleYear")}</dd></div>
             <div><dt>Health</dt><dd>${metricCell(r, healthText, ["leYear", "haleYear"])}</dd></div>
-            <div><dt>GNI pc</dt><dd>${metricCell(r, gniText, "gniYear")}</dd></div>
+            <div><dt>Income pc</dt><dd>${metricCell(r, gniText, "gniYear")}</dd></div>
             <div><dt>Homicides</dt><dd>${metricCell(
               r,
               fmtNum(r.homicidesPer100k, 1),
@@ -370,10 +371,12 @@ function globalSourceYearText(point) {
   const parts = [
     ["LE", point.leYear],
     ["HALE", point.haleYear],
-    ["GNI", point.gniYear],
+    [point.incomeSource === "GDP" ? "GDP" : "GNI", point.gniYear],
     ["Homicides", point.homicideYear],
   ]
-    .filter(([, year]) => typeof year === "number" && year !== point.year)
+    .filter(([label, year]) =>
+      typeof year === "number" && (label === "GDP" || year !== point.year)
+    )
     .map(([label, year]) => `${label} ${year}`);
   return parts.length ? `Source years: ${parts.join(", ")}` : "";
 }

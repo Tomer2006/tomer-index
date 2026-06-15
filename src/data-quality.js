@@ -3,7 +3,7 @@ import { escapeHtml } from "./format.js";
 const REQUIRED_INDEX_METRICS = [
   ["le", "Life exp."],
   ["hale", "HALE"],
-  ["gni", "GNI pc (PPP)"],
+  ["gni", "Income pc (PPP)"],
   ["homicidesPer100k", "Homicides /100k"],
 ];
 

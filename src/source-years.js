@@ -9,11 +9,22 @@ const METRIC_LABELS = {
 
 function yearPart(row, key) {
   const value = row?.[key];
+  const incomeLabel =
+    row?.incomeSource === "GDP"
+      ? "GDP"
+      : row?.incomeSource === "mixed"
+        ? "GNI/GDP"
+        : "GNI";
   if (typeof value === "number") {
-    return { label: METRIC_LABELS[key] ?? "Source", value: String(value), year: value };
+    const label = key === "gniYear" ? incomeLabel : METRIC_LABELS[key] ?? "Source";
+    return { label, value: String(value), year: value };
   }
   if (value === "mixed") {
-    return { label: METRIC_LABELS[key] ?? "Source", value: "mixed", year: null };
+    return {
+      label: key === "gniYear" ? incomeLabel : METRIC_LABELS[key] ?? "Source",
+      value: "mixed",
+      year: null,
+    };
   }
   return null;
 }
@@ -21,7 +32,8 @@ function yearPart(row, key) {
 function sourceYearPart(row, key, displayYear) {
   const part = yearPart(row, key);
   if (!part) return null;
-  if (typeof displayYear === "number" && part.year === displayYear) return null;
+  const isGdpFallback = key === "gniYear" && row?.incomeSource === "GDP";
+  if (!isGdpFallback && typeof displayYear === "number" && part.year === displayYear) return null;
   return part;
 }
 

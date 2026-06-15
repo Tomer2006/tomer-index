@@ -220,7 +220,7 @@ function showTooltip(iso, name, clientX, clientY) {
         <span>Tomer</span><span>${escapeHtml(formatTomer(idx))}</span>
         <span>Life exp.</span><span>${typeof point.le === "number" ? point.le.toFixed(1) : "—"}</span>
         <span>HALE</span><span>${typeof point.hale === "number" ? point.hale.toFixed(1) : "—"}</span>
-        <span>GNI pc</span><span>${typeof point.gni === "number" ? formatInt(point.gni) : "—"}</span>
+        <span>Income pc</span><span>${typeof point.gni === "number" ? formatInt(point.gni) : "—"}</span>
         <span>Hom./100k</span><span>${typeof point.homicidesPer100k === "number" ? point.homicidesPer100k.toFixed(1) : "—"}</span>
       </div>
       <small class="muted">Click for full history</small>
@@ -282,7 +282,7 @@ function renderDetail(iso) {
       )}</dd></div>
       <div><dt>Life exp.</dt><dd>${typeof point.le === "number" ? point.le.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "leYear", state.year)}</dd></div>
       <div><dt>HALE</dt><dd>${typeof point.hale === "number" ? point.hale.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "haleYear", state.year)}</dd></div>
-      <div><dt>GNI pc</dt><dd>${typeof point.gni === "number" ? formatInt(point.gni) : "-"}${sourceYearBadgeHtml(point, "gniYear", state.year)}</dd></div>
+      <div><dt>Income pc</dt><dd>${typeof point.gni === "number" ? formatInt(point.gni) : "-"}${sourceYearBadgeHtml(point, "gniYear", state.year)}</dd></div>
       <div><dt>Hom./100k</dt><dd>${typeof point.homicidesPer100k === "number" ? point.homicidesPer100k.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "homicideYear", state.year)}</dd></div>
     </dl>
   `;
