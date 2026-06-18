@@ -9,6 +9,7 @@ import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml, sourceYearSummary } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
+import { finishInitialLoad } from "./page-ready.js";
 import { metricDefs, metricSourceKeys, metricValue } from "./metric-defs.js";
 import {
   bindPointerYear,
@@ -844,8 +845,10 @@ async function load() {
   refreshCompare();
 }
 
-load().catch((e) => {
-  console.error(e);
-  $status.textContent = e instanceof Error ? e.message : "Could not load data.";
-  $status.classList.add("error");
-});
+load()
+  .catch((e) => {
+    console.error(e);
+    $status.textContent = e instanceof Error ? e.message : "Could not load data.";
+    $status.classList.add("error");
+  })
+  .finally(finishInitialLoad);

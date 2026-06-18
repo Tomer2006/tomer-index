@@ -4,6 +4,7 @@ import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
 import { YEAR_MAX } from "./site-years.js";
+import { finishInitialLoad } from "./page-ready.js";
 import { metricDefs, metricValue } from "./metric-defs.js";
 import {
   bindPointerYear,
@@ -267,8 +268,10 @@ async function load() {
   renderCharts(series);
 }
 
-load().catch((e) => {
-  console.error(e);
-  $title.textContent = "Entry history";
-  setStatus(e instanceof Error ? e.message : "Could not load entry history.", true);
-});
+load()
+  .catch((e) => {
+    console.error(e);
+    $title.textContent = "Entry history";
+    setStatus(e instanceof Error ? e.message : "Could not load entry history.", true);
+  })
+  .finally(finishInitialLoad);

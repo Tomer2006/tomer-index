@@ -28,6 +28,52 @@ body {
   line-height: 1.5;
 }
 
+body.is-loading {
+  overflow: hidden;
+}
+
+body.is-loading #app {
+  visibility: hidden;
+}
+
+.page-loader {
+  display: none;
+}
+
+body.is-loading .page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.8rem;
+  background: radial-gradient(1200px 600px at 10% -10%, #1a2336 0%, var(--bg) 55%);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.page-loader-mark {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: page-loader-spin 0.8s linear infinite;
+}
+
+@keyframes page-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader-mark {
+    animation: none;
+  }
+}
+
 a {
   color: var(--accent-dim);
 }

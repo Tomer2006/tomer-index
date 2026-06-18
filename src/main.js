@@ -6,6 +6,7 @@ import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearCellHtml } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { TOMER_SOURCE_KEYS } from "./metric-defs.js";
+import { finishInitialLoad } from "./page-ready.js";
 import {
   bindPointerYear,
   chartFrame,
@@ -749,7 +750,9 @@ async function loadAndCache() {
   refresh();
 }
 
-loadAndCache().catch((e) => {
-  console.error(e);
-  setStatus(e instanceof Error ? e.message : "Could not load data.", true);
-});
+loadAndCache()
+  .catch((e) => {
+    console.error(e);
+    setStatus(e instanceof Error ? e.message : "Could not load data.", true);
+  })
+  .finally(finishInitialLoad);

@@ -18,8 +18,12 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
-  <body>
-    <div id="app">
+  <body class="is-loading">
+    <div class="page-loader" role="status">
+      <span class="page-loader-mark" aria-hidden="true"></span>
+      <span>Loading entry…</span>
+    </div>
+    <div id="app" aria-busy="true">
       <header class="hero compare-page-header">
         <nav class="site-nav" aria-label="Main">
           <a href="./index.html" class="site-nav-link">Leaderboard</a>
