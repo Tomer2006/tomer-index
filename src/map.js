@@ -194,6 +194,27 @@ function renderMap() {
     path.appendChild(title);
     g.appendChild(path);
   }
+
+  // Raise the selected country above its neighbors (so its full outline shows)
+  // and drop a marker at its centroid, so a shared ?iso= link is legible even
+  // for countries too small to make out on the world map.
+  if (state.selectedIso) {
+    const selPath = g.querySelector(".map-country.is-selected");
+    if (selPath) g.appendChild(selPath);
+    const feature = state.worldFeatures.find((f) => f.id === state.selectedIso);
+    if (feature) {
+      const [cx, cy] = pathGen.centroid(feature);
+      if (Number.isFinite(cx) && Number.isFinite(cy)) {
+        const marker = document.createElementNS(ns, "circle");
+        marker.setAttribute("cx", String(cx));
+        marker.setAttribute("cy", String(cy));
+        marker.setAttribute("r", "8");
+        marker.setAttribute("class", "map-selected-marker");
+        marker.setAttribute("pointer-events", "none");
+        g.appendChild(marker);
+      }
+    }
+  }
 }
 
 function showTooltip(iso, name, clientX, clientY) {
@@ -268,7 +289,10 @@ function renderDetail(iso) {
         )}</h2>
         <p class="map-detail-sub muted">${state.year}</p>
       </div>
-      <a class="btn map-detail-link" href="${href}">History</a>
+      <div class="map-detail-actions">
+        <a class="btn map-detail-link" href="${href}">History</a>
+        <button type="button" class="btn map-detail-clear" data-clear-selection>Clear</button>
+      </div>
     </div>
     <dl class="map-detail-grid">
       <div><dt>Tomer</dt><dd>${formatTomer(entry.value)}${sourceYearBadgeHtml(
@@ -284,6 +308,32 @@ function renderDetail(iso) {
   `;
 }
 
+/** Reflect the current selection in the search box as canonical "Name (ISO)". */
+function syncSearchInput(iso) {
+  if (!$search) return;
+  const row = (state.payload?.countries ?? []).find((r) => r.iso === iso);
+  $search.value = row ? `${row.name} (${row.iso})` : "";
+}
+
+/** Single entry point for selecting a country: map, detail, search box, URL. */
+function selectIso(iso) {
+  state.selectedIso = iso;
+  renderMap();
+  renderDetail(iso);
+  syncSearchInput(iso);
+  syncUrl();
+}
+
+function clearSelection() {
+  state.selectedIso = "";
+  renderMap();
+  if ($detail) {
+    $detail.innerHTML = '<p class="map-detail-empty">Select a country on the map.</p>';
+  }
+  syncSearchInput("");
+  syncUrl();
+}
+
 function bindMapInteractions() {
   $svg.addEventListener("pointermove", (e) => {
     const target = e.target.closest(".map-country");
@@ -297,11 +347,10 @@ function bindMapInteractions() {
   $svg.addEventListener("click", (e) => {
     const target = e.target.closest(".map-country");
     if (!target) return;
-    const iso = target.dataset.iso;
-    state.selectedIso = iso;
-    renderMap();
-    renderDetail(iso);
-    syncUrl();
+    selectIso(target.dataset.iso);
+  });
+  $detail?.addEventListener("click", (e) => {
+    if (e.target.closest("[data-clear-selection]")) clearSelection();
   });
 }
 
@@ -332,10 +381,7 @@ function selectFromSearch() {
   const iso = isoFromSearch($search?.value ?? "");
   if (!iso) return;
   if (!(state.payload?.countries ?? []).some((r) => r.iso === iso)) return;
-  state.selectedIso = iso;
-  renderMap();
-  renderDetail(iso);
-  syncUrl();
+  selectIso(iso);
 }
 
 function setYear(y) {
@@ -391,7 +437,13 @@ async function load() {
   renderLegend();
   renderMap();
   populateSearchList();
-  if (state.selectedIso) renderDetail(state.selectedIso);
+  if (state.selectedIso) {
+    renderDetail(state.selectedIso);
+    syncSearchInput(state.selectedIso);
+    // A shared ?iso= link should land on the detail panel, which sits below
+    // the map; bring it into view without yanking past it on tall layouts.
+    $detail?.scrollIntoView({ block: "nearest" });
+  }
   bindMapInteractions();
 }
 

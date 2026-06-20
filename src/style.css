@@ -486,8 +486,16 @@ a {
 
 .map-country.is-selected {
   stroke: #ecfdf5;
-  stroke-width: 1.5;
-  filter: brightness(1.16);
+  stroke-width: 1.75;
+  filter: brightness(1.16) drop-shadow(0 0 3px rgba(236, 253, 245, 0.85));
+}
+
+.map-selected-marker {
+  fill: none;
+  stroke: #ecfdf5;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(236, 253, 245, 0.9));
 }
 
 .map-tooltip {
@@ -582,8 +590,13 @@ a {
   font-size: 0.82rem;
 }
 
-.map-detail-link {
+.map-detail-actions {
   flex: 0 0 auto;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.map-detail-link {
   text-decoration: none;
 }
 
