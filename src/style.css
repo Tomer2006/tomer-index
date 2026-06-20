@@ -1172,6 +1172,11 @@ table {
   padding: 0;
 }
 
+.table-wrap .leaderboard-table > thead > tr > th:first-child {
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
 .table-wrap thead th:nth-child(n + 3) {
   text-align: right;
 }
@@ -1189,6 +1194,11 @@ table {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-family: var(--mono);
+}
+
+.table-wrap .leaderboard-table > tbody > tr > td:first-child {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .table-wrap tbody td:nth-child(2) {
