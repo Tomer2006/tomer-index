@@ -4,6 +4,7 @@ import {
   combinedHealthLei,
   incomeIndexFromGni,
   safetyIndexFromHomicidesPer100k,
+  freedomIndexFromScore,
 } from "./hdi-core.js";
 import { dataQualityBadgeHtml, dataQualityForRow } from "./data-quality.js";
 import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
@@ -90,6 +91,12 @@ function snapshotForYear(iso) {
     incomeSource: point.incomeSource,
     homicidesPer100k: point.homicidesPer100k,
     homicideYear: point.homicideYear,
+    freedom: point.freedom,
+    freedomYear: point.freedomYear,
+    abundanceIndex: point.abundanceIndex,
+    safetyIndex: point.safetyIndex,
+    healthIndex: point.healthIndex,
+    freedomIndex: point.freedomIndex,
     customIndex: point.customIndex,
   };
 }
@@ -112,23 +119,35 @@ function rankForCountryInRows(iso, rankedRows) {
 }
 
 function pillarValues(row) {
-  const health =
+  const health = Number.isFinite(row.healthIndex)
+    ? row.healthIndex
+    :
     typeof row.le === "number" && typeof row.hale === "number"
       ? combinedHealthLei(row.le, row.hale)
       : NaN;
-  const income =
+  const income = Number.isFinite(row.abundanceIndex)
+    ? row.abundanceIndex
+    :
     typeof row.gni === "number" && Number.isFinite(row.gni)
       ? incomeIndexFromGni(row.gni)
       : NaN;
-  const safety =
+  const safety = Number.isFinite(row.safetyIndex)
+    ? row.safetyIndex
+    :
     typeof row.homicidesPer100k === "number" && Number.isFinite(row.homicidesPer100k)
       ? safetyIndexFromHomicidesPer100k(row.homicidesPer100k)
       : NaN;
-  return { health, income, safety };
+  const freedom = Number.isFinite(row.freedomIndex)
+    ? row.freedomIndex
+    :
+    typeof row.freedom === "number" && Number.isFinite(row.freedom)
+      ? freedomIndexFromScore(row.freedom)
+      : NaN;
+  return { health, abundance: income, safety, freedom };
 }
 
 function pillarBarsHtml(row) {
-  const { health, income, safety } = pillarValues(row);
+  const { health, abundance, safety, freedom } = pillarValues(row);
   const bar = (label, v, accent) =>
     Number.isFinite(v)
       ? `<div class="pillar-bar"><span class="pillar-bar-label">${label}</span>
@@ -141,9 +160,10 @@ function pillarBarsHtml(row) {
            <span class="pillar-bar-value muted">—</span></div>`;
   return `
     <div class="pillar-bars">
-      ${bar("Health", health, "#6ee7b7")}
-      ${bar("Income", income, "#fbbf24")}
+      ${bar("Abundance", abundance, "#fbbf24")}
       ${bar("Safety", safety, "#f472b6")}
+      ${bar("Health", health, "#6ee7b7")}
+      ${bar("Freedom", freedom, "#60a5fa")}
     </div>
   `;
 }
@@ -379,6 +399,7 @@ function renderCompareOut() {
   const bestHealth = bestCols(healthVals, false);
   const bestGni = bestCols(filled.map((r) => r.gni), false);
   const bestHom = bestCols(filled.map((r) => r.homicidesPer100k), true);
+  const bestFreedom = bestCols(filled.map((r) => r.freedom), false);
   const bestTomer = bestCols(
     filled.map((r) => r.customIndex ?? r.customHdi),
     false
@@ -395,6 +416,9 @@ function renderCompareOut() {
   const gniTexts = filled.map((r) => compareValueHtml(r, metricDefs[3], intOrDash(r.gni)));
   const homicideTexts = filled.map((r) =>
     compareValueHtml(r, metricDefs[4], num(r.homicidesPer100k, 1))
+  );
+  const freedomTexts = filled.map((r) =>
+    compareValueHtml(r, metricDefs[5], num(r.freedom, 1))
   );
   const tomerTexts = filled.map((r) =>
     compareValueHtml(r, metricDefs[0], formatTomer(r.customIndex ?? r.customHdi))
@@ -466,7 +490,7 @@ function renderCompareOut() {
             green(bestHealth)
           )}
           ${row(
-            "Income pc (PPP)",
+            "Abundance (income pc, PPP)",
             gniTexts,
             green(bestGni)
           )}
@@ -474,6 +498,11 @@ function renderCompareOut() {
             "Homicides /100k",
             homicideTexts,
             green(bestHom)
+          )}
+          ${row(
+            "Personal freedom (0–100)",
+            freedomTexts,
+            green(bestFreedom)
           )}
           ${row(
             "Tomer index",

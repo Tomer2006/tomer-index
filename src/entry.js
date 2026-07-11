@@ -88,8 +88,9 @@ function renderLatest(row, rank, series) {
         ${statHtml("Rank", rank)}
         ${statHtml("Life exp.", row.le.toFixed(1), sourceYearBadgeHtml(row, "leYear", YEAR_MAX))}
         ${statHtml("HALE", hale, sourceYearBadgeHtml(row, "haleYear", YEAR_MAX))}
-        ${statHtml("Income pc", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
+        ${statHtml("Abundance", formatInt(row.gni), sourceYearBadgeHtml(row, "gniYear", YEAR_MAX))}
         ${statHtml("Homicides", h, sourceYearBadgeHtml(row, "homicideYear", YEAR_MAX))}
+        ${statHtml("Freedom", Number.isFinite(row.freedom) ? row.freedom.toFixed(1) : "-", sourceYearBadgeHtml(row, "freedomYear", YEAR_MAX))}
         ${statHtml("Tomer", formatTomer(idx))}
       </div>
     </section>

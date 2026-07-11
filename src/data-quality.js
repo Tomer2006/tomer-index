@@ -3,8 +3,9 @@ import { escapeHtml } from "./format.js";
 const REQUIRED_INDEX_METRICS = [
   ["le", "Life exp."],
   ["hale", "HALE"],
-  ["gni", "Income pc (PPP)"],
+  ["gni", "Abundance (income pc, PPP)"],
   ["homicidesPer100k", "Homicides /100k"],
+  ["freedom", "Personal freedom"],
 ];
 
 const BAD_DATA_LABEL = "Incomplete data";

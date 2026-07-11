@@ -6,12 +6,12 @@
     <title>Tomer index</title>
     <meta
       name="description"
-      content="Tomer index — an HDI-style composite of health, income, and safety for every country, 2000–2024. Interactive leaderboard, world map, and country comparisons."
+      content="Tomer index — abundance, safety, health, and freedom for every country, 2000–2024. Interactive leaderboard, world map, and country comparisons."
     />
     <meta property="og:title" content="Tomer index" />
     <meta
       property="og:description"
-      content="An HDI-style composite of health, income, and safety for every country, 2000–2024."
+      content="A composite of abundance, safety, health, and freedom for every country, 2000–2024."
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Tomer index" />
@@ -35,16 +35,11 @@
           <div class="hero-titles">
             <p class="kicker">Leaderboard</p>
             <h1>Tomer index</h1>
+            <p class="hero-pillars">Abundance · Safety · Health · Freedom</p>
           </div>
         </div>
         <p id="status" class="status" aria-live="polite"></p>
       </header>
-
-      <section class="global-series" aria-labelledby="global-series-h">
-        <h2 id="global-series-h" class="global-series-title">Population-weighted world Tomer index over time</h2>
-        <p class="global-series-def">Population-weighted across the entire world — World Bank's “World” aggregate for life expectancy, GNI (GDP fallback only when annual GNI is missing), homicides and population, plus WHO's global healthy life expectancy. Not a simple average of countries.</p>
-        <div id="global-series-chart" class="global-series-chart" role="img" aria-label="Line chart of the population-weighted world Tomer index by year"></div>
-      </section>
 
       <main>
         <section class="leaderboard-controls" aria-label="Leaderboard filters">
@@ -120,12 +115,17 @@
                 </th>
                 <th scope="col">
                   <button type="button" class="th-sort" data-sort="gni">
-                    <span class="th-sort-label">Income pc (PPP)</span><span class="th-sort-icon" aria-hidden="true"></span>
+                    <span class="th-sort-label">Abundance (income pc)</span><span class="th-sort-icon" aria-hidden="true"></span>
                   </button>
                 </th>
                 <th scope="col">
                   <button type="button" class="th-sort" data-sort="homicides">
                     <span class="th-sort-label">Homicides /100k</span><span class="th-sort-icon" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="th-sort" data-sort="freedom">
+                    <span class="th-sort-label">Freedom</span><span class="th-sort-icon" aria-hidden="true"></span>
                   </button>
                 </th>
                 <th scope="col">

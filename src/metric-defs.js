@@ -2,7 +2,7 @@ import { formatInt } from "./format.js";
 import { formatTomer, formatTomerAxis } from "./index-scale.js";
 
 /** Source-year keys that feed the Tomer index itself. */
-export const TOMER_SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear"];
+export const TOMER_SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"];
 
 export function compactNumber(n) {
   return new Intl.NumberFormat(undefined, {
@@ -41,7 +41,7 @@ export const metricDefs = [
   {
     key: "gni",
     sourceYearKey: "gniYear",
-    label: "Income pc (PPP)",
+    label: "Abundance (income pc, PPP)",
     axis: (v) => compactNumber(v),
     value: (v) => formatInt(v),
   },
@@ -52,9 +52,16 @@ export const metricDefs = [
     axis: (v) => v.toFixed(1),
     value: (v) => v.toFixed(2),
   },
+  {
+    key: "freedom",
+    sourceYearKey: "freedomYear",
+    label: "Personal freedom (0–100)",
+    axis: (v) => v.toFixed(0),
+    value: (v) => v.toFixed(1),
+  },
 ];
 
-/** Source-year keys relevant to one metric (the index uses all four). */
+/** Source-year keys relevant to one metric (the index uses every listed input). */
 export function metricSourceKeys(metric) {
   if (metric.key === "customIndex") return TOMER_SOURCE_KEYS;
   return metric.sourceYearKey ? [metric.sourceYearKey] : [];

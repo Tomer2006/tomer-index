@@ -7,10 +7,37 @@ const HOMICIDE_RATE_MAX = 60;
 const LE_MIN = 20;
 const LE_MAX = 85;
 
-/** Weighted geometric mean, ratio 4 : 4 : 1 — safety is 4× less influential than each of LEI and income. */
-const W_LEI = 4 / 9;
-const W_INCOME = 4 / 9;
-const W_SAFETY = 1 / 9;
+/** User-defined importance weights; sum to 1. */
+export const INDEX_WEIGHTS = Object.freeze({
+  abundance: 0.1,
+  safety: 0.3,
+  health: 0.4,
+  freedom: 0.2,
+});
+
+/** Weighted geometric mean of already-normalized pillar values. */
+export function customIndexFromPillarsFull({ abundance, safety, health, freedom }) {
+  return (
+    Math.pow(abundance, INDEX_WEIGHTS.abundance) *
+    Math.pow(safety, INDEX_WEIGHTS.safety) *
+    Math.pow(health, INDEX_WEIGHTS.health) *
+    Math.pow(freedom, INDEX_WEIGHTS.freedom)
+  );
+}
+
+/**
+ * Mid-rank empirical percentile in (0, 1), with ties receiving the same value.
+ * This is used to quantile-normalize pillars to a common distribution.
+ */
+export function midrankPercentile(value, sortedValues) {
+  if (!Number.isFinite(value) || !sortedValues?.length) return NaN;
+  let lo = 0;
+  while (lo < sortedValues.length && sortedValues[lo] < value) lo += 1;
+  let hi = lo;
+  while (hi < sortedValues.length && sortedValues[hi] === value) hi += 1;
+  if (hi > lo) return (lo + hi) / (2 * sortedValues.length);
+  return Math.max(0.5, Math.min(sortedValues.length - 0.5, lo + 0.5)) / sortedValues.length;
+}
 
 /**
  * Life Expectancy Index from years at birth (same formula as UNDP LEI for full lifespan).
@@ -40,51 +67,60 @@ export function safetyIndexFromHomicidesPer100k(homicidesPer100k) {
   return (HOMICIDE_RATE_MAX - h) / HOMICIDE_RATE_MAX;
 }
 
-/** Income pillar 0-1 from GNI per capita (PPP) using HDI log goalposts. */
+/** Abundance pillar 0-1 from GNI per capita (PPP) using HDI log goalposts. */
 export function incomeIndexFromGni(gniPerCapita) {
   const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
   return (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
 }
 
+/** Freedom pillar 0-1 from the HFI-derived Personal Freedom score (0-100). */
+export function freedomIndexFromScore(score) {
+  return Math.max(0, Math.min(Number(score), 100)) / 100;
+}
+
 /**
- * Same formula as `customIndexHealthIncomeSafety` but full float precision (no rounding).
+ * Full-precision four-pillar index for aggregation and charting.
  * Use when aggregating or charting a time series so small year-to-year moves are not lost.
  */
-export function customIndexHealthIncomeSafetyFull(
+export function customIndexAbundanceSafetyHealthFreedomFull(
   lifeExpectancy,
   gniPerCapita,
   homicidesPer100k,
-  healthyLifeExpectancy
+  healthyLifeExpectancy,
+  freedomScore
 ) {
-  const lei = combinedHealthLei(lifeExpectancy, healthyLifeExpectancy);
+  const health = combinedHealthLei(lifeExpectancy, healthyLifeExpectancy);
   const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
   const incomeIndex =
     (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
   const si = safetyIndexFromHomicidesPer100k(homicidesPer100k);
-  return (
-    Math.pow(lei, W_LEI) *
-    Math.pow(incomeIndex, W_INCOME) *
-    Math.pow(si, W_SAFETY)
-  );
+  const freedom = freedomIndexFromScore(freedomScore);
+  return customIndexFromPillarsFull({
+    abundance: incomeIndex,
+    safety: si,
+    health,
+    freedom,
+  });
 }
 
 /**
- * 3-pillar weighted geometric index: LEI_combined^(4/9) × Income^(4/9) × Safety^(1/9)
- * LEI_combined = ½·LEI(lifespan) + ½·LEI(HALE healthspan).
+ * Importance-weighted geometric index of abundance, safety, health, and freedom.
  */
-export function customIndexHealthIncomeSafety(
+export function customIndexAbundanceSafetyHealthFreedom(
   lifeExpectancy,
   gniPerCapita,
   homicidesPer100k,
-  healthyLifeExpectancy
+  healthyLifeExpectancy,
+  freedomScore
 ) {
   return (
     Math.round(
-      customIndexHealthIncomeSafetyFull(
+      customIndexAbundanceSafetyHealthFreedomFull(
         lifeExpectancy,
         gniPerCapita,
         homicidesPer100k,
-        healthyLifeExpectancy
+        healthyLifeExpectancy,
+        freedomScore
       ) * 1000
     ) / 1000
   );
@@ -269,18 +305,20 @@ export function adjustedHaleAsOfYear(
  * @param {Map<string, { year: number, value: number, name: string }>} homicideMap
  * @param {Map<string, { year: number, value: number, name: string }>} haleMap
  */
-export function mergeRows(leMap, gniMap, homicideMap, haleMap) {
+export function mergeRows(leMap, gniMap, homicideMap, haleMap, freedomMap) {
   const merged = [];
   for (const [iso, le] of leMap) {
     const gni = gniMap.get(iso);
     const hom = homicideMap.get(iso);
     const hale = haleMap.get(iso);
-    if (!gni || !hom || !hale) continue;
-    const score = customIndexHealthIncomeSafety(
+    const freedom = freedomMap.get(iso);
+    if (!gni || !hom || !hale || !freedom) continue;
+    const score = customIndexAbundanceSafetyHealthFreedom(
       le.value,
       gni.value,
       hom.value,
-      hale.value
+      hale.value,
+      freedom.value
     );
     merged.push({
       iso,
@@ -294,6 +332,8 @@ export function mergeRows(leMap, gniMap, homicideMap, haleMap) {
       incomeSource: gni.incomeSource,
       homicideYear: hom.year,
       homicidesPer100k: hom.value,
+      freedomYear: freedom.year,
+      freedom: freedom.value,
       customIndex: score,
     });
   }

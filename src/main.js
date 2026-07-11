@@ -23,6 +23,7 @@ import {
 const $status = document.getElementById("status");
 const $tbody = document.getElementById("tbody");
 const $globalChart = document.getElementById("global-series-chart");
+const $globalDefinition = document.getElementById("global-series-def");
 const $yearSlider = document.getElementById("year-slider");
 const $yearOutput = document.getElementById("year-output");
 const $searchInput = document.getElementById("search-input");
@@ -34,7 +35,7 @@ const $includeAggregates = document.getElementById("include-aggregates");
 const $qualityFilter = document.getElementById("quality-filter");
 const $cards = document.getElementById("leaderboard-cards");
 
-const COLS = 8;
+const COLS = 9;
 const TYPE_FILTERS = [
   { id: "country", name: "Country" },
   { id: "region", name: "Region" },
@@ -43,6 +44,7 @@ const TYPE_FILTERS = [
 ];
 
 function healthValue(r) {
+  if (Number.isFinite(r?.healthIndex)) return r.healthIndex;
   if (typeof r.le !== "number" || !Number.isFinite(r.le)) return NaN;
   if (typeof r.hale !== "number" || !Number.isFinite(r.hale)) return NaN;
   return combinedHealthLei(r.le, r.hale);
@@ -104,6 +106,8 @@ function sortValue(r, key) {
       return typeof r.homicidesPer100k === "number" && Number.isFinite(r.homicidesPer100k)
         ? r.homicidesPer100k
         : NaN;
+    case "freedom":
+      return typeof r.freedom === "number" && Number.isFinite(r.freedom) ? r.freedom : NaN;
     default:
       return NaN;
   }
@@ -167,6 +171,12 @@ function rowsForYear(year) {
       incomeSource: point.incomeSource,
       homicidesPer100k: point.homicidesPer100k,
       homicideYear: point.homicideYear,
+      freedom: point.freedom,
+      freedomYear: point.freedomYear,
+      abundanceIndex: point.abundanceIndex,
+      safetyIndex: point.safetyIndex,
+      healthIndex: point.healthIndex,
+      freedomIndex: point.freedomIndex,
       customIndex: point.customIndex,
       derivedKind: base.derivedKind,
       memberCount: base.memberCount,
@@ -308,6 +318,7 @@ function renderTable(rows) {
       <td>${metricCell(r, healthText, ["leYear", "haleYear"])}</td>
       <td>${metricCell(r, gniText, "gniYear")}</td>
       <td>${metricCell(r, fmtNum(r.homicidesPer100k, 1), "homicideYear")}</td>
+      <td>${metricCell(r, fmtNum(r.freedom, 1), "freedomYear")}</td>
       <td>${metricCell(r, formatTomer(idx), TOMER_SOURCE_KEYS)}</td>
     `;
     frag.appendChild(tr);
@@ -349,12 +360,13 @@ function renderCards(rows) {
             <div><dt>Life exp.</dt><dd>${metricCell(r, fmtNum(r.le, 1), "leYear")}</dd></div>
             <div><dt>HALE</dt><dd>${metricCell(r, fmtNum(r.hale, 1), "haleYear")}</dd></div>
             <div><dt>Health</dt><dd>${metricCell(r, healthText, ["leYear", "haleYear"])}</dd></div>
-            <div><dt>Income pc</dt><dd>${metricCell(r, gniText, "gniYear")}</dd></div>
+            <div><dt>Abundance</dt><dd>${metricCell(r, gniText, "gniYear")}</dd></div>
             <div><dt>Homicides</dt><dd>${metricCell(
               r,
               fmtNum(r.homicidesPer100k, 1),
               "homicideYear"
             )}</dd></div>
+            <div><dt>Freedom</dt><dd>${metricCell(r, fmtNum(r.freedom, 1), "freedomYear")}</dd></div>
           </dl>
         </article>
       `;
@@ -368,6 +380,7 @@ function globalSourceYearText(point) {
     [point.haleEstimated ? "HALE est." : "HALE", point.haleYear],
     [point.incomeSource === "GDP" ? "GDP" : "GNI", point.gniYear],
     ["Homicides", point.homicideYear],
+    ["Freedom", point.freedomYear],
   ]
     .filter(([label, year]) =>
       typeof year === "number" && (label === "GDP" || year !== point.year)
@@ -390,10 +403,6 @@ function renderGlobalAverageChart(container, series, highlightYear) {
 
   const yearLo = Math.min(...pts.map((p) => p.year));
   const yearHi = Math.max(...pts.map((p) => p.year));
-  const valLo = Math.min(...pts.map((p) => p.value));
-  const valHi = Math.max(...pts.map((p) => p.value));
-  const padV = (valHi - valLo) * 0.08 || 0.02;
-
   const { svg, xAt, yAt, innerW, innerH, padL, padT } = chartFrame({
     w: 880,
     h: 300,
@@ -401,8 +410,8 @@ function renderGlobalAverageChart(container, series, highlightYear) {
     padR: 28,
     padT: 20,
     padB: 48,
-    y0: valLo - padV,
-    y1: valHi + padV,
+    y0: 0,
+    y1: 1,
     yearLo,
     yearHi,
     yLabel: formatTomerAxis,
@@ -480,9 +489,14 @@ function renderGlobalAverageChart(container, series, highlightYear) {
     hoverDot.setAttribute("cx", String(x));
     hoverDot.setAttribute("cy", String(y));
     const source = globalSourceYearText(point);
+    const coverage =
+      Number.isFinite(point.n) && Number.isFinite(point.population)
+        ? `${point.n} countries · ${(point.population / 1e9).toFixed(2)}B people`
+        : "";
     tooltip.innerHTML = `
       <strong>${point.year}</strong>
       <span>Tomer index: ${formatTomer(point.value)}</span>
+      ${coverage ? `<small>${escapeHtml(coverage)}</small>` : ""}
       ${source ? `<small>${escapeHtml(source)}</small>` : ""}
     `;
     tooltip.hidden = false;
@@ -602,25 +616,29 @@ function syncUrl() {
   window.history.replaceState(null, "", next);
 }
 
-function computeRanks() {
-  const ranked = sortedRows(rowsForYear(state.year), "tomer", true);
+function computeRanks(ranked) {
   rankByIso = new Map();
   ranked.forEach((r, i) => {
-    if (Number.isFinite(sortValue(r, "tomer"))) rankByIso.set(r.iso, i + 1);
+    if (state.sortKey === "name" || Number.isFinite(sortValue(r, state.sortKey))) {
+      rankByIso.set(r.iso, i + 1);
+    }
   });
 }
 
 function refresh() {
   syncUrl();
-  computeRanks();
   const rows = getDisplayRows();
+  computeRanks(rows);
   updateHeaderSortUI();
   renderTable(rows);
   renderCards(rows);
   // The world chart only depends on the year, so skip
   // the SVG rebuild when a search/filter keystroke triggered the refresh.
   const chartKey = String(state.year);
-  if (chartKey !== lastChartKey) {
+  if ($globalChart && chartKey !== lastChartKey) {
+    if ($globalDefinition && payload?.globalAverageSeries?.definition) {
+      $globalDefinition.textContent = payload.globalAverageSeries.definition;
+    }
     renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
     lastChartKey = chartKey;
   }

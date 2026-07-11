@@ -1,16 +1,20 @@
 # Tomer index
 
 A static site that ranks every country (plus World Bank regions, income
-groups, and other aggregates) on an HDI-style composite of **health**,
-**income**, and **safety** for the years **2000–2024**.
+groups, and other aggregates) on four pillars: **abundance**, **safety**,
+**health**, and **freedom** for the years **2000–2024**.
 
 ```
 Health = ½·LEI(life expectancy) + ½·LEI(HALE)        LEI goalposts: 20–85 years
-Income = log-scaled GNI per capita (PPP), with GDP PPP fallback, $100–$75,000 goalposts
+Abundance = log-scaled GNI per capita (PPP), with GDP PPP fallback, $100–$75,000 goalposts
 Safety = (60 − homicides per 100k) / 60, clamped
+Freedom score = 10 × mean of HFI Personal Freedom categories except Security & Safety (0–100)
 
-Tomer  = Health^(4/9) · Income^(4/9) · Safety^(1/9)
+Tomer  = Health^0.40 · Safety^0.30 · Freedom^0.20 · Abundance^0.10
 ```
+
+Each base pillar is converted to its yearly mid-rank country percentile before
+the weighted geometric mean, giving every pillar the same empirical distribution.
 
 When WHO HALE is unavailable for a year, HALE is estimated from that year's
 life expectancy while preserving the latest reported `life expectancy - HALE`
@@ -22,7 +26,7 @@ See [methodology.html](methodology.html) for the full write-up and rationale.
 
 | Page | Purpose |
 | --- | --- |
-| `index.html` | Leaderboard with year slider, search, region/income/type filters, and the population-weighted world line |
+| `index.html` | Leaderboard with year slider, search, region/income/type filters, and a population-weighted fixed-cohort trend line |
 | `compare.html` | Side-by-side comparison (`?picks=USA,JPN,...` deep links), pillar bars, per-metric charts |
 | `map.html` | Choropleth world map with year slider, country search, and detail panel |
 | `entry.html` | Per-entry history charts (`?iso=XXX`) |

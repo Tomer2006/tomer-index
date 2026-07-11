@@ -5,6 +5,7 @@ const METRIC_LABELS = {
   haleYear: "HALE",
   gniYear: "GNI",
   homicideYear: "Homicides",
+  freedomYear: "Freedom",
 };
 
 function yearPart(row, key) {

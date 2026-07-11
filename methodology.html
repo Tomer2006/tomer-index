@@ -35,8 +35,9 @@
         <section class="prose">
           <h2>What the Tomer index measures</h2>
           <p>
-            The Tomer index is an HDI-style composite of <strong>health</strong>,
-            <strong>income</strong>, and <strong>safety</strong>. Each pillar is
+            The Tomer index combines the four things that make a country great:
+            <strong>abundance</strong>, <strong>safety</strong>, <strong>health</strong>,
+            and <strong>freedom</strong>. Each pillar is
             normalised to 0–1, then combined into a single weighted geometric mean.
             The default display rescales the result to 0–100 (toggleable to 0–10
             or 0–1 in the header).
@@ -64,7 +65,7 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
             <strong>HALE est.</strong> with the latest reported HALE source year.
           </p>
 
-          <h3>Income (GNI preferred, GDP fallback; log-scaled)</h3>
+          <h3>Abundance (GNI preferred, GDP fallback; log-scaled)</h3>
           <p>
             World Bank GNI per capita in 2021-PPP dollars is preferred for each
             country-year. When that annual GNI observation is unavailable, GDP
@@ -73,8 +74,8 @@ Health = ½·LEI(LE) + ½·LEI(HALE)</code></pre>
             same goalposts UNDP uses for HDI. Log scaling means each doubling of
             income adds a fixed amount, not a fixed fraction.
           </p>
-          <pre><code>Income value = GNI PPP if available, otherwise GDP PPP
-Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</code></pre>
+          <pre><code>Abundance value = GNI PPP if available, otherwise GDP PPP
+Abundance = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</code></pre>
 
           <h3>Safety (homicide-only inversion)</h3>
           <p>
@@ -86,18 +87,42 @@ Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</c
           </p>
           <pre><code>Safety = (60 − clamp(homicides, 0, 60)) / 60</code></pre>
 
+          <h3>Freedom (Human Freedom Index personal freedom)</h3>
+          <p>
+            Freedom is derived from the Personal Freedom sub-index of the Cato
+            Institute and Fraser Institute's Human Freedom Index 2025. It averages
+            rule of law, movement, religion, association, expression and
+            information, and relationships. The Security and Safety category is
+            deliberately excluded so it does not overlap the Safety pillar.
+          </p>
+          <pre><code>Freedom score = 10 × mean(Rule of law, Movement, Religion,
+                          Association, Expression, Relationships)
+Freedom pillar = Freedom score / 100</code></pre>
+
           <h2>Weights</h2>
           <p>
-            The three pillars are combined as a weighted geometric mean with
-            ratio <strong>4 : 4 : 1</strong> (health : income : safety). Safety
-            is intentionally less influential because the homicide proxy is
-            narrower than the other two pillars.
+            Before weighting, each pillar is converted to its yearly
+            <strong>mid-rank percentile</strong> among countries with complete
+            data. The worst and best observations sit just above 0 and just
+            below 1, and tied values share a percentile. This quantile
+            normalization gives all four pillars the same country distribution,
+            so their original units and statistical spread do not create hidden
+            sensitivity differences. Scores are relative to other countries in
+            the selected year, not absolute performance thresholds.
           </p>
-          <pre><code>Tomer = Health<sup>4/9</sup> · Income<sup>4/9</sup> · Safety<sup>1/9</sup></code></pre>
+          <p>
+            The four distinct dimensions are weighted by importance:
+            <strong>Health 40%</strong>, <strong>Safety 30%</strong>,
+            <strong>Freedom 20%</strong>, and <strong>Abundance 10%</strong>.
+          </p>
+          <pre><code>Tomer = Health<sup>0.40</sup> · Safety<sup>0.30</sup> · Freedom<sup>0.20</sup> · Abundance<sup>0.10</sup></code></pre>
           <p>
             Geometric (rather than arithmetic) means penalise imbalance: a
             country can't compensate for a near-zero pillar by excelling
-            elsewhere.
+            elsewhere. Because every pillar is normalised before combination,
+            raw units do not control the result. Approximately, a 1% relative
+            improvement in one pillar changes the final index by that pillar's
+            weight times 1%, holding the other pillars fixed.
           </p>
 
           <h2>Data sources</h2>
@@ -128,6 +153,11 @@ Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</c
             <li>
               <strong>Population</strong> (timeline weights) — World Bank
               <code>SP.POP.TOTL</code>.
+            </li>
+            <li>
+              <strong>Personal Freedom categories, excluding Security and Safety</strong>
+              — Human Freedom Index 2025, copublished by the Cato Institute and
+              Fraser Institute; rescaled from 0–10 to 0–100.
             </li>
             <li>
               <strong>Country / region / income / lending metadata</strong> — World
@@ -165,11 +195,26 @@ Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</c
             from country observations. They are not separate published series.
           </p>
 
+          <h2>Comparable trend chart</h2>
+          <p>
+            The headline trend uses a <strong>fixed cohort</strong>: only countries
+            with a complete index for every year from 2000 through 2024 are
+            included, and the same countries remain in the calculation throughout.
+            Population weights still change normally over time. This prevents a
+            country entering the dataset from creating a false rise or fall. The
+            chart states its cohort size and coverage and is not labeled as a
+            whole-world estimate.
+          </p>
+
           <h2>Limitations</h2>
           <ul>
             <li>
               Safety is homicide-only; countries with low homicide but high
               other-crime rates may be over-rated for "safety".
+            </li>
+            <li>
+              Freedom is a custom recombination of published HFI category scores,
+              not the HFI's published Personal Freedom headline score.
             </li>
             <li>
               Both income series use constant 2021 PPP, so cross-year movement
@@ -179,8 +224,8 @@ Income = (ln(clamp(value, 100, 75000)) − ln(100)) / (ln(75000) − ln(100))</c
             </li>
             <li>
               The Tomer index is not endorsed by UNDP, the World Bank, or WHO.
-              It's a personal composite that mirrors HDI's structure with
-              safety added.
+              It's a personal composite built around abundance, safety, health,
+              and freedom.
             </li>
           </ul>
         </section>

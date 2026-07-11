@@ -6,8 +6,11 @@ import {
   combinedHealthLei,
   safetyIndexFromHomicidesPer100k,
   incomeIndexFromGni,
-  customIndexHealthIncomeSafety,
-  customIndexHealthIncomeSafetyFull,
+  freedomIndexFromScore,
+  customIndexAbundanceSafetyHealthFreedom,
+  customIndexAbundanceSafetyHealthFreedomFull,
+  INDEX_WEIGHTS,
+  midrankPercentile,
   incomeRowsWithGdpFallback,
   latestByCountry,
   byCountryYear,
@@ -83,7 +86,20 @@ test("income index uses HDI log goalposts $100–$75,000 and clamps", () => {
   closeTo(step, step2);
 });
 
-test("index is the 4:4:1 weighted geometric mean of the pillars", () => {
+test("freedom index maps the 0-100 personal-freedom score to 0-1 and clamps", () => {
+  assert.equal(freedomIndexFromScore(0), 0);
+  assert.equal(freedomIndexFromScore(50), 0.5);
+  assert.equal(freedomIndexFromScore(100), 1);
+  assert.equal(freedomIndexFromScore(120), 1);
+});
+
+test("midrank percentiles equalize a distribution and preserve ties", () => {
+  assert.equal(midrankPercentile(1, [1, 2, 3, 4]), 0.125);
+  assert.equal(midrankPercentile(4, [1, 2, 3, 4]), 0.875);
+  assert.equal(midrankPercentile(2, [1, 2, 2, 4]), 0.5);
+});
+
+test("index uses the declared 40/30/20/10 dimension weights", () => {
   const le = 80;
   const hale = 70;
   const gni = 40000;
@@ -91,19 +107,24 @@ test("index is the 4:4:1 weighted geometric mean of the pillars", () => {
   const health = combinedHealthLei(le, hale);
   const income = incomeIndexFromGni(gni);
   const safety = safetyIndexFromHomicidesPer100k(hom);
+  const freedom = 0.8;
   const expected =
-    Math.pow(health, 4 / 9) * Math.pow(income, 4 / 9) * Math.pow(safety, 1 / 9);
-  closeTo(customIndexHealthIncomeSafetyFull(le, gni, hom, hale), expected);
+    Math.pow(income, INDEX_WEIGHTS.abundance) *
+    Math.pow(safety, INDEX_WEIGHTS.safety) *
+    Math.pow(health, INDEX_WEIGHTS.health) *
+    Math.pow(freedom, INDEX_WEIGHTS.freedom);
+  assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, hom, hale, 80), expected);
 });
 
 test("homicide rates at or above 60/100k collapse the index to 0", () => {
-  assert.equal(customIndexHealthIncomeSafetyFull(80, 40000, 60, 70), 0);
-  assert.equal(customIndexHealthIncomeSafety(80, 40000, 75, 70), 0);
+  assert.equal(customIndexAbundanceSafetyHealthFreedomFull(80, 40000, 60, 70, 80), 0);
+  assert.equal(customIndexAbundanceSafetyHealthFreedom(80, 40000, 75, 70, 80), 0);
 });
 
-test("customIndexHealthIncomeSafety rounds to 3 decimals, Full does not", () => {
-  const full = customIndexHealthIncomeSafetyFull(80, 40000, 2, 70);
-  const rounded = customIndexHealthIncomeSafety(80, 40000, 2, 70);
+test("four-pillar index rounds to 3 decimals, Full does not", () => {
+  const full = customIndexAbundanceSafetyHealthFreedomFull(80, 40000, 2, 70, 80);
+  const rounded = customIndexAbundanceSafetyHealthFreedom(80, 40000, 2, 70, 80);
   assert.equal(rounded, Math.round(full * 1000) / 1000);
 });
 
@@ -165,7 +186,7 @@ test("adjustedHaleAsOfYear preserves the latest reported unhealthy-life gap", ()
   });
 });
 
-test("mergeRows requires all four inputs and sorts by index descending", () => {
+test("mergeRows requires every metric and sorts by index descending", () => {
   const le = new Map([
     ["AAA", { year: 2023, value: 84, name: "Alpha" }],
     ["BBB", { year: 2023, value: 60, name: "Beta" }],
@@ -186,7 +207,12 @@ test("mergeRows requires all four inputs and sorts by index descending", () => {
     ["BBB", { year: 2021, value: 52, name: "Beta" }],
     ["CCC", { year: 2021, value: 70, name: "Gamma" }],
   ]);
-  const merged = mergeRows(le, gni, hom, hale);
+  const freedom = new Map([
+    ["AAA", { year: 2023, value: 95, name: "Alpha" }],
+    ["BBB", { year: 2023, value: 40, name: "Beta" }],
+    ["CCC", { year: 2023, value: 80, name: "Gamma" }],
+  ]);
+  const merged = mergeRows(le, gni, hom, hale, freedom);
   assert.deepEqual(
     merged.map((r) => r.iso),
     ["AAA", "BBB"]

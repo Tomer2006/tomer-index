@@ -4,7 +4,7 @@
  * pretty-printed archive payload (data-archive/countries.json, not shipped).
  * Run: npm run build-data (needs network once; commit the JSON for offline builds).
  */
-import { writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -15,8 +15,15 @@ import {
   incomeRowsWithGdpFallback,
   haleHistoryByIso,
   adjustedHaleAsOfYear,
-  customIndexHealthIncomeSafety,
-  customIndexHealthIncomeSafetyFull,
+  customIndexAbundanceSafetyHealthFreedom,
+  customIndexAbundanceSafetyHealthFreedomFull,
+  customIndexFromPillarsFull,
+  midrankPercentile,
+  combinedHealthLei,
+  incomeIndexFromGni,
+  safetyIndexFromHomicidesPer100k,
+  freedomIndexFromScore,
+  INDEX_WEIGHTS,
 } from "../src/hdi-core.js";
 import { dataQualityForSeries } from "../src/data-quality.js";
 import { YEAR_MAX, YEAR_MIN } from "../src/site-years.js";
@@ -38,6 +45,18 @@ const WB_HOMICIDE = "VC.IHR.PSRC.P5";
 /** Total population — weights the global time series. */
 const WB_POP = "SP.POP.TOTL";
 const WB_PER_PAGE = "500";
+
+/** Cato/Fraser Human Freedom Index 2025, column-oriented JSON. */
+const HFI_URL =
+  "https://www.cato.org/sites/cato.org/files/human-freedom-index-files/2025-human-freedom-index.json";
+const HFI_FREEDOM_COMPONENTS = [
+  "pf_rol",
+  "pf_movement",
+  "pf_religion",
+  "pf_assembly",
+  "pf_expression",
+  "pf_identity",
+];
 
 /** WHO GHO: Healthy life expectancy (HALE) at birth, both sexes. This is the only non-World Bank source. */
 const WHO_HALE_URL = "https://ghoapi.azureedge.net/api/WHOSIS_000002";
@@ -105,6 +124,79 @@ const WORLD_BANK_INPUTS = {
   },
 };
 
+async function fetchHfiPersonalFreedom() {
+  let data;
+  try {
+    const res = await fetch(HFI_URL);
+    if (!res.ok) throw new Error(`Human Freedom Index request failed (${res.status})`);
+    const text = await res.text();
+    data = JSON.parse(text);
+  } catch (error) {
+    try {
+      const cached = JSON.parse(await readFile(SERIES_OUT, "utf8"));
+      const rows = [];
+      for (const [iso, series] of Object.entries(cached.entrySeries ?? {})) {
+        if (!/^[A-Z]{3}$/.test(iso)) continue;
+        for (const point of series.points ?? []) {
+          if (
+            point.freedomYear === point.year &&
+            Number.isFinite(point.freedom) &&
+            point.year >= YEAR_MIN &&
+            point.year <= YEAR_MAX
+          ) {
+            rows.push({
+              countryiso3code: iso,
+              date: String(point.year),
+              value: point.freedom,
+              country: { value: iso },
+            });
+          }
+        }
+      }
+      if (!rows.length) throw error;
+      console.warn(
+        `Human Freedom Index download unavailable; using ${rows.length} cached observations.`
+      );
+      return rows;
+    } catch {
+      throw error;
+    }
+  }
+  const rows = [];
+  for (const key of Object.keys(data.year ?? {})) {
+    const year = Number(data.year[key]);
+    const iso = data.iso?.[key];
+    // Respect the HFI's own coverage decision: JSON null must remain missing,
+    // never become Number(null) === 0.
+    if (data.pf_score?.[key] == null) continue;
+    const components = HFI_FREEDOM_COMPONENTS
+      .map((field) => data[field]?.[key])
+      .filter((value) => value != null)
+      .map(Number)
+      .filter(Number.isFinite);
+    if (components.length < 5) continue;
+    const value =
+      (components.reduce((sum, component) => sum + component, 0) / components.length) * 10;
+    if (
+      !Number.isInteger(year) ||
+      year < YEAR_MIN ||
+      year > YEAR_MAX ||
+      typeof iso !== "string" ||
+      !/^[A-Z]{3}$/.test(iso) ||
+      !Number.isFinite(value)
+    ) {
+      continue;
+    }
+    rows.push({
+      countryiso3code: iso,
+      date: String(year),
+      value,
+      country: { value: data.countries?.[key] ?? iso },
+    });
+  }
+  return rows;
+}
+
 function yearWindowFromRange(range) {
   const m = /^(\d{4}):(\d{4})$/.exec(range.trim());
   if (!m) throw new Error(`Invalid DATE_RANGE: ${range}`);
@@ -131,6 +223,7 @@ function worldAggregateTomerSeries(
   leByCY,
   gniByCY,
   homByCY,
+  freedomByCY,
   popByCY,
   haleWldMap,
   yearMin,
@@ -139,22 +232,25 @@ function worldAggregateTomerSeries(
   const leM = leByCY.get(WB_WLD);
   const gniM = gniByCY.get(WB_WLD);
   const homM = homByCY.get(WB_WLD);
+  const freedomM = freedomByCY.get(WB_WLD);
   const popM = popByCY.get(WB_WLD);
   const points = [];
   for (let y = yearMin; y <= yearMax; y++) {
     const leY = observationAsOfYear(leM, y, yearMin);
     const gniY = observationAsOfYear(gniM, y, yearMin);
     const homY = observationAsOfYear(homM, y, yearMin);
+    const freedomY = observationAsOfYear(freedomM, y, yearMin);
     const popY = observationAsOfYear(popM, y, yearMin);
     const hale = adjustedHaleAsOfYear(haleWldMap, WB_WLD, y, leM, yearMin);
-    if (!leY || !gniY || !homY || !hale || !popY) continue;
+    if (!leY || !gniY || !homY || !freedomY || !hale || !popY) continue;
     const p = popY.value;
     if (typeof p !== "number" || !Number.isFinite(p) || p <= 0) continue;
-    const idx = customIndexHealthIncomeSafetyFull(
+    const idx = customIndexAbundanceSafetyHealthFreedomFull(
       leY.value,
       gniY.value,
       homY.value,
-      hale.value
+      hale.value,
+      freedomY.value
     );
     points.push({
       year: y,
@@ -165,6 +261,8 @@ function worldAggregateTomerSeries(
       gniYear: gniY.year,
       incomeSource: gniY.incomeSource,
       homicideYear: homY.year,
+      freedomYear: freedomY.year,
+      freedom: rounded(freedomY.value, 2),
       populationYear: popY.year,
       n: 1,
       population: Math.round(p),
@@ -211,7 +309,7 @@ async function fetchHaleWldMapFromGlobalWho() {
   return m;
 }
 
-async function fetchAllPages(indicator, dateRange = DATE_RANGE) {
+async function fetchAllPages(indicator, dateRange = DATE_RANGE, source = null) {
   const out = [];
   let page = 1;
   for (;;) {
@@ -222,6 +320,7 @@ async function fetchAllPages(indicator, dateRange = DATE_RANGE) {
     url.searchParams.set("date", dateRange);
     url.searchParams.set("per_page", WB_PER_PAGE);
     url.searchParams.set("page", String(page));
+    if (source) url.searchParams.set("source", source);
 
     const json = await fetchWorldBankJson(url.toString(), indicator);
     const [meta, data] = json;
@@ -267,7 +366,7 @@ async function fetchAllWorldBankInputs() {
   const entries = await Promise.all(
     Object.entries(WORLD_BANK_INPUTS).map(async ([key, spec]) => {
       console.log("Fetching", spec.indicator, "...");
-      const rows = await fetchAllPages(spec.indicator, spec.dateRange);
+      const rows = await fetchAllPages(spec.indicator, spec.dateRange, spec.source);
       return [key, { ...spec, rows }];
     })
   );
@@ -469,6 +568,7 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
         hale: 0,
         gni: 0,
         hom: 0,
+        freedom: 0,
         members: 0,
         gniMembers: 0,
         gdpMembers: 0,
@@ -480,6 +580,7 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
     bucket.hale += row.hale * pop;
     bucket.gni += row.gni * pop;
     bucket.hom += row.homicidesPer100k * pop;
+    bucket.freedom += row.freedom * pop;
     bucket.members += 1;
     if (row.incomeSource === "GDP") bucket.gdpMembers += 1;
     else bucket.gniMembers += 1;
@@ -499,6 +600,7 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
     const hale = bucket.hale / bucket.pop;
     const gni = bucket.gni / bucket.pop;
     const homicidesPer100k = bucket.hom / bucket.pop;
+    const freedom = bucket.freedom / bucket.pop;
     out.push({
       iso: bucket.iso,
       name: bucket.name,
@@ -516,9 +618,17 @@ function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
             : "GNI",
       homicideYear: "mixed",
       homicidesPer100k,
+      freedomYear: "mixed",
+      freedom,
       derivedKind: bucket.kind,
       memberCount: bucket.members,
-      customIndex: customIndexHealthIncomeSafety(le, gni, homicidesPer100k, hale),
+      customIndex: customIndexAbundanceSafetyHealthFreedom(
+        le,
+        gni,
+        homicidesPer100k,
+        hale,
+        freedom
+      ),
     });
   }
   out.sort((a, b) => b.customIndex - a.customIndex);
@@ -551,10 +661,132 @@ function annualRange(yearMin, yearMax) {
   return out;
 }
 
-function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory, yearMin, yearMax) {
+function rawPillarValues(point) {
+  if (
+    !Number.isFinite(point?.le) ||
+    !Number.isFinite(point?.hale) ||
+    !Number.isFinite(point?.gni) ||
+    !Number.isFinite(point?.homicidesPer100k) ||
+    !Number.isFinite(point?.freedom)
+  ) {
+    return null;
+  }
+  return {
+    abundance: incomeIndexFromGni(point.gni),
+    safety: safetyIndexFromHomicidesPer100k(point.homicidesPer100k),
+    health: combinedHealthLei(point.le, point.hale),
+    freedom: freedomIndexFromScore(point.freedom),
+  };
+}
+
+function applyPercentilePillars(point, scales) {
+  const raw = rawPillarValues(point);
+  if (!raw || !scales) return false;
+  point.abundanceIndex = rounded(midrankPercentile(raw.abundance, scales.abundance), 6);
+  point.safetyIndex = rounded(midrankPercentile(raw.safety, scales.safety), 6);
+  point.healthIndex = rounded(midrankPercentile(raw.health, scales.health), 6);
+  point.freedomIndex = rounded(midrankPercentile(raw.freedom, scales.freedom), 6);
+  point.customIndex = rounded(
+    customIndexFromPillarsFull({
+      abundance: point.abundanceIndex,
+      safety: point.safetyIndex,
+      health: point.healthIndex,
+      freedom: point.freedomIndex,
+    }),
+    4
+  );
+  return true;
+}
+
+function equalizeCountryPillarDistributions(entrySeries, countryIsos, yearMin, yearMax) {
+  const scalesByYear = new Map();
+  for (const year of annualRange(yearMin, yearMax)) {
+    const records = [];
+    for (const iso of countryIsos) {
+      const point = entrySeries[iso]?.points?.find((candidate) => candidate.year === year);
+      const raw = rawPillarValues(point);
+      if (raw) records.push({ point, raw });
+    }
+    const scales = {
+      abundance: records.map((record) => record.raw.abundance).sort((a, b) => a - b),
+      safety: records.map((record) => record.raw.safety).sort((a, b) => a - b),
+      health: records.map((record) => record.raw.health).sort((a, b) => a - b),
+      freedom: records.map((record) => record.raw.freedom).sort((a, b) => a - b),
+    };
+    scalesByYear.set(year, scales);
+    for (const { point } of records) applyPercentilePillars(point, scales);
+  }
+  return scalesByYear;
+}
+
+function equalizeDerivedPillarDistributions(derivedSeries, scalesByYear) {
+  for (const series of derivedSeries.values()) {
+    for (const point of series.points) {
+      applyPercentilePillars(point, scalesByYear.get(point.year));
+    }
+  }
+}
+
+function buildFixedCohortSeries(entrySeries, countryRows, scalesByYear, yearMin, yearMax) {
+  const years = annualRange(yearMin, yearMax);
+  const pointByIsoYear = new Map();
+  const cohort = countryRows
+    .map((row) => row.iso)
+    .filter((iso) => {
+      const byYear = new Map(
+        (entrySeries[iso]?.points ?? []).map((point) => [point.year, point])
+      );
+      pointByIsoYear.set(iso, byYear);
+      return years.every((year) => {
+        const point = byYear.get(year);
+        return (
+          Number.isFinite(point?.customIndex) &&
+          Number.isFinite(point?.population) &&
+          point.population > 0
+        );
+      });
+    });
+
+  const points = years.map((year) => {
+    const totals = { pop: 0, le: 0, hale: 0, gni: 0, hom: 0, freedom: 0 };
+    for (const iso of cohort) {
+      const point = pointByIsoYear.get(iso).get(year);
+      const pop = point.population;
+      totals.pop += pop;
+      totals.le += point.le * pop;
+      totals.hale += point.hale * pop;
+      totals.gni += point.gni * pop;
+      totals.hom += point.homicidesPer100k * pop;
+      totals.freedom += point.freedom * pop;
+    }
+    const le = totals.le / totals.pop;
+    const hale = totals.hale / totals.pop;
+    const gni = totals.gni / totals.pop;
+    const homicidesPer100k = totals.hom / totals.pop;
+    const freedom = totals.freedom / totals.pop;
+    const point = {
+      year,
+      le: rounded(le, 2),
+      hale: rounded(hale, 2),
+      gni: rounded(gni, 2),
+      homicidesPer100k: rounded(homicidesPer100k, 3),
+      freedom: rounded(freedom, 2),
+      population: Math.round(totals.pop),
+      n: cohort.length,
+    };
+    applyPercentilePillars(point, scalesByYear.get(year));
+    point.value = point.customIndex;
+    return point;
+  });
+
+  return { cohort, points };
+}
+
+function buildCountrySeries(iso, leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, yearMin, yearMax) {
   const leM = leByCY.get(iso);
   const gniM = gniByCY.get(iso);
   const homM = homByCY.get(iso);
+  const freedomM = freedomByCY.get(iso);
   const popM = popByCY.get(iso);
   const years = annualRange(yearMin, yearMax);
   const points = [];
@@ -563,6 +795,7 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
     const leY = observationAsOfYear(leM, y, yearMin);
     const gniY = observationAsOfYear(gniM, y, yearMin);
     const homY = observationAsOfYear(homM, y, yearMin);
+    const freedomY = observationAsOfYear(freedomM, y, yearMin);
     const popY = observationAsOfYear(popM, y, yearMin);
     const hale = adjustedHaleAsOfYear(haleHistory, iso, y, leM, yearMin);
     const point = { year: y };
@@ -585,17 +818,22 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
       point.homicidesPer100k = rounded(homY.value, 3);
       point.homicideYear = homY.year;
     }
+    if (freedomY) {
+      point.freedom = rounded(freedomY.value, 2);
+      point.freedomYear = freedomY.year;
+    }
     const pop = popY?.value;
     if (typeof pop === "number" && Number.isFinite(pop) && pop > 0) {
       point.population = Math.round(pop);
     }
 
-    if (leY && gniY && homY && hale) {
-      const idx = customIndexHealthIncomeSafetyFull(
+    if (leY && gniY && homY && freedomY && hale) {
+      const idx = customIndexAbundanceSafetyHealthFreedomFull(
         leY.value,
         gniY.value,
         homY.value,
-        hale.value
+        hale.value,
+        freedomY.value
       );
       point.customIndex = rounded(idx, 4);
     }
@@ -605,6 +843,7 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, popByCY, haleHistory,
       Number.isFinite(point.hale) ||
       Number.isFinite(point.gni) ||
       Number.isFinite(point.homicidesPer100k) ||
+      Number.isFinite(point.freedom) ||
       Number.isFinite(point.customIndex);
     if (hasMetric) points.push(point);
   }
@@ -624,6 +863,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
       hale: 0,
       gni: 0,
       hom: 0,
+      freedom: 0,
       members: 0,
       gniMembers: 0,
       gdpMembers: 0,
@@ -636,13 +876,14 @@ function addWeightedYearBucket(buckets, def, values, pop) {
   bucket.hale += values.hale * pop;
   bucket.gni += values.gni * pop;
   bucket.hom += values.hom * pop;
+  bucket.freedom += values.freedom * pop;
   bucket.members += 1;
   if (values.incomeSource === "GDP") bucket.gdpMembers += 1;
   else bucket.gniMembers += 1;
   if (values.haleEstimated) bucket.estimatedHaleMembers += 1;
 }
 
-function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
+function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
   const byIso = new Map();
   const years = annualRange(yearMin, yearMax);
 
@@ -652,6 +893,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       const leY = observationAsOfYear(leByCY.get(iso), y, yearMin);
       const gniY = observationAsOfYear(gniByCY.get(iso), y, yearMin);
       const homY = observationAsOfYear(homByCY.get(iso), y, yearMin);
+      const freedomY = observationAsOfYear(freedomByCY.get(iso), y, yearMin);
       const popY = observationAsOfYear(popByCY.get(iso), y, yearMin);
       const hale = adjustedHaleAsOfYear(
         haleHistory,
@@ -661,7 +903,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
         yearMin
       );
       const pop = popY?.value;
-      if (!leY || !gniY || !homY || !hale) continue;
+      if (!leY || !gniY || !homY || !freedomY || !hale) continue;
       if (typeof pop !== "number" || !Number.isFinite(pop) || pop <= 0) continue;
 
       const values = {
@@ -671,6 +913,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
         gni: gniY.value,
         incomeSource: gniY.incomeSource,
         hom: homY.value,
+        freedom: freedomY.value,
       };
       for (const def of groupDefsForCountry(meta)) {
         addWeightedYearBucket(buckets, def, values, pop);
@@ -683,7 +926,14 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
       const hale = bucket.hale / bucket.pop;
       const gni = bucket.gni / bucket.pop;
       const homicidesPer100k = bucket.hom / bucket.pop;
-      const idx = customIndexHealthIncomeSafetyFull(le, gni, homicidesPer100k, hale);
+      const freedom = bucket.freedom / bucket.pop;
+      const idx = customIndexAbundanceSafetyHealthFreedomFull(
+        le,
+        gni,
+        homicidesPer100k,
+        hale,
+        freedom
+      );
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
@@ -704,6 +954,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, popByCY, haleHistory,
               ? "GDP"
               : "GNI",
         homicidesPer100k: rounded(homicidesPer100k, 3),
+        freedom: rounded(freedom, 2),
         customIndex: rounded(idx, 4),
         population: Math.round(bucket.pop),
         n: bucket.members,
@@ -749,6 +1000,12 @@ function rowsForDisplayYear(rows, entrySeries, displayYear) {
         incomeSource: point.incomeSource ?? row.incomeSource,
         homicidesPer100k: point.homicidesPer100k,
         homicideYear: point.homicideYear ?? row.homicideYear,
+        freedom: point.freedom,
+        freedomYear: point.freedomYear ?? row.freedomYear,
+        abundanceIndex: point.abundanceIndex,
+        safetyIndex: point.safetyIndex,
+        healthIndex: point.healthIndex,
+        freedomIndex: point.freedomIndex,
         population: point.population ?? row.population,
         customIndex: point.customIndex,
       };
@@ -764,6 +1021,8 @@ async function main() {
   const gdpRows = worldBankData.gdpPerCapita.rows;
   const incomeRows = incomeRowsWithGdpFallback(gniRows, gdpRows);
   const homRows = worldBankData.intentionalHomicidesPer100k.rows;
+  console.log("Fetching Human Freedom Index personal-freedom scores …");
+  const freedomRows = await fetchHfiPersonalFreedom();
   const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
   // Same cap as the WDI fetch: drop observations past the display window at the
@@ -772,14 +1031,12 @@ async function main() {
     const y = typeof r.TimeDim === "number" ? r.TimeDim : parseInt(String(r.TimeDim), 10);
     return Number.isFinite(y) && y <= SERIES_YEAR_MAX;
   });
-  console.log("Fetching WHO global HALE (GLOBAL / SEX_BTSX) for WLD time series …");
-  const haleWldMap = await fetchHaleWldMapFromGlobalWho();
-
   const leMap = latestByCountry(leRows);
   const gniMap = latestByCountry(incomeRows);
   const homicideMap = latestByCountry(homRows);
+  const freedomMap = latestByCountry(freedomRows);
   const haleMap = latestHaleByIso(haleRows);
-  const countryRows = mergeRows(leMap, gniMap, homicideMap, haleMap);
+  const countryRows = mergeRows(leMap, gniMap, homicideMap, haleMap, freedomMap);
   for (const row of countryRows) {
     const meta = countryMeta.get(row.iso);
     if (!meta) continue;
@@ -798,19 +1055,12 @@ async function main() {
   const leByCY = byCountryYear(leRows);
   const gniByCY = byCountryYear(incomeRows);
   const homByCY = byCountryYear(homRows);
+  const freedomByCY = byCountryYear(freedomRows);
   const popByCY = byCountryYear(popRows);
   const haleHistory = haleHistoryByIso(haleRows);
   const seriesYearMin = Math.max(yearMin, SERIES_YEAR_MIN);
   const seriesYearMax = Math.min(yearMax, SERIES_YEAR_MAX);
-  const worldSeries = worldAggregateTomerSeries(
-    leByCY,
-    gniByCY,
-    homByCY,
-    popByCY,
-    haleWldMap,
-    seriesYearMin,
-    seriesYearMax
-  );
+  let worldSeries = [];
   const entrySeries = {};
   for (const row of countryRows) {
     const points = buildCountrySeries(
@@ -818,6 +1068,7 @@ async function main() {
       leByCY,
       gniByCY,
       homByCY,
+      freedomByCY,
       popByCY,
       haleHistory,
       seriesYearMin,
@@ -826,23 +1077,40 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, and population; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all index inputs are available as of that year. Future observations are not pulled backward.`,
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, with GDP fallback), safety (intentional homicides/100k), life expectancy, and population; WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
   }
-  for (const [iso, series] of buildDerivedGroupSeries(
+  const percentileScalesByYear = equalizeCountryPillarDistributions(
+    entrySeries,
+    countryRows.map((row) => row.iso),
+    seriesYearMin,
+    seriesYearMax
+  );
+  const derivedSeries = buildDerivedGroupSeries(
     leByCY,
     gniByCY,
     homByCY,
+    freedomByCY,
     popByCY,
     haleHistory,
     countryMeta,
     seriesYearMin,
     seriesYearMax
-  )) {
+  );
+  equalizeDerivedPillarDistributions(derivedSeries, percentileScalesByYear);
+  for (const [iso, series] of derivedSeries) {
     if (series.points.length) entrySeries[iso] = series;
   }
+  const fixedCohort = buildFixedCohortSeries(
+    entrySeries,
+    countryRows,
+    percentileScalesByYear,
+    seriesYearMin,
+    seriesYearMax
+  );
+  worldSeries = fixedCohort.points;
   const countries = rowsForDisplayYear(latestCountries, entrySeries, SERIES_YEAR_MAX);
   const firstP = worldSeries[0];
   const lastP = worldSeries[worldSeries.length - 1];
@@ -851,7 +1119,7 @@ async function main() {
     firstP && lastP
       ? `${firstP.year} ${fmt4(firstP.value)} → ${lastP.year} ${fmt4(
           lastP.value
-        )}. World Bank WLD: life expectancy, GNI per capita (PPP), GDP per capita (PPP) only when annual GNI is missing, intentional homicides/100k, and population. WHO GHO: global healthy life expectancy (HALE) at birth, both sexes. Missing HALE years are adjusted by life-expectancy movement; other missing inputs use the latest prior value from ${SERIES_YEAR_MIN} onward. Pop. = WLD world total.`
+        )}. Fixed cohort of ${fixedCohort.cohort.length} countries present in every year; population-weighted within that cohort. Coverage grows from ${Math.round(firstP.population / 1e6)}M to ${Math.round(lastP.population / 1e6)}M people.`
       : "";
 
   const payload = {
@@ -864,25 +1132,35 @@ async function main() {
       gniPerCapita: WB_GNI,
       gdpPerCapitaFallback: WB_GDP,
       intentionalHomicidesPer100k: WB_HOMICIDE,
+      freedomPersonalFreedomSubIndex:
+        "Human Freedom Index 2025 Personal Freedom components excluding Security and Safety, rescaled to 0-100",
       population: WB_POP,
     },
     sourcePolicy: {
       worldBank:
-        "All non-HALE inputs come from World Bank: life expectancy, GNI per capita (PPP), GDP per capita (PPP) only as an annual fallback when GNI is missing, intentional homicides/100k, population, and country/group metadata.",
+        "World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) only as an annual fallback when GNI is missing, intentional homicides/100k, population, and country/group metadata.",
       whoGho:
         "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes. Missing annual HALE values are estimated by preserving the latest reported life-expectancy-minus-HALE gap and applying it to current life expectancy.",
+      humanFreedomIndex:
+        "Freedom is derived from the Cato Institute and Fraser Institute Human Freedom Index 2025 Personal Freedom categories, excluding Security and Safety to keep it distinct from the tracker’s Safety pillar.",
     },
     derivedRows:
-      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for all non-HALE metrics and WHO GHO for HALE only. GNI per capita (PPP) is preferred for income; GDP per capita (PPP) is substituted only for country-years without GNI. Added group types: World, regions, admin regions, income levels, lending types, plus Low & middle income, Middle income, IDA total, and IDA & IBRD total.",
+      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, safety, life expectancy, and population; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is preferred for abundance; GDP per capita (PPP) is substituted only for country-years without GNI.",
     healthPillar:
       "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
     safetyNote:
       "Safety uses intentional homicides/100k only (comparable worldwide). Theft, assault, and sexual violence are not mixed in because definitions and reporting differ by country.",
-    indexWeights: { lei: 4 / 9, income: 4 / 9, safety: 1 / 9 },
+    freedomNote:
+      "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
+    pillarNormalization:
+      "For each year, every base pillar is transformed to its mid-rank empirical percentile among countries with complete data. This quantile-normalizes the four country distributions before weighting.",
+    indexWeights: INDEX_WEIGHTS,
     globalAverageSeries: {
       definition:
-        `Worldwide published timeline, not a sample of individual countries. Each plotted year from ${SERIES_RANGE_LABEL} uses observations available as of that year within the ${SERIES_RANGE_LABEL} window: World Bank WLD (World) for SP.DYN.LE00.IN, NY.GNP.PCAP.PP.KD, NY.GDP.PCAP.PP.KD only when annual GNI is missing, VC.IHR.PSRC.P5, and SP.POP.TOTL, plus WHO GHO global HALE (WHOSIS_000002, GLOBAL, both sexes). Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward is used.`,
-      chartTitle: "Worldwide aggregate (WLD + global HALE)",
+        `Comparable fixed-cohort trend: the same ${fixedCohort.cohort.length} countries are included in every year from ${SERIES_RANGE_LABEL}, weighted by their population in each year. This avoids false jumps when countries enter the dataset. It covers ${Math.round(firstP.population / 1e6)} million people in ${firstP.year} and ${Math.round(lastP.population / 1e6)} million in ${lastP.year}; it is not a whole-world estimate.`,
+      chartTitle: "Fixed-cohort Tomer index trend",
+      cohortSize: fixedCohort.cohort.length,
+      cohortIso: fixedCohort.cohort,
       footNote,
       points: worldSeries,
     },
@@ -903,6 +1181,8 @@ async function main() {
     derivedRows: payload.derivedRows,
     healthPillar: payload.healthPillar,
     safetyNote: payload.safetyNote,
+    freedomNote: payload.freedomNote,
+    pillarNormalization: payload.pillarNormalization,
     indexWeights: payload.indexWeights,
     globalAverageSeries: payload.globalAverageSeries,
     qualityByIso,

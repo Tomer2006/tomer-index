@@ -16,9 +16,14 @@ const $yearOut = document.getElementById("map-year-output");
 const $detail = document.getElementById("map-detail");
 const $search = document.getElementById("map-search");
 const $searchList = document.getElementById("map-search-list");
+const $weightInputs = [...document.querySelectorAll("[data-map-weight]")];
+const $weightOutputs = [...document.querySelectorAll("[data-weight-output]")];
+const $weightNote = document.getElementById("map-weight-note");
+const $weightReset = document.getElementById("map-weight-reset");
 
 const W = 960;
 const H = 500;
+const DEFAULT_WEIGHTS = Object.freeze({ health: 40, safety: 30, freedom: 20, abundance: 10 });
 
 // A perceptually ordered Plasma palette. Discrete bands are easier to compare
 // across small neighboring countries than nearly identical continuous shades.
@@ -52,7 +57,48 @@ const state = {
   domainMax: 1,
   colorBreaks: [],
   selectedIso: "",
+  weights: { ...DEFAULT_WEIGHTS },
 };
+
+function normalizedWeights() {
+  const total = Object.values(state.weights).reduce((sum, value) => sum + value, 0);
+  const source = total > 0 ? state.weights : DEFAULT_WEIGHTS;
+  const denominator = total > 0
+    ? total
+    : Object.values(DEFAULT_WEIGHTS).reduce((sum, value) => sum + value, 0);
+  return Object.fromEntries(
+    Object.entries(source).map(([key, value]) => [key, value / denominator])
+  );
+}
+
+function weightedMapScore(point) {
+  const pillars = {
+    health: point?.healthIndex,
+    safety: point?.safetyIndex,
+    freedom: point?.freedomIndex,
+    abundance: point?.abundanceIndex,
+  };
+  if (!Object.values(pillars).every(Number.isFinite)) return NaN;
+  const weights = normalizedWeights();
+  return Object.entries(pillars).reduce(
+    (score, [key, value]) => score * Math.pow(value, weights[key]),
+    1
+  );
+}
+
+function updateWeightUi() {
+  const effective = normalizedWeights();
+  for (const input of $weightInputs) input.value = String(state.weights[input.dataset.mapWeight]);
+  for (const output of $weightOutputs) {
+    output.textContent = `${(effective[output.dataset.weightOutput] * 100).toFixed(1)}%`;
+  }
+  if ($weightNote) {
+    const rawTotal = Object.values(state.weights).reduce((sum, value) => sum + value, 0);
+    $weightNote.textContent = rawTotal > 0
+      ? `Normalized to 100% from ${rawTotal} slider points`
+      : "All-zero selection uses the default weights";
+  }
+}
 
 function featurePath(feature) {
   return pathGen(feature) ?? "";
@@ -127,19 +173,20 @@ function buildIsoMap() {
 
   for (const iso of Object.keys(series)) {
     const point = series[iso].points.find((p) => p.year === state.year);
-    if (!point || typeof point.customIndex !== "number" || !Number.isFinite(point.customIndex)) {
+    const value = weightedMapScore(point);
+    if (!point || !Number.isFinite(value)) {
       continue;
     }
     const row = latest.get(iso);
     if (!row || row.derivedKind) continue;
-    map.set(iso, { value: point.customIndex, row, point });
+    map.set(iso, { value, row, point });
   }
 
   if (state.year === YEAR_MAX) {
     for (const [iso, row] of latest) {
       if (row.derivedKind) continue;
       if (!map.has(iso)) {
-        const value = row.customIndex ?? row.customHdi;
+        const value = weightedMapScore(row);
         if (typeof value !== "number" || !Number.isFinite(value)) continue;
         map.set(iso, {
           value,
@@ -237,8 +284,9 @@ function showTooltip(iso, name, clientX, clientY) {
         <span>Tomer</span><span>${escapeHtml(formatTomer(idx))}</span>
         <span>Life exp.</span><span>${typeof point.le === "number" ? point.le.toFixed(1) : "—"}</span>
         <span>HALE</span><span>${typeof point.hale === "number" ? point.hale.toFixed(1) : "—"}</span>
-        <span>Income pc</span><span>${typeof point.gni === "number" ? formatInt(point.gni) : "—"}</span>
+        <span>Abundance</span><span>${typeof point.gni === "number" ? formatInt(point.gni) : "—"}</span>
         <span>Hom./100k</span><span>${typeof point.homicidesPer100k === "number" ? point.homicidesPer100k.toFixed(1) : "—"}</span>
+        <span>Freedom</span><span>${typeof point.freedom === "number" ? point.freedom.toFixed(1) : "—"}</span>
       </div>
       <small class="muted">Click for full history</small>
     `;
@@ -297,13 +345,14 @@ function renderDetail(iso) {
     <dl class="map-detail-grid">
       <div><dt>Tomer</dt><dd>${formatTomer(entry.value)}${sourceYearBadgeHtml(
         point,
-        ["leYear", "haleYear", "gniYear", "homicideYear"],
+        ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"],
         state.year
       )}</dd></div>
       <div><dt>Life exp.</dt><dd>${typeof point.le === "number" ? point.le.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "leYear", state.year)}</dd></div>
       <div><dt>HALE</dt><dd>${typeof point.hale === "number" ? point.hale.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "haleYear", state.year)}</dd></div>
-      <div><dt>Income pc</dt><dd>${typeof point.gni === "number" ? formatInt(point.gni) : "-"}${sourceYearBadgeHtml(point, "gniYear", state.year)}</dd></div>
+      <div><dt>Abundance</dt><dd>${typeof point.gni === "number" ? formatInt(point.gni) : "-"}${sourceYearBadgeHtml(point, "gniYear", state.year)}</dd></div>
       <div><dt>Hom./100k</dt><dd>${typeof point.homicidesPer100k === "number" ? point.homicidesPer100k.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "homicideYear", state.year)}</dd></div>
+      <div><dt>Freedom</dt><dd>${typeof point.freedom === "number" ? point.freedom.toFixed(1) : "-"}${sourceYearBadgeHtml(point, "freedomYear", state.year)}</dd></div>
     </dl>
   `;
 }
@@ -400,6 +449,12 @@ function applyUrlState() {
   const params = new URLSearchParams(window.location.search);
   state.year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(params.get("year"), 10) || YEAR_MAX));
   state.selectedIso = (params.get("iso") ?? "").trim().toUpperCase();
+  for (const key of Object.keys(DEFAULT_WEIGHTS)) {
+    const raw = params.get(`w_${key}`);
+    if (raw == null) continue;
+    const value = Number(raw);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) state.weights[key] = value;
+  }
 }
 
 function syncUrl() {
@@ -407,6 +462,9 @@ function syncUrl() {
   const params = new URLSearchParams();
   if (state.year !== YEAR_MAX) params.set("year", String(state.year));
   if (state.selectedIso) params.set("iso", state.selectedIso);
+  for (const [key, value] of Object.entries(state.weights)) {
+    if (value !== DEFAULT_WEIGHTS[key]) params.set(`w_${key}`, String(value));
+  }
   const query = params.toString();
   const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
   window.history.replaceState(null, "", next);
@@ -429,6 +487,7 @@ async function load() {
     qualityByIso: leaderboardPayload.qualityByIso ?? {},
   };
   applyUrlState();
+  updateWeightUi();
   if ($year) $year.value = String(state.year);
   if ($yearOut) $yearOut.textContent = String(state.year);
   $status.textContent = "";
@@ -449,6 +508,28 @@ async function load() {
 
 $year?.addEventListener("input", (e) => setYear(e.target.value));
 $search?.addEventListener("change", selectFromSearch);
+$weightInputs.forEach((input) =>
+  input.addEventListener("input", () => {
+    state.weights[input.dataset.mapWeight] = Number(input.value);
+    updateWeightUi();
+    buildIsoMap();
+    computeColorScale();
+    renderLegend();
+    renderMap();
+    if (state.selectedIso) renderDetail(state.selectedIso);
+    syncUrl();
+  })
+);
+$weightReset?.addEventListener("click", () => {
+  state.weights = { ...DEFAULT_WEIGHTS };
+  updateWeightUi();
+  buildIsoMap();
+  computeColorScale();
+  renderLegend();
+  renderMap();
+  if (state.selectedIso) renderDetail(state.selectedIso);
+  syncUrl();
+});
 
 load()
   .catch((e) => {
