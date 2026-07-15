@@ -13,8 +13,9 @@ Freedom score = 10 × mean of HFI Personal Freedom categories except Security & 
 Tomer  = Health^0.40 · Safety^0.30 · Freedom^0.20 · Abundance^0.10
 ```
 
-Each base pillar is converted to its yearly mid-rank country percentile before
-the weighted geometric mean, giving every pillar the same empirical distribution.
+The score is always absolute: raw data is normalized against the fixed goalposts
+above, then the normalized pillars are combined directly with the weighted
+geometric mean. A country's score never depends on other countries' results.
 
 When WHO HALE is unavailable for a year, HALE is estimated from that year's
 life expectancy while preserving the latest reported `life expectancy - HALE`

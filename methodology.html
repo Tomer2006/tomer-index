@@ -101,14 +101,11 @@ Freedom pillar = Freedom score / 100</code></pre>
 
           <h2>Weights</h2>
           <p>
-            Before weighting, each pillar is converted to its yearly
-            <strong>mid-rank percentile</strong> among countries with complete
-            data. The worst and best observations sit just above 0 and just
-            below 1, and tied values share a percentile. This quantile
-            normalization gives all four pillars the same country distribution,
-            so their original units and statistical spread do not create hidden
-            sensitivity differences. Scores are relative to other countries in
-            the selected year, not absolute performance thresholds.
+            Before weighting, each pillar is normalized to 0–1 against the fixed
+            goalposts above. The normalized values go directly into the geometric
+            mean; there is no yearly percentile-ranking step. Scores are therefore
+            absolute and comparable across countries and years: a country's score
+            does not change merely because another country's performance changes.
           </p>
           <p>
             The four distinct dimensions are weighted by importance:
@@ -119,7 +116,7 @@ Freedom pillar = Freedom score / 100</code></pre>
           <p>
             Geometric (rather than arithmetic) means penalise imbalance: a
             country can't compensate for a near-zero pillar by excelling
-            elsewhere. Because every pillar is normalised before combination,
+            elsewhere. Because every pillar uses fixed goalposts before combination,
             raw units do not control the result. Approximately, a 1% relative
             improvement in one pillar changes the final index by that pillar's
             weight times 1%, holding the other pillars fixed.

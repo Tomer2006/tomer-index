@@ -18,7 +18,6 @@ import {
   customIndexAbundanceSafetyHealthFreedom,
   customIndexAbundanceSafetyHealthFreedomFull,
   customIndexFromPillarsFull,
-  midrankPercentile,
   combinedHealthLei,
   incomeIndexFromGni,
   safetyIndexFromHomicidesPer100k,
@@ -679,13 +678,13 @@ function rawPillarValues(point) {
   };
 }
 
-function applyPercentilePillars(point, scales) {
+function applyAbsolutePillars(point) {
   const raw = rawPillarValues(point);
-  if (!raw || !scales) return false;
-  point.abundanceIndex = rounded(midrankPercentile(raw.abundance, scales.abundance), 6);
-  point.safetyIndex = rounded(midrankPercentile(raw.safety, scales.safety), 6);
-  point.healthIndex = rounded(midrankPercentile(raw.health, scales.health), 6);
-  point.freedomIndex = rounded(midrankPercentile(raw.freedom, scales.freedom), 6);
+  if (!raw) return false;
+  point.abundanceIndex = rounded(raw.abundance, 6);
+  point.safetyIndex = rounded(raw.safety, 6);
+  point.healthIndex = rounded(raw.health, 6);
+  point.freedomIndex = rounded(raw.freedom, 6);
   point.customIndex = rounded(
     customIndexFromPillarsFull({
       abundance: point.abundanceIndex,
@@ -698,36 +697,7 @@ function applyPercentilePillars(point, scales) {
   return true;
 }
 
-function equalizeCountryPillarDistributions(entrySeries, countryIsos, yearMin, yearMax) {
-  const scalesByYear = new Map();
-  for (const year of annualRange(yearMin, yearMax)) {
-    const records = [];
-    for (const iso of countryIsos) {
-      const point = entrySeries[iso]?.points?.find((candidate) => candidate.year === year);
-      const raw = rawPillarValues(point);
-      if (raw) records.push({ point, raw });
-    }
-    const scales = {
-      abundance: records.map((record) => record.raw.abundance).sort((a, b) => a - b),
-      safety: records.map((record) => record.raw.safety).sort((a, b) => a - b),
-      health: records.map((record) => record.raw.health).sort((a, b) => a - b),
-      freedom: records.map((record) => record.raw.freedom).sort((a, b) => a - b),
-    };
-    scalesByYear.set(year, scales);
-    for (const { point } of records) applyPercentilePillars(point, scales);
-  }
-  return scalesByYear;
-}
-
-function equalizeDerivedPillarDistributions(derivedSeries, scalesByYear) {
-  for (const series of derivedSeries.values()) {
-    for (const point of series.points) {
-      applyPercentilePillars(point, scalesByYear.get(point.year));
-    }
-  }
-}
-
-function buildFixedCohortSeries(entrySeries, countryRows, scalesByYear, yearMin, yearMax) {
+function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMax) {
   const years = annualRange(yearMin, yearMax);
   const pointByIsoYear = new Map();
   const cohort = countryRows
@@ -774,7 +744,7 @@ function buildFixedCohortSeries(entrySeries, countryRows, scalesByYear, yearMin,
       population: Math.round(totals.pop),
       n: cohort.length,
     };
-    applyPercentilePillars(point, scalesByYear.get(year));
+    applyAbsolutePillars(point);
     point.value = point.customIndex;
     return point;
   });
@@ -827,16 +797,7 @@ function buildCountrySeries(iso, leByCY, gniByCY, homByCY, freedomByCY, popByCY,
       point.population = Math.round(pop);
     }
 
-    if (leY && gniY && homY && freedomY && hale) {
-      const idx = customIndexAbundanceSafetyHealthFreedomFull(
-        leY.value,
-        gniY.value,
-        homY.value,
-        hale.value,
-        freedomY.value
-      );
-      point.customIndex = rounded(idx, 4);
-    }
+    if (leY && gniY && homY && freedomY && hale) applyAbsolutePillars(point);
 
     const hasMetric =
       Number.isFinite(point.le) ||
@@ -927,13 +888,6 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY,
       const gni = bucket.gni / bucket.pop;
       const homicidesPer100k = bucket.hom / bucket.pop;
       const freedom = bucket.freedom / bucket.pop;
-      const idx = customIndexAbundanceSafetyHealthFreedomFull(
-        le,
-        gni,
-        homicidesPer100k,
-        hale,
-        freedom
-      );
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
@@ -941,7 +895,7 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY,
           points: [],
         });
       }
-      byIso.get(bucket.iso).points.push({
+      const point = {
         year: y,
         le: rounded(le, 2),
         hale: rounded(hale, 2),
@@ -955,10 +909,11 @@ function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY,
               : "GNI",
         homicidesPer100k: rounded(homicidesPer100k, 3),
         freedom: rounded(freedom, 2),
-        customIndex: rounded(idx, 4),
         population: Math.round(bucket.pop),
         n: bucket.members,
-      });
+      };
+      applyAbsolutePillars(point);
+      byIso.get(bucket.iso).points.push(point);
     }
   }
 
@@ -1082,12 +1037,6 @@ async function main() {
       };
     }
   }
-  const percentileScalesByYear = equalizeCountryPillarDistributions(
-    entrySeries,
-    countryRows.map((row) => row.iso),
-    seriesYearMin,
-    seriesYearMax
-  );
   const derivedSeries = buildDerivedGroupSeries(
     leByCY,
     gniByCY,
@@ -1099,14 +1048,12 @@ async function main() {
     seriesYearMin,
     seriesYearMax
   );
-  equalizeDerivedPillarDistributions(derivedSeries, percentileScalesByYear);
   for (const [iso, series] of derivedSeries) {
     if (series.points.length) entrySeries[iso] = series;
   }
   const fixedCohort = buildFixedCohortSeries(
     entrySeries,
     countryRows,
-    percentileScalesByYear,
     seriesYearMin,
     seriesYearMax
   );
@@ -1153,7 +1100,7 @@ async function main() {
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:
-      "For each year, every base pillar is transformed to its mid-rank empirical percentile among countries with complete data. This quantile-normalizes the four country distributions before weighting.",
+      "Every base pillar is normalized against fixed goalposts, then combined directly. Scores are absolute and do not depend on other countries or the selected year.",
     indexWeights: INDEX_WEIGHTS,
     globalAverageSeries: {
       definition:

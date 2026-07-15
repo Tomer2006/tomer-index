@@ -15,7 +15,7 @@ export const INDEX_WEIGHTS = Object.freeze({
   freedom: 0.2,
 });
 
-/** Weighted geometric mean of already-normalized pillar values. */
+/** Weighted geometric mean of pillars normalized against fixed goalposts. */
 export function customIndexFromPillarsFull({ abundance, safety, health, freedom }) {
   return (
     Math.pow(abundance, INDEX_WEIGHTS.abundance) *
@@ -23,20 +23,6 @@ export function customIndexFromPillarsFull({ abundance, safety, health, freedom 
     Math.pow(health, INDEX_WEIGHTS.health) *
     Math.pow(freedom, INDEX_WEIGHTS.freedom)
   );
-}
-
-/**
- * Mid-rank empirical percentile in (0, 1), with ties receiving the same value.
- * This is used to quantile-normalize pillars to a common distribution.
- */
-export function midrankPercentile(value, sortedValues) {
-  if (!Number.isFinite(value) || !sortedValues?.length) return NaN;
-  let lo = 0;
-  while (lo < sortedValues.length && sortedValues[lo] < value) lo += 1;
-  let hi = lo;
-  while (hi < sortedValues.length && sortedValues[hi] === value) hi += 1;
-  if (hi > lo) return (lo + hi) / (2 * sortedValues.length);
-  return Math.max(0.5, Math.min(sortedValues.length - 0.5, lo + 0.5)) / sortedValues.length;
 }
 
 /**

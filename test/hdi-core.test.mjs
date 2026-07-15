@@ -10,7 +10,6 @@ import {
   customIndexAbundanceSafetyHealthFreedom,
   customIndexAbundanceSafetyHealthFreedomFull,
   INDEX_WEIGHTS,
-  midrankPercentile,
   incomeRowsWithGdpFallback,
   latestByCountry,
   byCountryYear,
@@ -91,12 +90,6 @@ test("freedom index maps the 0-100 personal-freedom score to 0-1 and clamps", ()
   assert.equal(freedomIndexFromScore(50), 0.5);
   assert.equal(freedomIndexFromScore(100), 1);
   assert.equal(freedomIndexFromScore(120), 1);
-});
-
-test("midrank percentiles equalize a distribution and preserve ties", () => {
-  assert.equal(midrankPercentile(1, [1, 2, 3, 4]), 0.125);
-  assert.equal(midrankPercentile(4, [1, 2, 3, 4]), 0.875);
-  assert.equal(midrankPercentile(2, [1, 2, 2, 4]), 0.5);
 });
 
 test("index uses the declared 40/30/20/10 dimension weights", () => {
