@@ -59,15 +59,15 @@
             <datalist id="map-search-list"></datalist>
           </label>
           <div class="map-legend" id="map-legend" aria-label="Color legend"></div>
-          <fieldset class="map-weight-controls">
+          <fieldset class="index-weight-controls">
             <legend class="control-label">Map weights</legend>
-            <div class="map-weight-grid">
-              <label><span>Health <output data-weight-output="health">40%</output></span><input type="range" min="0" max="100" step="1" value="40" data-map-weight="health" /></label>
-              <label><span>Safety <output data-weight-output="safety">30%</output></span><input type="range" min="0" max="100" step="1" value="30" data-map-weight="safety" /></label>
-              <label><span>Freedom <output data-weight-output="freedom">20%</output></span><input type="range" min="0" max="100" step="1" value="20" data-map-weight="freedom" /></label>
-              <label><span>Abundance <output data-weight-output="abundance">10%</output></span><input type="range" min="0" max="100" step="1" value="10" data-map-weight="abundance" /></label>
+            <div class="index-weight-grid">
+              <label><span>Health <output data-index-weight-output="health">40%</output></span><input type="range" min="0" max="100" step="1" value="40" data-index-weight="health" aria-label="Health weight" /></label>
+              <label><span>Safety <output data-index-weight-output="safety">30%</output></span><input type="range" min="0" max="100" step="1" value="30" data-index-weight="safety" aria-label="Safety weight" /></label>
+              <label><span>Freedom <output data-index-weight-output="freedom">20%</output></span><input type="range" min="0" max="100" step="1" value="20" data-index-weight="freedom" aria-label="Freedom weight" /></label>
+              <label><span>Abundance <output data-index-weight-output="abundance">10%</output></span><input type="range" min="0" max="100" step="1" value="10" data-index-weight="abundance" aria-label="Abundance weight" /></label>
             </div>
-            <div class="map-weight-footer">
+            <div class="index-weight-footer">
               <span id="map-weight-note" class="muted">Normalized to 100%</span>
               <button type="button" id="map-weight-reset" class="btn">Reset weights</button>
             </div>

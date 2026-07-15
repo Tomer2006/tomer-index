@@ -5,6 +5,11 @@ import { loadLeaderboardData, loadSeriesData } from "./data-loader.js";
 import { sourceYearBadgeHtml } from "./source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { finishInitialLoad } from "./page-ready.js";
+import {
+  DEFAULT_WEIGHT_POINTS,
+  normalizedWeightPoints,
+  weightedIndexFromPillars,
+} from "./index-weights.js";
 import { geoEquirectangular, geoPath } from "d3-geo";
 
 const $status = document.getElementById("status");
@@ -16,14 +21,13 @@ const $yearOut = document.getElementById("map-year-output");
 const $detail = document.getElementById("map-detail");
 const $search = document.getElementById("map-search");
 const $searchList = document.getElementById("map-search-list");
-const $weightInputs = [...document.querySelectorAll("[data-map-weight]")];
-const $weightOutputs = [...document.querySelectorAll("[data-weight-output]")];
+const $weightInputs = [...document.querySelectorAll("[data-index-weight]")];
+const $weightOutputs = [...document.querySelectorAll("[data-index-weight-output]")];
 const $weightNote = document.getElementById("map-weight-note");
 const $weightReset = document.getElementById("map-weight-reset");
 
 const W = 960;
 const H = 500;
-const DEFAULT_WEIGHTS = Object.freeze({ health: 40, safety: 30, freedom: 20, abundance: 10 });
 
 // A perceptually ordered Plasma palette. Discrete bands are easier to compare
 // across small neighboring countries than nearly identical continuous shades.
@@ -57,40 +61,18 @@ const state = {
   domainMax: 1,
   colorBreaks: [],
   selectedIso: "",
-  weights: { ...DEFAULT_WEIGHTS },
+  weights: { ...DEFAULT_WEIGHT_POINTS },
 };
 
-function normalizedWeights() {
-  const total = Object.values(state.weights).reduce((sum, value) => sum + value, 0);
-  const source = total > 0 ? state.weights : DEFAULT_WEIGHTS;
-  const denominator = total > 0
-    ? total
-    : Object.values(DEFAULT_WEIGHTS).reduce((sum, value) => sum + value, 0);
-  return Object.fromEntries(
-    Object.entries(source).map(([key, value]) => [key, value / denominator])
-  );
-}
-
 function weightedMapScore(point) {
-  const pillars = {
-    health: point?.healthIndex,
-    safety: point?.safetyIndex,
-    freedom: point?.freedomIndex,
-    abundance: point?.abundanceIndex,
-  };
-  if (!Object.values(pillars).every(Number.isFinite)) return NaN;
-  const weights = normalizedWeights();
-  return Object.entries(pillars).reduce(
-    (score, [key, value]) => score * Math.pow(value, weights[key]),
-    1
-  );
+  return weightedIndexFromPillars(point, state.weights);
 }
 
 function updateWeightUi() {
-  const effective = normalizedWeights();
-  for (const input of $weightInputs) input.value = String(state.weights[input.dataset.mapWeight]);
+  const effective = normalizedWeightPoints(state.weights);
+  for (const input of $weightInputs) input.value = String(state.weights[input.dataset.indexWeight]);
   for (const output of $weightOutputs) {
-    output.textContent = `${(effective[output.dataset.weightOutput] * 100).toFixed(1)}%`;
+    output.textContent = `${(effective[output.dataset.indexWeightOutput] * 100).toFixed(1)}%`;
   }
   if ($weightNote) {
     const rawTotal = Object.values(state.weights).reduce((sum, value) => sum + value, 0);
@@ -449,7 +431,7 @@ function applyUrlState() {
   const params = new URLSearchParams(window.location.search);
   state.year = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(params.get("year"), 10) || YEAR_MAX));
   state.selectedIso = (params.get("iso") ?? "").trim().toUpperCase();
-  for (const key of Object.keys(DEFAULT_WEIGHTS)) {
+  for (const key of Object.keys(DEFAULT_WEIGHT_POINTS)) {
     const raw = params.get(`w_${key}`);
     if (raw == null) continue;
     const value = Number(raw);
@@ -463,7 +445,7 @@ function syncUrl() {
   if (state.year !== YEAR_MAX) params.set("year", String(state.year));
   if (state.selectedIso) params.set("iso", state.selectedIso);
   for (const [key, value] of Object.entries(state.weights)) {
-    if (value !== DEFAULT_WEIGHTS[key]) params.set(`w_${key}`, String(value));
+    if (value !== DEFAULT_WEIGHT_POINTS[key]) params.set(`w_${key}`, String(value));
   }
   const query = params.toString();
   const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
@@ -510,7 +492,7 @@ $year?.addEventListener("input", (e) => setYear(e.target.value));
 $search?.addEventListener("change", selectFromSearch);
 $weightInputs.forEach((input) =>
   input.addEventListener("input", () => {
-    state.weights[input.dataset.mapWeight] = Number(input.value);
+    state.weights[input.dataset.indexWeight] = Number(input.value);
     updateWeightUi();
     buildIsoMap();
     computeColorScale();
@@ -521,7 +503,7 @@ $weightInputs.forEach((input) =>
   })
 );
 $weightReset?.addEventListener("click", () => {
-  state.weights = { ...DEFAULT_WEIGHTS };
+  state.weights = { ...DEFAULT_WEIGHT_POINTS };
   updateWeightUi();
   buildIsoMap();
   computeColorScale();

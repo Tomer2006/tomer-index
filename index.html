@@ -87,6 +87,21 @@
               means at least one yearly point is missing an index input. Hover or tap a badge for details.
             </p>
           </div>
+          <div class="control-row">
+            <fieldset class="index-weight-controls">
+              <legend class="control-label">Leaderboard weights</legend>
+              <div class="index-weight-grid">
+                <label><span>Health <output data-index-weight-output="health">40%</output></span><input type="range" min="0" max="100" step="1" value="40" data-index-weight="health" aria-label="Health weight" /></label>
+                <label><span>Safety <output data-index-weight-output="safety">30%</output></span><input type="range" min="0" max="100" step="1" value="30" data-index-weight="safety" aria-label="Safety weight" /></label>
+                <label><span>Freedom <output data-index-weight-output="freedom">20%</output></span><input type="range" min="0" max="100" step="1" value="20" data-index-weight="freedom" aria-label="Freedom weight" /></label>
+                <label><span>Abundance <output data-index-weight-output="abundance">10%</output></span><input type="range" min="0" max="100" step="1" value="10" data-index-weight="abundance" aria-label="Abundance weight" /></label>
+              </div>
+              <div class="index-weight-footer">
+                <span id="leaderboard-weight-note" class="muted">Normalized to 100%</span>
+                <button type="button" id="leaderboard-weight-reset" class="btn">Reset weights</button>
+              </div>
+            </fieldset>
+          </div>
         </section>
         <div class="table-wrap">
           <table class="leaderboard-table">

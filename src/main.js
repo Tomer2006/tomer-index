@@ -8,6 +8,11 @@ import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { TOMER_SOURCE_KEYS } from "./metric-defs.js";
 import { finishInitialLoad } from "./page-ready.js";
 import {
+  DEFAULT_WEIGHT_POINTS,
+  normalizedWeightPoints,
+  weightedIndexFromPillars,
+} from "./index-weights.js";
+import {
   bindPointerYear,
   chartFrame,
   createTooltip,
@@ -34,6 +39,10 @@ const $filterReset = document.getElementById("filter-reset");
 const $includeAggregates = document.getElementById("include-aggregates");
 const $qualityFilter = document.getElementById("quality-filter");
 const $cards = document.getElementById("leaderboard-cards");
+const $weightInputs = [...document.querySelectorAll("[data-index-weight]")];
+const $weightOutputs = [...document.querySelectorAll("[data-index-weight-output]")];
+const $weightNote = document.getElementById("leaderboard-weight-note");
+const $weightReset = document.getElementById("leaderboard-weight-reset");
 
 const COLS = 9;
 const TYPE_FILTERS = [
@@ -59,6 +68,7 @@ const state = {
   includeAggregates: true,
   sortKey: "tomer",
   bestFirst: true,
+  weights: { ...DEFAULT_WEIGHT_POINTS },
 };
 
 let payload = null;
@@ -71,6 +81,24 @@ let incomesList = [];
 /** ISO → Tomer rank for the current year, over the full unfiltered row set. */
 let rankByIso = new Map();
 let lastChartKey = "";
+
+function indexValue(row) {
+  return weightedIndexFromPillars(row, state.weights);
+}
+
+function updateWeightUi() {
+  const effective = normalizedWeightPoints(state.weights);
+  for (const input of $weightInputs) input.value = String(state.weights[input.dataset.indexWeight]);
+  for (const output of $weightOutputs) {
+    output.textContent = `${(effective[output.dataset.indexWeightOutput] * 100).toFixed(1)}%`;
+  }
+  if ($weightNote) {
+    const rawTotal = Object.values(state.weights).reduce((sum, value) => sum + value, 0);
+    $weightNote.textContent = rawTotal > 0
+      ? `Normalized to 100% from ${rawTotal} slider points`
+      : "All-zero selection uses the default weights";
+  }
+}
 
 /**
  * series.json is ~1.4 MB and only needed for years before YEAR_MAX, so it is
@@ -91,7 +119,7 @@ function ensureSeries() {
 function sortValue(r, key) {
   switch (key) {
     case "tomer": {
-      const v = r.customIndex ?? r.customHdi;
+      const v = indexValue(r);
       return typeof v === "number" && Number.isFinite(v) ? v : NaN;
     }
     case "le":
@@ -303,7 +331,7 @@ function renderTable(rows) {
       "aria-label",
       quality ? `Open ${r.name} history. ${quality.description}` : `Open ${r.name} history`
     );
-    const idx = r.customIndex ?? r.customHdi;
+    const idx = indexValue(r);
     const health = healthValue(r);
     const healthText = Number.isFinite(health) ? formatTomer(health) : "—";
     const gniText =
@@ -337,7 +365,7 @@ function renderCards(rows) {
       const href = `./entry.html?iso=${encodeURIComponent(r.iso)}`;
       const rank = rankByIso.get(r.iso) ?? "—";
       const quality = rowQuality(r);
-      const idx = r.customIndex ?? r.customHdi;
+      const idx = indexValue(r);
       const health = healthValue(r);
       const healthText = Number.isFinite(health) ? formatTomer(health) : "—";
       const gniText =
@@ -520,6 +548,17 @@ function renderGlobalAverageChart(container, series, highlightYear) {
   );
 }
 
+function weightedGlobalSeries(series) {
+  if (!Array.isArray(series?.points)) return series;
+  return {
+    ...series,
+    points: series.points.map((point) => ({
+      ...point,
+      value: indexValue(point),
+    })),
+  };
+}
+
 function setYear(year) {
   const y = Math.max(YEAR_MIN, Math.min(YEAR_MAX, parseInt(year, 10) || YEAR_MAX));
   state.year = y;
@@ -597,6 +636,12 @@ function applyUrlState() {
   const sort = params.get("sort");
   if (sort) state.sortKey = sort;
   state.bestFirst = params.get("dir") !== "asc";
+  for (const key of Object.keys(DEFAULT_WEIGHT_POINTS)) {
+    const raw = params.get(`w_${key}`);
+    if (raw == null) continue;
+    const value = Number(raw);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) state.weights[key] = value;
+  }
 }
 
 function syncUrl() {
@@ -611,6 +656,9 @@ function syncUrl() {
   if (!state.includeAggregates) params.set("aggregates", "0");
   if (state.sortKey !== "tomer") params.set("sort", state.sortKey);
   if (!state.bestFirst) params.set("dir", "asc");
+  for (const [key, value] of Object.entries(state.weights)) {
+    if (value !== DEFAULT_WEIGHT_POINTS[key]) params.set(`w_${key}`, String(value));
+  }
   const query = params.toString();
   const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
   window.history.replaceState(null, "", next);
@@ -632,14 +680,18 @@ function refresh() {
   updateHeaderSortUI();
   renderTable(rows);
   renderCards(rows);
-  // The world chart only depends on the year, so skip
-  // the SVG rebuild when a search/filter keystroke triggered the refresh.
-  const chartKey = String(state.year);
+  // The world chart depends on the year and custom weights, so skip the SVG
+  // rebuild when only a search/filter keystroke triggered the refresh.
+  const chartKey = `${state.year}:${Object.values(state.weights).join(",")}`;
   if ($globalChart && chartKey !== lastChartKey) {
     if ($globalDefinition && payload?.globalAverageSeries?.definition) {
       $globalDefinition.textContent = payload.globalAverageSeries.definition;
     }
-    renderGlobalAverageChart($globalChart, payload?.globalAverageSeries, state.year);
+    renderGlobalAverageChart(
+      $globalChart,
+      weightedGlobalSeries(payload?.globalAverageSeries),
+      state.year
+    );
     lastChartKey = chartKey;
   }
   syncChipState();
@@ -731,6 +783,20 @@ $includeAggregates?.addEventListener("change", (e) => {
   refresh();
 });
 
+$weightInputs.forEach((input) =>
+  input.addEventListener("input", () => {
+    state.weights[input.dataset.indexWeight] = Number(input.value);
+    updateWeightUi();
+    refresh();
+  })
+);
+
+$weightReset?.addEventListener("click", () => {
+  state.weights = { ...DEFAULT_WEIGHT_POINTS };
+  updateWeightUi();
+  refresh();
+});
+
 $filterReset?.addEventListener("click", () => {
   state.search = "";
   state.types.clear();
@@ -764,6 +830,7 @@ async function loadAndCache() {
   if ($yearOutput) $yearOutput.textContent = String(state.year);
   if ($searchInput) $searchInput.value = state.search;
   if ($includeAggregates) $includeAggregates.checked = state.includeAggregates;
+  updateWeightUi();
   renderFilterChips();
   refresh();
 }

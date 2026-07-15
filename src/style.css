@@ -1172,7 +1172,7 @@ table {
   padding: 0;
 }
 
-.map-weight-controls {
+.index-weight-controls {
   flex: 1 0 100%;
   min-width: 0;
   margin: 0;
@@ -1181,13 +1181,13 @@ table {
   border-top: 1px solid var(--border);
 }
 
-.map-weight-grid {
+.index-weight-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: 0.75rem 1rem;
 }
 
-.map-weight-grid label {
+.index-weight-grid label {
   display: grid;
   gap: 0.35rem;
   color: var(--muted);
@@ -1195,23 +1195,23 @@ table {
   font-weight: 600;
 }
 
-.map-weight-grid label > span {
+.index-weight-grid label > span {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
 }
 
-.map-weight-grid output {
+.index-weight-grid output {
   color: var(--accent);
   font-family: var(--mono);
 }
 
-.map-weight-grid input[type="range"] {
+.index-weight-grid input[type="range"] {
   width: 100%;
   accent-color: var(--accent-dim);
 }
 
-.map-weight-footer {
+.index-weight-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1221,7 +1221,7 @@ table {
 }
 
 @media (max-width: 760px) {
-  .map-weight-grid {
+  .index-weight-grid {
     grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
 }

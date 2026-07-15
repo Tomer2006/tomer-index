@@ -20,7 +20,7 @@ or side-by-side comparisons.
 
 - Rank and filter countries by year, region, income level, entry type, or data quality.
 - Compare several countries across the full index, individual pillars, and raw inputs.
-- Explore the world map and experiment with custom pillar weights.
+- Experiment with custom pillar weights on either the leaderboard or world map.
 - Open a country page to inspect its score and input history from 2000–2024.
 - See source-year badges, estimated HALE labels, and incomplete-data warnings.
 - Follow a population-weighted fixed cohort for a comparable long-run trend.
@@ -77,7 +77,7 @@ headline series.
 
 | Page | Purpose |
 | --- | --- |
-| [`index.html`](./index.html) | Sortable leaderboard, filters, year slider, and fixed-cohort trend |
+| [`index.html`](./index.html) | Sortable leaderboard, filters, year slider, and adjustable pillar weights |
 | [`compare.html`](./compare.html) | Side-by-side comparisons with shareable `?picks=USA,JPN,...` links |
 | [`map.html`](./map.html) | Interactive choropleth with adjustable pillar weights |
 | [`entry.html`](./entry.html) | Per-entry history for the index, pillars, and raw inputs |
