@@ -23,34 +23,13 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--font);
-  background: radial-gradient(1200px 600px at 10% -10%, #1a2336 0%, var(--bg) 55%);
+  background: radial-gradient(
+    1200px 600px at 10% -10%,
+    #1a2336 0%,
+    var(--bg) 55%
+  );
   color: var(--text);
   line-height: 1.5;
-}
-
-body.is-loading {
-  overflow: hidden;
-}
-
-body.is-loading #app {
-  visibility: hidden;
-}
-
-.page-loader {
-  display: none;
-}
-
-body.is-loading .page-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.8rem;
-  background: radial-gradient(1200px 600px at 10% -10%, #1a2336 0%, var(--bg) 55%);
-  color: var(--muted);
-  font-size: 0.9rem;
 }
 
 .page-loader-mark {
@@ -85,16 +64,7 @@ a {
 }
 
 .site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  padding: 0.35rem;
-  margin-bottom: 1.25rem;
-  width: fit-content;
-  max-width: 100%;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  @apply mb-5 flex w-fit max-w-full flex-wrap gap-[0.35rem] rounded-[10px] border border-border bg-panel p-[0.35rem];
 }
 
 .site-nav-link {
@@ -125,12 +95,7 @@ a {
 }
 
 .hero-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.35rem;
+  @apply mb-[0.35rem] flex flex-wrap items-start justify-between gap-4;
 }
 
 .hero-titles .kicker {
@@ -163,7 +128,9 @@ a {
   color: var(--text);
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .btn:hover {
@@ -181,21 +148,11 @@ a {
 }
 
 .leaderboard-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding: 0.95rem 1rem;
-  margin-bottom: 1rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  @apply mb-4 flex flex-col gap-[0.85rem] rounded-xl border border-border bg-panel px-4 py-[0.95rem];
 }
 
 .control-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 1rem;
+  @apply flex flex-wrap items-end gap-4;
 }
 
 .control-label {
@@ -212,7 +169,7 @@ a {
   display: flex;
   flex-direction: column;
   flex: 1 1 280px;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .year-control input[type="range"] {
@@ -270,7 +227,7 @@ a {
   padding: 0;
   border: 0;
   flex: 1 1 320px;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .filter-chips legend {
@@ -293,7 +250,10 @@ a {
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
   font-size: 0.78rem;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .chip:hover {
@@ -325,12 +285,14 @@ a {
 }
 
 .prose h2 {
+  @apply font-bold;
   margin: 2rem 0 0.75rem;
   font-size: 1.4rem;
   letter-spacing: -0.01em;
 }
 
 .prose h3 {
+  @apply font-bold;
   margin: 1.5rem 0 0.5rem;
   font-size: 1.05rem;
   color: var(--accent);
@@ -342,6 +304,7 @@ a {
 }
 
 .prose ul {
+  @apply list-disc;
   padding-left: 1.25rem;
   margin: 0 0 1rem;
 }
@@ -360,6 +323,7 @@ a {
 }
 
 .prose pre {
+  @apply my-4;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -441,11 +405,7 @@ a {
 }
 
 .map-wrap {
-  position: relative;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
+  @apply relative overflow-hidden rounded-xl border border-border bg-panel;
 }
 
 .map-svg-root {
@@ -518,8 +478,7 @@ a {
 }
 
 .map-tooltip .muted {
-  color: var(--muted);
-  font-size: 0.78rem;
+  @apply text-muted;
 }
 
 .map-tooltip-grid {
@@ -572,6 +531,7 @@ a {
 }
 
 .map-detail-head {
+  flex-wrap: wrap;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -591,6 +551,7 @@ a {
 }
 
 .map-detail-actions {
+  flex-wrap: wrap;
   flex: 0 0 auto;
   display: flex;
   gap: 0.4rem;
@@ -623,12 +584,12 @@ a {
 
 .compare-year-control {
   flex: 1 1 280px;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .compare-presets {
   flex: 2 1 320px;
-  min-width: 240px;
+  min-width: min(240px, 100%);
 }
 
 .compare-preset-chip {
@@ -873,7 +834,10 @@ a {
   height: 2.25rem;
   border-radius: 8px;
   padding: 0;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .compare-remove:hover {
@@ -882,6 +846,9 @@ a {
 }
 
 .compare-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
@@ -931,7 +898,7 @@ a {
 }
 
 /* One country: keep Tomer row highlighted; no per-metric “best” styling. */
-.compare-table.compare-single tbody tr:last-child td {
+.compare-table.compare-single tbody tr.tomer-row td {
   color: var(--accent);
   font-weight: 600;
 }
@@ -964,9 +931,7 @@ a {
 }
 
 .compare-series-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(430px, 100%), 1fr));
-  gap: 1rem;
+  @apply grid grid-cols-[repeat(auto-fit,minmax(min(430px,100%),1fr))] gap-4;
 }
 
 .compare-series-card {
@@ -1392,10 +1357,11 @@ table {
 .source-year-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   width: fit-content;
   max-width: 100%;
   margin-left: 0.35rem;
-  padding: 0.08rem 0.32rem;
+  padding: 0.18rem 0.5rem;
   border: 1px solid rgba(96, 165, 250, 0.45);
   border-radius: 999px;
   background: rgba(96, 165, 250, 0.1);
@@ -1403,7 +1369,8 @@ table {
   font-family: var(--font);
   font-size: 0.64rem;
   font-weight: 650;
-  line-height: 1.2;
+  line-height: 1.4;
+  text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
   vertical-align: middle;
@@ -1537,8 +1504,7 @@ table {
 }
 
 .global-series-chart-inner {
-  position: relative;
-  width: 100%;
+  @apply relative w-full;
 }
 
 .global-series-svg {
@@ -1655,6 +1621,17 @@ table {
   font-family: var(--mono);
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
+}
+
+.entry-stat .metric-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.entry-stat .source-year-badge {
+  margin-left: 0;
 }
 
 .entry-series-def {
@@ -1817,5 +1794,41 @@ table {
   .metric-latest {
     margin-top: 0.25rem;
     text-align: left;
+  }
+}
+
+.filter-groups {
+  align-items: flex-start;
+}
+.mobile-sort {
+  display: none;
+}
+.mobile-sort select {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  width: 100%;
+}
+@media (max-width: 560px) {
+  .mobile-sort {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .mobile-sort .search-control {
+    min-width: 0;
+  }
+}
+@media (max-width: 400px) {
+  .index-weight-grid {
+    grid-template-columns: 1fr;
+  }
+  .index-weight-footer {
+    flex-wrap: wrap;
   }
 }

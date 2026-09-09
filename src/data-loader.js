@@ -1,5 +1,5 @@
 function dataUrl(file) {
-  return `${import.meta.env.BASE_URL}data/${file}?v=${__DATA_VERSION__}`;
+  return `/data/${file}?v=${process.env.NEXT_PUBLIC_DATA_VERSION ?? "dev"}`;
 }
 
 async function fetchJson(file) {
@@ -16,4 +16,8 @@ export function loadLeaderboardData() {
 
 export function loadSeriesData() {
   return fetchJson("series.json");
+}
+
+export function loadWorldData() {
+  return fetchJson("world.geojson");
 }
