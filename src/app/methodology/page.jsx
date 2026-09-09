@@ -19,6 +19,30 @@ export default function Page() {
             mean. The display rescales the result to 0–100.
           </p>
 
+          <h2>Philosophy: trust informed preferences</h2>
+          <p>
+            The philosophy behind the Tomer index is to trust people’s own
+            preferences. Its guiding question is: what conditions would people
+            choose to live under in a world of perfect information, where they
+            understood the available options, their consequences, and the
+            tradeoffs involved?
+          </p>
+          <p>
+            From this perspective, abundance, safety, health, and freedom matter
+            because they help people pursue the lives they would choose for
+            themselves. The aim is to evaluate the conditions that support those
+            choices, while respecting that different people can prefer different
+            ways of living even when fully informed.
+          </p>
+          <p>
+            Perfect information is a thought experiment, not a claim about the
+            world today. The index does not directly measure what everyone would
+            prefer under those conditions. Its four pillars and default weights
+            are a proposed approximation of that ideal, open to disagreement and
+            revision. The adjustable weights let readers explore how different
+            priorities affect the results.
+          </p>
+
           <h2>Pillars and goalposts</h2>
 
           <h3>Health (½ life expectancy + ½ HALE)</h3>
