@@ -97,6 +97,7 @@ export default function Entry() {
                 <HistoryChart
                   key={metric.key}
                   metric={metric}
+                  showMarkers={false}
                   series={[{ iso, name: row.name, points }]}
                 />
               ))}

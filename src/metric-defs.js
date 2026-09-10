@@ -1,5 +1,6 @@
 import { formatInt } from "./format.js";
 import { formatTomer, formatTomerAxis } from "./index-scale.js";
+import { TOPIC_COLORS } from "./topic-colors.js";
 
 /** Source-year keys that feed the Tomer index itself. */
 export const TOMER_SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"];
@@ -20,12 +21,14 @@ export function metricValue(row, key) {
 export const metricDefs = [
   {
     key: "customIndex",
+    color: "#a78bfa",
     label: "Tomer index",
     axis: (v) => formatTomerAxis(v),
     value: (v) => formatTomer(v),
   },
   {
     key: "le",
+    color: TOPIC_COLORS.health,
     sourceYearKey: "leYear",
     label: "Life expectancy",
     axis: (v) => v.toFixed(0),
@@ -33,6 +36,7 @@ export const metricDefs = [
   },
   {
     key: "hale",
+    color: TOPIC_COLORS.health,
     sourceYearKey: "haleYear",
     label: "HALE",
     axis: (v) => v.toFixed(0),
@@ -40,6 +44,7 @@ export const metricDefs = [
   },
   {
     key: "gni",
+    color: TOPIC_COLORS.abundance,
     sourceYearKey: "gniYear",
     label: "Abundance (income pc, PPP)",
     axis: (v) => compactNumber(v),
@@ -47,13 +52,16 @@ export const metricDefs = [
   },
   {
     key: "homicidesPer100k",
+    color: TOPIC_COLORS.safety,
     sourceYearKey: "homicideYear",
     label: "Homicides /100k",
+    lowerIsBetter: true,
     axis: (v) => v.toFixed(1),
     value: (v) => v.toFixed(2),
   },
   {
     key: "freedom",
+    color: TOPIC_COLORS.freedom,
     sourceYearKey: "freedomYear",
     label: "Personal freedom (0–100)",
     axis: (v) => v.toFixed(0),

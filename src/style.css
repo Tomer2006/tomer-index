@@ -174,7 +174,7 @@ a {
 
 .year-control input[type="range"] {
   width: 100%;
-  accent-color: var(--accent-dim);
+  accent-color: #a3a3a3;
 }
 
 .year-output {
@@ -1167,13 +1167,13 @@ table {
 }
 
 .index-weight-grid output {
-  color: var(--accent);
+  color: var(--topic-color, var(--accent));
   font-family: var(--mono);
 }
 
 .index-weight-grid input[type="range"] {
   width: 100%;
-  accent-color: var(--accent-dim);
+  accent-color: var(--topic-color, var(--accent-dim));
 }
 
 .index-weight-footer {
@@ -1666,6 +1666,15 @@ table {
   margin: 0;
   font-size: 1rem;
   font-weight: 650;
+}
+
+.metric-direction {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .metric-latest {

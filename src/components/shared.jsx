@@ -5,6 +5,7 @@ import {
 } from "../index-weights.js";
 import { YEAR_MAX, YEAR_MIN } from "../site-years.js";
 import { sourceYearParts } from "../source-years.js";
+import { TOPIC_COLORS } from "../topic-colors.js";
 
 export function Header({ title, kicker = "Tomer index", children }) {
   return (
@@ -67,7 +68,7 @@ export function Weights({ weights, onChange, label }) {
       <legend className="control-label">{label} weights</legend>
       <div className="index-weight-grid">
         {Object.entries(weights).map(([key, value]) => (
-          <label key={key}>
+          <label key={key} style={{ "--topic-color": TOPIC_COLORS[key] }}>
             <span className="capitalize">
               {key} <output>{(effective[key] * 100).toFixed(1)}%</output>
             </span>
@@ -161,10 +162,10 @@ export function PillarBars({ row }) {
   return (
     <div className="pillar-bars">
       {[
-        ["Abundance", "#fbbf24"],
-        ["Safety", "#f472b6"],
-        ["Health", "#6ee7b7"],
-        ["Freedom", "#60a5fa"],
+        ["Abundance", TOPIC_COLORS.abundance],
+        ["Safety", TOPIC_COLORS.safety],
+        ["Health", TOPIC_COLORS.health],
+        ["Freedom", TOPIC_COLORS.freedom],
       ].map(([label, color]) => {
         const value = row[`${label.toLowerCase()}Index`];
         return (

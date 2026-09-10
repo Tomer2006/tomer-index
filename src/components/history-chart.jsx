@@ -19,8 +19,13 @@ export default function HistoryChart({
   metric,
   year = YEAR_MAX,
   onYearChange,
+  showMarkers = series.length > 1,
 }) {
   const [hoverYear, setHoverYear] = useState(null);
+  const seriesColor = (index) =>
+    series.length === 1
+      ? metric.color ?? SERIES_COLORS[0]
+      : SERIES_COLORS[index % SERIES_COLORS.length];
   const points = series
     .flatMap((item) => item.points)
     .filter((point) => Number.isFinite(point[metric.key]));
@@ -58,7 +63,12 @@ export default function HistoryChart({
   return (
     <section className="metric-card">
       <div className="metric-card-head">
-        <h2 className="metric-title">{metric.label}</h2>
+        <h2 className="metric-title">
+          {metric.label}
+          {metric.lowerIsBetter && (
+            <span className="metric-direction">↓ Lower is better</span>
+          )}
+        </h2>
         {series.length === 1 && (
           <p className="metric-latest muted">
             {points[0].year} {metric.value(points[0][metric.key])} →{" "}
@@ -69,12 +79,12 @@ export default function HistoryChart({
       <div className="compare-series-legend">
         {series.map((item, i) => (
           <span className="compare-series-legend-item" key={item.iso}>
-            <i
-              className="compare-series-swatch"
-              style={{
-                "--series-color": SERIES_COLORS[i % SERIES_COLORS.length],
-              }}
-            />
+            {series.length > 1 && (
+              <i
+                className="compare-series-swatch"
+                style={{ "--series-color": seriesColor(i) }}
+              />
+            )}
             {item.name}
           </span>
         ))}
@@ -164,11 +174,11 @@ export default function HistoryChart({
           const current = item.points.find(
             (point) => point.year === activeYear,
           );
-          const color = SERIES_COLORS[i % SERIES_COLORS.length];
+          const color = seriesColor(i);
           return (
             <g key={item.iso}>
               <path d={path} fill="none" stroke={color} strokeWidth={2.5} />
-              {Number.isFinite(current?.[metric.key]) && (
+              {showMarkers && Number.isFinite(current?.[metric.key]) && (
                 <circle
                   cx={x(activeYear)}
                   cy={y(current[metric.key])}
@@ -187,7 +197,7 @@ export default function HistoryChart({
           const value = point?.[metric.key];
           return (
             <div key={item.iso}>
-              <span style={{ color: SERIES_COLORS[i % SERIES_COLORS.length] }}>
+              <span style={{ color: seriesColor(i) }}>
                 {item.name}:{" "}
                 {Number.isFinite(value) ? metric.value(value) : "—"}
               </span>
