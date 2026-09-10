@@ -1361,29 +1361,15 @@ table {
   width: fit-content;
   max-width: 100%;
   margin-left: 0.35rem;
-  padding: 0.18rem 0.5rem;
-  border: 1px solid rgba(96, 165, 250, 0.45);
-  border-radius: 999px;
-  background: rgba(96, 165, 250, 0.1);
-  color: #bfdbfe;
+  color: var(--muted);
   font-family: var(--font);
   font-size: 0.64rem;
-  font-weight: 650;
+  font-weight: 550;
   line-height: 1.4;
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
   vertical-align: middle;
-}
-
-/* Year that matches the displayed year: same footprint as the pill (border
-   kept, made invisible) but quiet, so the highlight stays reserved for
-   carried-forward and mixed source years. */
-.source-year-badge.is-current {
-  border-color: transparent;
-  background: transparent;
-  color: var(--muted);
-  font-weight: 550;
 }
 
 /* Uniform leaderboard metric cells: value on the first line, source-year
