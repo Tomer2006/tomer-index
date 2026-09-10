@@ -462,9 +462,15 @@ a {
   stroke: rgba(139, 149, 168, 0.35);
 }
 
+.map-country:focus {
+  outline: none;
+}
+
+.map-country:focus-visible,
 .map-country.is-selected {
   stroke: #ecfdf5;
   stroke-width: 1.75;
+  stroke-dasharray: none;
   filter: brightness(1.16) drop-shadow(0 0 3px rgba(236, 253, 245, 0.85));
 }
 
