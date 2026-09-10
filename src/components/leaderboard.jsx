@@ -22,11 +22,14 @@ import {
 } from "../view-model.js";
 import { dataQualityForRow } from "../data-quality.js";
 import { YEAR_MAX } from "../site-years.js";
+import { metricDefs } from "../metric-defs.js";
 import {
   geographicRegionForRow,
   matchesRegions,
   regionOptions,
 } from "../regions.js";
+
+const tomerColor = metricDefs.find((metric) => metric.key === "customIndex").color;
 
 export default function Leaderboard() {
   const [params, update] = useQuery();
@@ -270,7 +273,7 @@ export default function Leaderboard() {
               </button>
             </div>
             <div className="table-wrap">
-              <table className="leaderboard-table">
+              <table className="leaderboard-table" style={{ "--tomer-color": tomerColor }}>
                 <thead>
                   <tr>
                     <th scope="col">Rank</th>
@@ -341,7 +344,7 @@ export default function Leaderboard() {
                         <QualityBadge quality={qualityFor(row)} />
                       </td>
                       {columns.map((column) => (
-                        <td key={column.key}>
+                        <td key={column.key} data-metric={column.key}>
                           <MetricCell
                             compact
                             row={row}
@@ -363,7 +366,7 @@ export default function Leaderboard() {
                 </tbody>
               </table>
             </div>
-            <div className="leaderboard-cards">
+            <div className="leaderboard-cards" style={{ "--tomer-color": tomerColor }}>
               {rows.map((row, i) => (
                 <article className="leaderboard-card" key={row.iso}>
                   <div className="leaderboard-card-head">
@@ -387,7 +390,7 @@ export default function Leaderboard() {
                   </div>
                   <dl className="leaderboard-card-grid">
                     {[columns.at(-1), ...columns.slice(0, -1)].map((column) => (
-                      <div key={column.key}>
+                      <div key={column.key} data-metric={column.key}>
                         <dt>{column.label}</dt>
                         <dd>
                           <MetricCell

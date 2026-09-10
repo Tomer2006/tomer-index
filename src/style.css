@@ -1100,6 +1100,13 @@ a {
   color: var(--accent);
 }
 
+.leaderboard-table .th-sort[data-sort="tomer"],
+.leaderboard-table td[data-metric="tomer"] .metric-cell-value,
+.leaderboard-card-grid [data-metric="tomer"] dt,
+.leaderboard-card-grid [data-metric="tomer"] .metric-cell-value {
+  color: var(--tomer-color);
+}
+
 .leaderboard-table .th-sort-icon {
   flex-shrink: 0;
   font-size: 0.85rem;
