@@ -246,10 +246,15 @@ test("map zoom is bounded, keyboard panning resets, and fullscreen can be exited
   expect(geography.getAttribute("transform")).toBe("translate(0,0) scale(1)");
   expect(window.location.search).toContain("iso=JPN");
   await user.click(screen.getByRole("button", { name: "Fullscreen", exact: true }));
-  expect(container.querySelector(".map-page.is-fullscreen")).toBeTruthy();
+  const fullscreenMap = container.querySelector(".map-wrap.is-fullscreen");
+  expect(fullscreenMap).toBeTruthy();
+  expect(fullscreenMap.contains(svg)).toBe(true);
+  expect(within(fullscreenMap).getByRole("button", { name: "Exit fullscreen" })).toBeTruthy();
+  expect(fullscreenMap.querySelector(".map-controls")).toBeNull();
+  expect(fullscreenMap.querySelector(".map-detail-panel")).toBeNull();
   expect(document.body.style.overflow).toBe("hidden");
   fireEvent.keyDown(document, { key: "Escape" });
-  expect(container.querySelector(".map-page.is-fullscreen")).toBeNull();
+  expect(container.querySelector(".map-wrap.is-fullscreen")).toBeNull();
   expect(document.body.style.overflow).not.toBe("hidden");
   expect(screen.getByRole("button", { name: "Fullscreen", exact: true })).toBe(document.activeElement);
 });

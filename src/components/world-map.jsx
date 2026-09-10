@@ -54,7 +54,7 @@ export default function WorldMap() {
     iso = (params.get("iso") ?? "").trim().toUpperCase();
   const [search, setSearch] = useState(null),
     [hover, setHover] = useState(null);
-  const pageRef = useRef(null), svgRef = useRef(null), zoomRef = useRef(null);
+  const mapRef = useRef(null), svgRef = useRef(null), zoomRef = useRef(null);
   const fullscreenButtonRef = useRef(null);
   const [transform, setTransform] = useState(zoomIdentity);
   const [fullscreen, setFullscreen] = useState(false);
@@ -80,7 +80,7 @@ export default function WorldMap() {
   }, [ready]);
   useEffect(() => {
     const sync = () => {
-      setFullscreen(document.fullscreenElement === pageRef.current);
+      setFullscreen(document.fullscreenElement === mapRef.current);
       if (!document.fullscreenElement) fullscreenButtonRef.current?.focus();
     };
     document.addEventListener("fullscreenchange", sync);
@@ -96,7 +96,7 @@ export default function WorldMap() {
         fullscreenButtonRef.current?.focus();
       }
       if (event.key === "Tab") {
-        const targets = [...pageRef.current.querySelectorAll('button:not(:disabled), input, a[href], [tabindex="0"]')];
+        const targets = [...mapRef.current.querySelectorAll('button:not(:disabled), input, a[href], [tabindex="0"]')];
         const first = targets[0], last = targets.at(-1);
         if (event.shiftKey && document.activeElement === first) {
           event.preventDefault(); last?.focus();
@@ -119,10 +119,10 @@ export default function WorldMap() {
   };
   const toggleFullscreen = async () => {
     if (fullscreen) {
-      if (document.fullscreenElement === pageRef.current) await document.exitFullscreen();
+      if (document.fullscreenElement === mapRef.current) await document.exitFullscreen();
       setFullscreen(false);
     } else {
-      try { await pageRef.current.requestFullscreen(); } catch { /* Expand within browsers without native fullscreen. */ }
+      try { await mapRef.current.requestFullscreen(); } catch { /* Expand within browsers without native fullscreen. */ }
       setFullscreen(true);
     }
   };
@@ -173,7 +173,7 @@ export default function WorldMap() {
     <>
       <Header title="Tomer index by country" kicker="World map" />
       <DataStatus datasets={datasets} />
-      <main ref={pageRef} className={`map-page${fullscreen ? " is-fullscreen" : ""}`}>
+      <main className="map-page">
         <section className="map-controls" aria-label="Map controls">
           <YearControl
             id="map-year-slider"
@@ -249,6 +249,7 @@ export default function WorldMap() {
         </section>
         {ready && (
           <>
+            <div ref={mapRef} className={`map-wrap${fullscreen ? " is-fullscreen" : ""}`}>
             <div className="map-toolbar" role="group" aria-label="Map view controls">
               <span className="map-view-hint">Equal Earth · Scroll or pinch to zoom · Drag to pan</span>
               <button className="btn" onClick={() => changeZoom(1 / 1.5)} disabled={transform.k <= 1} aria-label="Zoom out">−</button>
@@ -259,7 +260,6 @@ export default function WorldMap() {
                 {fullscreen ? "Exit fullscreen" : "Fullscreen"}
               </button>
             </div>
-            <div className="map-wrap">
               <svg
                 ref={svgRef}
                 viewBox="0 0 960 500"
@@ -315,7 +315,7 @@ export default function WorldMap() {
                       onPointerMove={(event) => {
                         if (event.buttons) return;
                         const rect =
-                          event.currentTarget.ownerSVGElement.getBoundingClientRect();
+                          mapRef.current.getBoundingClientRect();
                         setHover({
                           iso: shape.iso,
                           name: shape.name,
