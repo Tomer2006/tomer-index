@@ -1341,14 +1341,10 @@ table {
   width: fit-content;
   max-width: 100%;
   margin-left: 0.45rem;
-  padding: 0.12rem 0.4rem;
-  border: 1px solid rgba(251, 191, 36, 0.48);
-  border-radius: 999px;
-  background: rgba(251, 191, 36, 0.1);
-  color: #fde68a;
+  color: #c9ad73;
   font-family: var(--font);
   font-size: 0.68rem;
-  font-weight: 650;
+  font-weight: 550;
   line-height: 1.2;
   white-space: nowrap;
   vertical-align: middle;
