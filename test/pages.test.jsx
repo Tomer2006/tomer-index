@@ -226,6 +226,34 @@ test("map supports shared country selection, searching, keyboard selection, and 
   expect(window.location.search).not.toContain("w_health");
 }, 20000);
 
+test("map zoom is bounded, keyboard panning resets, and fullscreen can be exited", async () => {
+  window.history.replaceState(null, "", "/map?iso=JPN");
+  const user = userEvent.setup();
+  const { container } = render(<WorldMap />);
+  await screen.findByRole("heading", { name: "Japan" });
+  const svg = container.querySelector(".map-svg-root");
+  const geography = container.querySelector(".map-geography");
+  expect(screen.getByRole("button", { name: "Zoom out" }).disabled).toBe(true);
+  await user.click(screen.getByRole("button", { name: "Zoom in" }));
+  expect(screen.getByLabelText("Map zoom").textContent).toBe("150%");
+  const beforePan = geography.getAttribute("transform");
+  fireEvent.keyDown(svg, { key: "ArrowRight" });
+  expect(geography.getAttribute("transform")).not.toBe(beforePan);
+  for (let i = 0; i < 8; i++) fireEvent.keyDown(svg, { key: "+" });
+  expect(screen.getByLabelText("Map zoom").textContent).toBe("800%");
+  expect(screen.getByRole("button", { name: "Zoom in" }).disabled).toBe(true);
+  await user.click(screen.getByRole("button", { name: "Reset view" }));
+  expect(geography.getAttribute("transform")).toBe("translate(0,0) scale(1)");
+  expect(window.location.search).toContain("iso=JPN");
+  await user.click(screen.getByRole("button", { name: "Fullscreen", exact: true }));
+  expect(container.querySelector(".map-page.is-fullscreen")).toBeTruthy();
+  expect(document.body.style.overflow).toBe("hidden");
+  fireEvent.keyDown(document, { key: "Escape" });
+  expect(container.querySelector(".map-page.is-fullscreen")).toBeNull();
+  expect(document.body.style.overflow).not.toBe("hidden");
+  expect(screen.getByRole("button", { name: "Fullscreen", exact: true })).toBe(document.activeElement);
+});
+
 test("comparison preserves blank slots and clears stale searches", async () => {
   const user = userEvent.setup();
   render(<Compare />);

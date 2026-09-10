@@ -413,7 +413,25 @@ a {
   width: 100%;
   height: auto;
   background: transparent;
+  touch-action: none;
+  cursor: grab;
 }
+
+.map-svg-root:active { cursor: grabbing; }
+.map-svg-root:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.map-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.map-toolbar output { min-width: 3.5rem; text-align: center; font-family: var(--mono); }
+.map-view-hint { margin-right: auto; color: var(--muted); font-size: 0.75rem; }
+.map-toolbar .btn { min-height: 44px; min-width: 44px; }
+.map-toolbar .btn:disabled { opacity: 0.4; cursor: default; }
+.map-page.is-fullscreen, .map-page:fullscreen {
+  position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100dvh;
+  box-sizing: border-box; padding: 1rem; background: var(--bg); overflow: auto;
+}
+.map-page.is-fullscreen .map-wrap { flex: 1 0 45vh; }
+.map-page.is-fullscreen .map-svg-root { height: 100%; min-height: 45vh; }
+.map-page.is-fullscreen .map-controls, .map-page.is-fullscreen .map-detail-panel,
+.map-page.is-fullscreen .map-toolbar { flex-shrink: 0; }
 
 .map-ocean {
   fill: #0f1a2a;

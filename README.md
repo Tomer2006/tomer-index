@@ -27,6 +27,8 @@ or side-by-side comparisons.
   scores retain their World Bank definitions. Multiple region selections are combined.
 - Compare several countries across the full index, individual pillars, and raw inputs.
 - Experiment with custom pillar weights on either the leaderboard or world map.
+- Explore the Equal Earth map in fullscreen, zoom up to 8×, and pan by dragging.
+  Use scroll or pinch to zoom, or focus the map and use +/−, arrow keys, and Home.
 - Open a country page to inspect its score and input history from 2000–2025.
 - See source-year badges, estimated HALE labels, and incomplete-data warnings.
 - Follow a population-weighted fixed cohort for a comparable long-run trend.

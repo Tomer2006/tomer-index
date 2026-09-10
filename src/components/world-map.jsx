@@ -1,7 +1,9 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { geoEquirectangular, geoPath } from "d3-geo";
+import { geoEqualEarth, geoPath } from "d3-geo";
+import { select as selectElement } from "d3-selection";
+import { zoom, zoomIdentity } from "d3-zoom";
 import { useDataset, useQuery } from "./hooks";
 import {
   Header,
@@ -34,9 +36,7 @@ const COLORS = [
   "#f0f921",
 ];
 const path = geoPath(
-  geoEquirectangular()
-    .scale(960 / (2 * Math.PI))
-    .translate([480, 250]),
+  geoEqualEarth().fitExtent([[18, 18], [942, 482]], { type: "Sphere" }),
 );
 const quantile = (sorted, probability) => {
   const position = (sorted.length - 1) * probability,
@@ -54,11 +54,78 @@ export default function WorldMap() {
     iso = (params.get("iso") ?? "").trim().toUpperCase();
   const [search, setSearch] = useState(null),
     [hover, setHover] = useState(null);
+  const pageRef = useRef(null), svgRef = useRef(null), zoomRef = useRef(null);
+  const fullscreenButtonRef = useRef(null);
+  const [transform, setTransform] = useState(zoomIdentity);
+  const [fullscreen, setFullscreen] = useState(false);
   const leaderboard = useDataset("leaderboard"),
     history = useDataset("series", year !== YEAR_MAX),
     world = useDataset("world");
   const datasets =
     year === YEAR_MAX ? [leaderboard, world] : [leaderboard, history, world];
+  const ready = datasets.every((dataset) => dataset.data);
+  useEffect(() => {
+    if (!ready) return;
+    const svg = selectElement(svgRef.current);
+    const behavior = zoom()
+      .extent([[0, 0], [960, 500]])
+      .translateExtent([[0, 0], [960, 500]])
+      .scaleExtent([1, 8])
+      .clickDistance(5)
+      .on("start", () => setHover(null))
+      .on("zoom", (event) => setTransform(event.transform));
+    zoomRef.current = behavior;
+    svg.call(behavior).call(behavior.transform, zoomIdentity);
+    return () => { svg.on(".zoom", null); zoomRef.current = null; };
+  }, [ready]);
+  useEffect(() => {
+    const sync = () => {
+      setFullscreen(document.fullscreenElement === pageRef.current);
+      if (!document.fullscreenElement) fullscreenButtonRef.current?.focus();
+    };
+    document.addEventListener("fullscreenchange", sync);
+    return () => document.removeEventListener("fullscreenchange", sync);
+  }, []);
+  useEffect(() => {
+    if (!fullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event) => {
+      if (event.key === "Escape" && !document.fullscreenElement) {
+        setFullscreen(false);
+        fullscreenButtonRef.current?.focus();
+      }
+      if (event.key === "Tab") {
+        const targets = [...pageRef.current.querySelectorAll('button:not(:disabled), input, a[href], [tabindex="0"]')];
+        const first = targets[0], last = targets.at(-1);
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault(); last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault(); first?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [fullscreen]);
+  const changeZoom = (factor) => {
+    if (zoomRef.current) selectElement(svgRef.current).call(zoomRef.current.scaleBy, factor);
+  };
+  const resetView = () => {
+    if (zoomRef.current) selectElement(svgRef.current).call(zoomRef.current.transform, zoomIdentity);
+  };
+  const toggleFullscreen = async () => {
+    if (fullscreen) {
+      if (document.fullscreenElement === pageRef.current) await document.exitFullscreen();
+      setFullscreen(false);
+    } else {
+      try { await pageRef.current.requestFullscreen(); } catch { /* Expand within browsers without native fullscreen. */ }
+      setFullscreen(true);
+    }
+  };
   const countries = leaderboard.data?.countries ?? [],
     series = history.data?.entrySeries ?? {};
   const rows = rowsForYear(countries, series, year).filter(
@@ -106,7 +173,7 @@ export default function WorldMap() {
     <>
       <Header title="Tomer index by country" kicker="World map" />
       <DataStatus datasets={datasets} />
-      <main className="map-page">
+      <main ref={pageRef} className={`map-page${fullscreen ? " is-fullscreen" : ""}`}>
         <section className="map-controls" aria-label="Map controls">
           <YearControl
             id="map-year-slider"
@@ -180,21 +247,48 @@ export default function WorldMap() {
             onChange={(next) => update(weightQuery(next))}
           />
         </section>
-        {datasets.every((dataset) => dataset.data) && (
+        {ready && (
           <>
+            <div className="map-toolbar" role="group" aria-label="Map view controls">
+              <span className="map-view-hint">Equal Earth · Scroll or pinch to zoom · Drag to pan</span>
+              <button className="btn" onClick={() => changeZoom(1 / 1.5)} disabled={transform.k <= 1} aria-label="Zoom out">−</button>
+              <output aria-label="Map zoom">{Math.round(transform.k * 100)}%</output>
+              <button className="btn" onClick={() => changeZoom(1.5)} disabled={transform.k >= 8} aria-label="Zoom in">+</button>
+              <button className="btn" onClick={resetView}>Reset view</button>
+              <button ref={fullscreenButtonRef} className="btn" onClick={toggleFullscreen} aria-pressed={fullscreen}>
+                {fullscreen ? "Exit fullscreen" : "Fullscreen"}
+              </button>
+            </div>
             <div className="map-wrap">
               <svg
+                ref={svgRef}
                 viewBox="0 0 960 500"
                 className="map-svg-root"
-                aria-label="Choropleth world map of Tomer index"
+                aria-label="Equal Earth world map of Tomer index. Use plus and minus to zoom, arrow keys to pan, and Home to reset."
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (["+", "=", "-", "Home", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+                    event.preventDefault();
+                    if (["+", "="].includes(event.key)) changeZoom(1.5);
+                    else if (event.key === "-") changeZoom(1 / 1.5);
+                    else if (event.key === "Home") resetView();
+                    else {
+                      const [x, y] = { ArrowLeft: [60, 0], ArrowRight: [-60, 0], ArrowUp: [0, 60], ArrowDown: [0, -60] }[event.key];
+                      selectElement(svgRef.current).call(zoomRef.current.translateBy, x / transform.k, y / transform.k);
+                    }
+                  }
+                }}
                 onPointerLeave={() => setHover(null)}
               >
                 <rect
                   width="960"
                   height="500"
-                  className="map-ocean"
+                  fill="transparent"
                   onClick={() => select("")}
                 />
+                <g className="map-geography" transform={transform.toString()}>
+                <path d={path({ type: "Sphere" })} className="map-ocean" onClick={() => select("")} />
                 {[
                   ...shapes.filter((shape) => shape.iso !== iso),
                   ...shapes.filter((shape) => shape.iso === iso),
@@ -219,6 +313,7 @@ export default function WorldMap() {
                         }
                       }}
                       onPointerMove={(event) => {
+                        if (event.buttons) return;
                         const rect =
                           event.currentTarget.ownerSVGElement.getBoundingClientRect();
                         setHover({
@@ -245,11 +340,12 @@ export default function WorldMap() {
                   <circle
                     cx={selectedShape.center[0]}
                     cy={selectedShape.center[1]}
-                    r={5}
+                    r={5 / transform.k}
                     className="map-selected-marker"
                     pointerEvents="none"
                   />
                 )}
+                </g>
               </svg>
               {hover && (
                 <div
