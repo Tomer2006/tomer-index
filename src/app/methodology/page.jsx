@@ -200,15 +200,14 @@ export default function Page() {
 
           <h2>Year coverage and back-fill</h2>
           <p>
-            The leaderboard supports any year from <strong>2000 to 2024</strong>
+            The leaderboard supports any year from <strong>2000 to 2025</strong>
             . For each displayed year we use the latest source observation on or
             before that year, looking back as far as 2000; later observations
             are never pulled backward, and the data pipeline does not ingest
-            observations newer than 2024 at all (recent vintages may still be
-            revised). The actual source year for each metric is stored on every
-            data point and shown next to every value on the leaderboard — muted
-            when it matches the displayed year, highlighted when the value was
-            carried forward from an earlier year.
+            observations newer than 2025. Source releases have different lags,
+            so a 2025 score can include older observations. The actual source
+            year for each metric is stored on every data point and shown next
+            to every value on the leaderboard, with details in its tooltip.
           </p>
           <p>
             HALE is the exception to flat carry-forward: missing HALE years are
@@ -232,7 +231,7 @@ export default function Page() {
           <p>
             The headline trend uses a <strong>fixed cohort</strong>: only
             countries with a complete index for every year from 2000 through
-            2024 are included, and the same countries remain in the calculation
+            2025 are included, and the same countries remain in the calculation
             throughout. Population weights still change normally over time. This
             prevents a country entering the dataset from creating a false rise
             or fall. The chart states its cohort size and coverage and is not

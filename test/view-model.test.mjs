@@ -9,6 +9,7 @@ import {
   weightQuery,
 } from "../src/view-model.js";
 import { DEFAULT_WEIGHT_POINTS } from "../src/index-weights.js";
+import { YEAR_MIN, YEAR_MAX } from "../src/site-years.js";
 
 test("historical snapshots never leak latest metrics or source years into missing observations", () => {
   const latest = [
@@ -30,7 +31,7 @@ test("historical snapshots never leak latest metrics or source years into missin
   assert.equal(point.haleYear, undefined);
   assert.equal(point.region.id, "R");
   assert.deepEqual(rowsForYear(latest, series, 2001), []);
-  assert.equal(rowsForYear(latest, series, 2024), latest);
+  assert.equal(rowsForYear(latest, series, YEAR_MAX), latest);
 });
 
 test("every historical snapshot agrees with the committed dataset, including missing values", () => {
@@ -53,7 +54,7 @@ test("every historical snapshot agrees with the committed dataset, including mis
     "homicideYear",
     "freedomYear",
   ];
-  for (let year = 2000; year < 2024; year++) {
+  for (let year = YEAR_MIN; year < YEAR_MAX; year++) {
     const rows = rowsForYear(countries, entrySeries, year);
     assert.ok(rows.length > 100);
     for (const row of rows) {
@@ -84,8 +85,8 @@ test("sorting puts missing values last in both directions and honors lower-is-be
 
 test("shared links validate years and weights and round-trip custom weights", () => {
   assert.equal(readYear(new URLSearchParams("year=1990")), 2000);
-  assert.equal(readYear(new URLSearchParams("year=2030")), 2024);
-  assert.equal(readYear(new URLSearchParams("year=invalid")), 2024);
+  assert.equal(readYear(new URLSearchParams("year=2030")), YEAR_MAX);
+  assert.equal(readYear(new URLSearchParams("year=invalid")), YEAR_MAX);
   assert.deepEqual(
     readWeights(
       new URLSearchParams(

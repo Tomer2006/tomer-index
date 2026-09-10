@@ -1,6 +1,6 @@
 # Tomer index
 
-![Data coverage](https://img.shields.io/badge/data-2000--2024-0f766e)
+![Data coverage](https://img.shields.io/badge/data-2000--2025-0f766e)
 ![Scoring](https://img.shields.io/badge/scoring-absolute-2563eb)
 ![Next.js](https://img.shields.io/badge/Next.js-16.3.4-black?logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-19.2.8-149eca?logo=react)
@@ -10,7 +10,7 @@ An interactive country index built around four dimensions of a good society:
 **abundance, safety, health, and freedom**.
 
 The project turns public data into a transparent, reproducible score for countries,
-World Bank regions, income groups, and other aggregates from **2000 through 2024**.
+World Bank regions, income groups, and other aggregates from **2000 through 2025**.
 Explore the results as a sortable leaderboard, a choropleth map, country histories,
 or side-by-side comparisons.
 
@@ -27,7 +27,7 @@ or side-by-side comparisons.
   scores retain their World Bank definitions. Multiple region selections are combined.
 - Compare several countries across the full index, individual pillars, and raw inputs.
 - Experiment with custom pillar weights on either the leaderboard or world map.
-- Open a country page to inspect its score and input history from 2000–2024.
+- Open a country page to inspect its score and input history from 2000–2025.
 - See source-year badges, estimated HALE labels, and incomplete-data warnings.
 - Follow a population-weighted fixed cohort for a comparable long-run trend.
 
@@ -60,7 +60,7 @@ rationale in [the methodology](./src/app/methodology/page.jsx).
 
 ## Data and coverage
 
-The tracker uses observations from **2000–2024** and stores the actual source year
+The tracker uses observations from **2000–2025** and stores the actual source year
 beside every metric. For a displayed year, the pipeline uses the latest observation
 available on or before that year; it never pulls future observations backward.
 
@@ -154,7 +154,7 @@ and writes:
   (gitignored and not shipped).
 
 The leaderboard and map lazy-load the larger history file when a visitor selects a
-year before 2024. Entry and comparison pages load it immediately for their charts.
+year before 2025. Entry and comparison pages load it immediately for their charts.
 Data requests are shared across client navigation, and failed requests can be retried.
 
 ## Limitations

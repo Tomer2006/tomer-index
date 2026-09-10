@@ -8,7 +8,7 @@ export const metadata = {
 
 const files = [
   ["leaderboard.json", "Latest leaderboard", "Country and aggregate scores, raw inputs, pillar weights, source years, and data-quality metadata.", "JSON"],
-  ["series.json", "Full historical data", "Annual country and aggregate histories for 2000–2024, including available inputs, scores, and source years.", "JSON"],
+  ["series.json", "Full historical data", "Annual country and aggregate histories for 2000–2025, including available inputs, scores, and source years.", "JSON"],
   ["world.geojson", "World map boundaries", "The geographic features used to draw the interactive country map.", "GeoJSON"],
 ];
 

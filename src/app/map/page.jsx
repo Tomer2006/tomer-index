@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import WorldMap from "../../components/world-map";
 export const metadata = {
   title: "Map",
-  description: "Choropleth world map of the Tomer index by country, 2000–2024.",
+  description: "Choropleth world map of the Tomer index by country, 2000–2025.",
 };
 export default function Page() {
   return (

@@ -156,7 +156,7 @@ async function fetchHfiPersonalFreedom() {
       console.warn(
         `Human Freedom Index download unavailable; using ${rows.length} cached observations.`
       );
-      return rows;
+      return { rows, status: "cached" };
     } catch {
       throw error;
     }
@@ -193,7 +193,7 @@ async function fetchHfiPersonalFreedom() {
       country: { value: data.countries?.[key] ?? iso },
     });
   }
-  return rows;
+  return { rows, status: "downloaded" };
 }
 
 function yearWindowFromRange(range) {
@@ -977,7 +977,8 @@ async function main() {
   const incomeRows = incomeRowsWithGdpFallback(gniRows, gdpRows);
   const homRows = worldBankData.intentionalHomicidesPer100k.rows;
   console.log("Fetching Human Freedom Index personal-freedom scores …");
-  const freedomRows = await fetchHfiPersonalFreedom();
+  const freedomDownload = await fetchHfiPersonalFreedom();
+  const freedomRows = freedomDownload.rows;
   const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
   // Same cap as the WDI fetch: drop observations past the display window at the
@@ -1073,6 +1074,19 @@ async function main() {
     generatedAt: new Date().toISOString(),
     yearWindow: DATE_RANGE,
     worldBankAudit,
+    sourceRefresh: {
+      worldBank: { status: "downloaded" },
+      whoHale: {
+        status: "downloaded",
+        latestObservationYear: Math.max(...haleRows.map((row) => Number(row.TimeDim))),
+      },
+      humanFreedomIndex: {
+        status: freedomDownload.status,
+        edition: 2025,
+        latestObservationYear: Math.max(...freedomRows.map((row) => Number(row.date))),
+        url: HFI_URL,
+      },
+    },
     indicators: {
       lifeExpectancy: WB_LE,
       healthyLifeExpectancyHale: "WHO WHOSIS_000002 (HALE at birth, both sexes)",
@@ -1122,6 +1136,7 @@ async function main() {
   );
   const leaderboardPayload = {
     generatedAt: payload.generatedAt,
+    sourceRefresh: payload.sourceRefresh,
     yearWindow: payload.yearWindow,
     indicators: payload.indicators,
     sourcePolicy: payload.sourcePolicy,
@@ -1137,6 +1152,7 @@ async function main() {
   };
   const seriesPayload = {
     generatedAt: payload.generatedAt,
+    sourceRefresh: payload.sourceRefresh,
     yearWindow: payload.yearWindow,
     entrySeries,
   };

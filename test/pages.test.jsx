@@ -13,6 +13,7 @@ import Leaderboard from "../src/components/leaderboard";
 import Compare from "../src/components/compare";
 import Entry from "../src/components/entry";
 import WorldMap from "../src/components/world-map";
+import { YEAR_MAX } from "../src/site-years.js";
 import {
   loadLeaderboardData,
   loadSeriesData,
@@ -183,7 +184,7 @@ test("entry history shows source labels and keyboard-accessible charts; invalid 
   expect(screen.getAllByRole("img")).toHaveLength(6);
   fireEvent.keyDown(screen.getAllByRole("img")[0], { key: "ArrowLeft" });
   expect(
-    within(view.container.querySelector(".metric-card")).getByText("2023"),
+    within(view.container.querySelector(".metric-card")).getByText(String(YEAR_MAX - 1)),
   ).toBeTruthy();
   expect(document.title).toBe("Japan history — Tomer index");
   expect(
