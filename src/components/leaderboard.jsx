@@ -123,7 +123,7 @@ function useUrlDraft(value, read, key = String) {
 }
 
 // The prerendered snapshot shows the same lede, so the page keeps its height when
-// the client view takes over; without JavaScript (no year badges) CSS hides the years.
+// the client view takes over.
 function LeaderboardLede() {
   return (
     <p className="leaderboard-lede">
@@ -151,7 +151,8 @@ function RankText({ row, rank }) {
 }
 
 // Memoized rows and cards: a filter or rank change only touches rows it moves.
-const TableRow = memo(function TableRow({ row, rank, quality, year, weights }) {
+// The page's prerendered snapshot renders these too, so the two views match.
+export const TableRow = memo(function TableRow({ row, rank, quality, year, weights }) {
   return (
     <tr
       data-iso={row.iso}
@@ -188,7 +189,7 @@ const TableRow = memo(function TableRow({ row, rank, quality, year, weights }) {
   );
 });
 
-const LeaderboardCard = memo(function LeaderboardCard({
+export const LeaderboardCard = memo(function LeaderboardCard({
   row,
   rank,
   quality,

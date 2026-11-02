@@ -453,10 +453,9 @@ a {
   }
 }
 
-/* Without JavaScript only the prerendered snapshot shows: no year badges, and
-   its inert stand-in controls would never work. */
+/* Without JavaScript only the prerendered snapshot shows, and its inert
+   stand-in controls would never work. */
 @media (scripting: none) {
-  .leaderboard-lede-years,
   .leaderboard-controls[inert],
   .mobile-sort[inert] {
     display: none;
@@ -1940,6 +1939,76 @@ a {
   vertical-align: bottom;
 }
 
+/* Fixed column widths, so the prerendered snapshot (25 rows) and the live table
+   (every row and badge) lay out the same and nothing moves when one replaces the
+   other. Each width fits its column's widest content at that tier's padding;
+   Place takes the rest. Narrower than the minimum, the table scrolls sideways. */
+.leaderboard-table {
+  --col-rank: 4.125rem;
+  --col-tomer: 8.375rem;
+  --col-le: 6rem;
+  --col-hale: 5.5rem;
+  --col-health: 7.5rem;
+  --col-homicides: 10rem;
+  --col-freedom: 7rem;
+  --col-gni: 9.375rem;
+  table-layout: fixed;
+  min-width: 43.5rem;
+}
+
+@media (max-width: 1200px) {
+  .leaderboard-table {
+    --col-rank: 3.25rem;
+    --col-tomer: 7.5rem;
+    --col-le: 4.375rem;
+    --col-hale: 4.625rem;
+    --col-health: 5.625rem;
+    --col-homicides: 7.5rem;
+    --col-freedom: 6.125rem;
+    --col-gni: 6.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .leaderboard-table {
+    --col-rank: 2.875rem;
+    --col-tomer: 7.125rem;
+    --col-le: 3.375rem;
+    --col-hale: 3.625rem;
+    --col-health: 4.5rem;
+    --col-homicides: 5.625rem;
+    --col-freedom: 4.625rem;
+    --col-gni: 5.125rem;
+  }
+}
+
+.leaderboard-table thead th:first-child { width: var(--col-rank); }
+.leaderboard-table thead th[data-metric="tomer"] { width: var(--col-tomer); }
+.leaderboard-table thead th[data-metric="le"] { width: var(--col-le); }
+.leaderboard-table thead th[data-metric="hale"] { width: var(--col-hale); }
+.leaderboard-table thead th[data-metric="health"] { width: var(--col-health); }
+.leaderboard-table thead th[data-metric="homicides"] { width: var(--col-homicides); }
+.leaderboard-table thead th[data-metric="freedom"] { width: var(--col-freedom); }
+.leaderboard-table thead th[data-metric="gni"] { width: var(--col-gni); }
+
+/* The snapshot can't know the screen size: it carries both the phone cards and
+   the table, and shows the one the live view will use (see PHONE_QUERY). */
+.leaderboard-snapshot {
+  display: contents;
+}
+
+@media (max-width: 560px) {
+  .leaderboard-snapshot .table-wrap {
+    display: none;
+  }
+}
+
+@media (min-width: 561px) {
+  .leaderboard-snapshot .leaderboard-cards {
+    display: none;
+  }
+}
+
 .leaderboard-table .th-sort {
   display: flex;
   align-items: center;
@@ -1971,14 +2040,9 @@ a {
   color: var(--text);
 }
 
-/* The prerendered snapshot's headers are plain labels, not sort buttons. Its
-   badge-free columns are wider, so its labels fit on one line; reserve the two
-   lines the live table's labels take, so the rows stay put when it replaces it. */
+/* The prerendered snapshot's headers are plain labels, not sort buttons. */
 .leaderboard-table span.th-sort {
   cursor: auto;
-  align-items: flex-end;
-  align-items: last baseline;
-  min-height: calc(2lh + 1.5rem);
 }
 
 .leaderboard-table span.th-sort:hover {

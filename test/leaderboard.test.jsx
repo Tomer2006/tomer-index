@@ -4,6 +4,7 @@ import { beforeAll, expect, onTestFinished, test, vi } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Leaderboard, { LeaderboardPreview } from "../src/components/leaderboard";
+import LeaderboardSnapshot from "../src/components/leaderboard-snapshot";
 import { YEAR_MAX } from "../src/site-years.js";
 import {
   loadEntrySeries,
@@ -177,6 +178,41 @@ test("phones get compact, fully tappable cards instead of the table", async () =
   expect(world.querySelector(".leaderboard-card-rank").textContent).toBe(
     "World · 146 countries",
   );
+});
+
+// useId ids differ between two renders; nothing else may.
+const markup = (elements) =>
+  [...elements].map((el) =>
+    el.outerHTML.replace(/ (id|aria-describedby)="[^"]*"/g, ""),
+  );
+
+test("the prerendered snapshot's rows and cards are the live view's first 25, markup for markup", async () => {
+  // So nothing on screen changes when the live view replaces the snapshot.
+  const snapshot = render(<LeaderboardSnapshot />).container;
+  const snapshotRows = snapshot.querySelectorAll(".leaderboard-table tbody tr");
+  const snapshotCards = snapshot.querySelectorAll(".leaderboard-card");
+  expect(snapshotRows).toHaveLength(25);
+  expect(snapshotCards).toHaveLength(25);
+  expect(
+    [...snapshot.querySelectorAll(".leaderboard-table thead th")].map((th) => th.textContent),
+  ).toEqual(["Rank", "Place", "Tomer index↓", "Life exp.", "HALE", "Health score", "Homicides per 100k", "Freedom", "Income per person"]);
+
+  const table = render(<Leaderboard />);
+  await screen.findByRole("table");
+  const liveRows = [...table.container.querySelectorAll(".leaderboard-table tbody tr")];
+  expect(markup(liveRows.slice(0, 25))).toEqual(markup(snapshotRows));
+  table.unmount();
+
+  window.matchMedia = (query) => ({
+    matches: query === "(max-width: 560px)",
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  });
+  onTestFinished(() => delete window.matchMedia);
+  const cards = render(<Leaderboard />);
+  await screen.findByText(/^Showing /);
+  const liveCards = [...cards.container.querySelectorAll(".leaderboard-card")];
+  expect(markup(liveCards.slice(0, 25))).toEqual(markup(snapshotCards));
 });
 
 const snapshotTable = <p data-testid="snapshot">Top 25 of 146 countries.</p>;
