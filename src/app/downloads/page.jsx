@@ -64,7 +64,14 @@ const FIELDS = [
       in life expectancy (for a group, when any member’s was).
     </>,
   ],
-  ["homicidesPer100k", <>Intentional homicides per 100,000 people.</>],
+  [
+    "homicidesPer100k, warDeathsPer100k, roadDeathsPer100k, safetyDeathsPer100k",
+    <>
+      Deaths per 100,000 people from intentional homicide, war (battle-related
+      deaths, 0 in years without fighting), and road crashes, and their total,
+      which the safety pillar scores.
+    </>,
+  ],
   ["freedom", <>Personal freedom score, 0–100.</>],
   [
     "gni, incomeSource, incomeEstimated",
@@ -79,7 +86,7 @@ const FIELDS = [
     </>,
   ],
   [
-    "leYear, haleYear, gniYear, homicideYear, freedomYear",
+    "leYear, haleYear, gniYear, homicideYear, warYear, roadYear, freedomYear",
     <>
       The source year of each input, which can be earlier than the year shown.
       Group rows say “mixed” in leaderboard.json and leave them out in

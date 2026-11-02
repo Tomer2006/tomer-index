@@ -9,7 +9,8 @@ import {
   customIndexFromPillarsFull,
   freedomIndexFromScore,
   incomeIndexFromGni,
-  safetyIndexFromHomicidesPer100k,
+  safetyDeathsPer100k,
+  safetyIndexFromDeathsPer100k,
 } from "../src/hdi-core.js";
 import { YEAR_MIN, YEAR_MAX } from "../src/site-years.js";
 
@@ -22,9 +23,25 @@ const { entrySeries } = JSON.parse(
 const countries = leaderboard.countries.filter((row) => !row.derivedKind);
 const groups = leaderboard.countries.filter((row) => row.derivedKind);
 
-const INPUTS = ["le", "hale", "gni", "homicidesPer100k", "freedom"];
+const INPUTS = [
+  "le",
+  "hale",
+  "gni",
+  "homicidesPer100k",
+  "warDeathsPer100k",
+  "roadDeathsPer100k",
+  "freedom",
+];
 const PILLARS = ["abundanceIndex", "safetyIndex", "healthIndex", "freedomIndex"];
-const SOURCE_YEARS = ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"];
+const SOURCE_YEARS = [
+  "leYear",
+  "haleYear",
+  "gniYear",
+  "homicideYear",
+  "warYear",
+  "roadYear",
+  "freedomYear",
+];
 const GROUP_KINDS = ["world", "region", "adminregion", "incomeLevel", "lendingType"];
 
 function rounded(value, digits) {
@@ -89,13 +106,19 @@ test("stored pillars and Tomer index recompute from the stored inputs", () => {
   for (const [iso, entry] of Object.entries(entrySeries)) {
     for (const point of entry.points) {
       if (!Number.isFinite(point.customIndex)) continue;
+      const where = `${iso}/${point.year}`;
+      const deaths = safetyDeathsPer100k(
+        point.homicidesPer100k,
+        point.warDeathsPer100k,
+        point.roadDeathsPer100k,
+      );
+      assert.equal(point.safetyDeathsPer100k, rounded(deaths, 3), `${where} deaths`);
       const pillars = {
         abundance: rounded(incomeIndexFromGni(point.gni), 6),
-        safety: rounded(safetyIndexFromHomicidesPer100k(point.homicidesPer100k), 6),
+        safety: rounded(safetyIndexFromDeathsPer100k(point.safetyDeathsPer100k), 6),
         health: rounded(combinedHealthLei(point.le, point.hale), 6),
         freedom: rounded(freedomIndexFromScore(point.freedom), 6),
       };
-      const where = `${iso}/${point.year}`;
       assert.equal(point.abundanceIndex, pillars.abundance, `${where} abundance`);
       assert.equal(point.safetyIndex, pillars.safety, `${where} safety`);
       assert.equal(point.healthIndex, pillars.health, `${where} health`);

@@ -121,6 +121,19 @@ test("full badges list only differing years, but always the GDP fallback", () =>
   );
 });
 
+test("war and road deaths get their own badge labels and stale-data notes", () => {
+  const safety = { homicideYear: 2023, warYear: 2024, roadYear: 2019 };
+  const keys = ["homicideYear", "warYear", "roadYear"];
+  assert.deepEqual(
+    sourceYearParts(safety, keys, 2025).map((part) => part.label),
+    ["Homicides", "War", "Road"],
+  );
+  const badge = sourceBadge(safety, keys, 2025, { compact: true });
+  assert.equal(badge.text, "2019–2024");
+  assert.equal(badge.stale, true);
+  assert.match(badge.description, /Latest road death data is from 2019 \(6 years earlier\)\./);
+});
+
 test("history gaps are described with canonical labels and year ranges", () => {
   const points = [2000, 2001, 2002, 2003, 2004].map((year) => ({
     year,
@@ -128,6 +141,8 @@ test("history gaps are described with canonical labels and year ranges", () => {
     hale: 70,
     gni: 40000,
     homicidesPer100k: year < 2003 ? null : 1,
+    warDeathsPer100k: 0,
+    roadDeathsPer100k: year === 2001 ? null : 4,
     freedom: year === 2000 ? null : 90,
     customIndex: year < 2003 ? null : 0.9,
   }));
@@ -135,7 +150,7 @@ test("history gaps are described with canonical labels and year ranges", () => {
   assert.equal(quality.label, "History gaps");
   assert.equal(
     quality.description,
-    "Some years between 2000 and 2025 are missing at least one index input (Homicides per 100k: 2000–2002; Freedom: 2000).",
+    "Some years between 2000 and 2025 are missing at least one index input (Homicides per 100k: 2000–2002; Road deaths per 100k: 2001; Freedom: 2000).",
   );
   assert.equal(quality.badPoints, 3);
   assert.equal(dataQualityForSeries({ points: points.slice(3) }), null);

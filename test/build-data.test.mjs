@@ -80,32 +80,26 @@ function scriptedFetch(answers) {
   return { impl, calls };
 }
 
-/** Inputs for one country with the same value in every listed year. */
+/**
+ * Series inputs and HALE history for countries with the same value in every listed year.
+ * War deaths default to 0 and road deaths to 5 per 100k; pass null to leave one out.
+ */
 function inputs(countries) {
-  const le = [];
-  const gni = [];
-  const hom = [];
-  const freedom = [];
-  const pop = [];
+  const rows = { le: [], gni: [], homicide: [], war: [], road: [], freedom: [], pop: [] };
   const hale = [];
   for (const c of countries) {
+    const values = { war: 0, road: 5, ...c, homicide: c.hom };
     for (const year of c.years) {
-      if (c.le != null) le.push(wbRow(c.iso, year, c.le));
-      if (c.gni != null) gni.push(wbRow(c.iso, year, c.gni));
-      if (c.hom != null) hom.push(wbRow(c.iso, year, c.hom));
-      if (c.freedom != null) freedom.push(wbRow(c.iso, year, c.freedom));
-      if (c.pop != null) pop.push(wbRow(c.iso, year, c.pop));
+      for (const key of Object.keys(rows))
+        if (values[key] != null) rows[key].push(wbRow(c.iso, year, values[key]));
       if (c.hale != null) hale.push(whoRow(c.iso, year, c.hale));
     }
   }
-  return [
-    byCountryYear(le),
-    byCountryYear(incomeRowsWithGdpFallback(gni, [])),
-    byCountryYear(hom),
-    byCountryYear(freedom),
-    byCountryYear(pop),
-    haleHistoryByIso(hale),
-  ];
+  const byCY = Object.fromEntries(
+    Object.entries(rows).map(([key, list]) => [key, byCountryYear(list)])
+  );
+  byCY.gni = byCountryYear(incomeRowsWithGdpFallback(rows.gni, []));
+  return [byCY, haleHistoryByIso(hale)];
 }
 
 /**
@@ -180,8 +174,7 @@ test("carry-forward uses the latest earlier observation and never a later one", 
   assert.deepEqual(observationAsOfYear(byYear, 2005, 2000), { value: 5, year: 2005 });
   assert.equal(observationAsOfYear(byYear, 2003, 2002), null);
 
-  const leByCY = byCountryYear([wbRow("AAA", 2001, 70), wbRow("AAA", 2004, 72)]);
-  const [, gniByCY, homByCY, freedomByCY, popByCY, haleHistory] = inputs([
+  const [byCY] = inputs([
     {
       iso: "AAA",
       years: [2000, 2001, 2002, 2003, 2004, 2005],
@@ -191,18 +184,11 @@ test("carry-forward uses the latest earlier observation and never a later one", 
       pop: 1e6,
     },
   ]);
+  // Road deaths stop in 2003 and carry forward, as the World Bank's end in 2019.
+  byCY.road = byCountryYear([2000, 2001, 2002, 2003].map((year) => wbRow("AAA", year, 4)));
+  byCY.le = byCountryYear([wbRow("AAA", 2001, 70), wbRow("AAA", 2004, 72)]);
   const hale = haleHistoryByIso([whoRow("AAA", 2002, 62)]);
-  const points = buildCountrySeries(
-    "AAA",
-    leByCY,
-    gniByCY,
-    homByCY,
-    freedomByCY,
-    popByCY,
-    hale,
-    2000,
-    2005
-  );
+  const points = buildCountrySeries("AAA", byCY, hale, 2000, 2005);
   const byPointYear = new Map(points.map((point) => [point.year, point]));
   assert.equal(byPointYear.get(2000).le, undefined);
   assert.equal(byPointYear.get(2000).customIndex, undefined);
@@ -210,13 +196,17 @@ test("carry-forward uses the latest earlier observation and never a later one", 
   assert.equal(byPointYear.get(2005).leYear, 2004);
   assert.equal(byPointYear.get(2001).hale, undefined, "HALE from 2002 must not reach 2001");
   assert.ok(Number.isFinite(byPointYear.get(2002).customIndex));
+  assert.equal(byPointYear.get(2005).roadYear, 2003);
+  assert.equal(byPointYear.get(2005).safetyDeathsPer100k, 6);
+  const sourceKeys = ["leYear", "haleYear", "gniYear", "homicideYear", "warYear", "roadYear", "freedomYear"];
   for (const point of points) {
-    for (const key of ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"]) {
+    for (const key of sourceKeys) {
       if (point[key] != null) assert.ok(point[key] <= point.year, `${point.year} ${key}`);
     }
   }
+  const inputKeys = ["le", "hale", "gni", "homicidesPer100k", "warDeathsPer100k", "roadDeathsPer100k", "freedom"];
   for (const point of points.filter((p) => Number.isFinite(p.customIndex))) {
-    for (const key of ["le", "hale", "gni", "homicidesPer100k", "freedom"]) {
+    for (const key of inputKeys) {
       assert.ok(Number.isFinite(point[key]), `${point.year} index without ${key}`);
     }
   }
@@ -238,16 +228,22 @@ const META = {
     incomeLevel: { id: "LMC", name: "Lower middle income" },
     lendingType: { id: "IDX", name: "IDA only" },
   },
+  DDD: {
+    region: { id: "ECS", name: "Europe & Central Asia" },
+    incomeLevel: { id: "LMC", name: "Lower middle income" },
+    lendingType: { id: "IDX", name: "IDA only" },
+  },
 };
 
 test("group series are population-weighted and skip members missing any input", () => {
   const countryMeta = new Map(Object.entries(META));
   const series = buildDerivedGroupSeries(
     ...inputs([
-      { iso: "AAA", years: [2020], le: 60, hale: 50, gni: 10000, hom: 4, freedom: 60, pop: 1e6 },
-      { iso: "BBB", years: [2020], le: 80, hale: 70, gni: 30000, hom: 0, freedom: 100, pop: 3e6 },
-      // CCC lacks freedom, so it must not count towards any group.
+      { iso: "AAA", years: [2020], le: 60, hale: 50, gni: 10000, hom: 4, war: 40, road: 20, freedom: 60, pop: 1e6 },
+      { iso: "BBB", years: [2020], le: 80, hale: 70, gni: 30000, hom: 0, road: 4, freedom: 100, pop: 3e6 },
+      // CCC lacks freedom and DDD road deaths, so neither counts towards any group.
       { iso: "CCC", years: [2020], le: 40, hale: 30, gni: 1000, hom: 40, pop: 9e6 },
+      { iso: "DDD", years: [2020], le: 40, hale: 30, gni: 1000, hom: 40, road: null, freedom: 50, pop: 9e6 },
     ]),
     countryMeta,
     2020,
@@ -260,6 +256,9 @@ test("group series are population-weighted and skip members missing any input", 
   assert.equal(world.hale, 65);
   assert.equal(world.gni, 25000);
   assert.equal(world.homicidesPer100k, 1);
+  assert.equal(world.warDeathsPer100k, 10);
+  assert.equal(world.roadDeathsPer100k, 8);
+  assert.equal(world.safetyDeathsPer100k, 19);
   assert.equal(world.freedom, 90);
   assert.ok(Number.isFinite(world.customIndex));
   assert.equal(series.get("ECS").points[0].n, 2);
@@ -333,6 +332,8 @@ test("the fixed cohort keeps only countries with a score in every year", () => {
     hale: value - 10,
     gni: 20000,
     homicidesPer100k: 1,
+    warDeathsPer100k: 0,
+    roadDeathsPer100k: 4,
     freedom: 80,
     population,
     customIndex: 0.8,

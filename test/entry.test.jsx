@@ -60,9 +60,13 @@ test("entry ranks count countries only and follow the leaderboard's score order"
       weightedIndexFromPillars(b) - weightedIndexFromPillars(a) ||
       a.name.localeCompare(b.name),
   );
-  byScore.forEach((row, index) => {
+  byScore.forEach((row) => {
     const summary = entrySummary(leaderboard, row.iso);
-    expect(summary.rank, row.iso).toBe(index + 1);
+    // Tied scores (countries at war all score 0) share a rank.
+    const ahead = byScore.filter(
+      (other) => weightedIndexFromPillars(other) > weightedIndexFromPillars(row),
+    ).length;
+    expect(summary.rank, row.iso).toBe(ahead + 1);
     expect(summary.total).toBe(countries.length);
   });
   for (const group of leaderboard.countries.filter((row) => row.derivedKind))
@@ -95,7 +99,7 @@ test("country page leads with the Tomer index, its country rank and onward links
   expect(href("Compare with others")).toBe("/compare?picks=JPN");
   expect(href("View on map")).toBe("/map?iso=JPN");
   expect(href(/leaderboard/)).toBe("/");
-  expect(await screen.findAllByRole("img")).toHaveLength(6);
+  expect(await screen.findAllByRole("img")).toHaveLength(9);
   expect(loadSeriesData).not.toHaveBeenCalled();
 });
 

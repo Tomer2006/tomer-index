@@ -97,14 +97,14 @@ test("leaderboard searches, filters, sorts, changes weights, and restores histor
   expect(table.querySelectorAll("tbody tr")).toHaveLength(
     leaderboard.countries.filter((row) => !row.derivedKind).length,
   );
-  const homicides = screen.getByRole("button", { name: "Homicides per 100k" });
-  await user.click(homicides);
-  expect(window.location.search).toContain("sort=homicides");
-  expect(homicides.closest("th").getAttribute("aria-sort")).toBe("ascending");
+  const deaths = screen.getByRole("button", { name: "Violent & road deaths per 100k" });
+  await user.click(deaths);
+  expect(window.location.search).toContain("sort=deaths");
+  expect(deaths.closest("th").getAttribute("aria-sort")).toBe("ascending");
   expect(table.querySelectorAll("th[aria-sort]")).toHaveLength(1);
   const firstRow = table.querySelector("tbody tr");
-  await user.click(homicides);
-  expect(homicides.closest("th").getAttribute("aria-sort")).toBe("descending");
+  await user.click(deaths);
+  expect(deaths.closest("th").getAttribute("aria-sort")).toBe("descending");
   expect(table.querySelector("tbody tr").textContent).not.toBe(
     firstRow.textContent,
   );
@@ -165,7 +165,7 @@ test("detailed region links filter historical rows, combine selections, and rese
 test("entry history shows source labels and keyboard-accessible charts; invalid ids show an error", async () => {
   const view = render(<Entry iso="JPN" />);
   await screen.findByRole("heading", { level: 1, name: "Japan" });
-  expect(await screen.findAllByRole("img")).toHaveLength(6);
+  expect(await screen.findAllByRole("img")).toHaveLength(9);
   expect(loadEntrySeries).toHaveBeenCalledWith("JPN");
   fireEvent.keyDown(screen.getAllByRole("img")[0], { key: "ArrowLeft" });
   expect(

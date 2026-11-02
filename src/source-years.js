@@ -4,6 +4,8 @@ const METRIC_LABELS = {
   haleYear: "HALE",
   gniYear: "GNI",
   homicideYear: "Homicides",
+  warYear: "War",
+  roadYear: "Road",
   freedomYear: "Freedom",
 };
 
@@ -13,6 +15,8 @@ const DATA_NOUNS = {
   haleYear: "HALE",
   gniYear: "income",
   homicideYear: "homicide",
+  warYear: "war death",
+  roadYear: "road death",
   freedomYear: "freedom",
 };
 

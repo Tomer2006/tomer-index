@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import {
   leiFromYears,
   combinedHealthLei,
-  safetyIndexFromHomicidesPer100k,
+  safetyDeathsPer100k,
+  safetyIndexFromDeathsPer100k,
   incomeIndexFromGni,
   freedomIndexFromScore,
   customIndexAbundanceSafetyHealthFreedom,
@@ -17,6 +18,7 @@ import {
   haleAsOfYear,
   adjustedHaleAsOfYear,
   mergeRows,
+  warDeathRows,
 } from "../src/hdi-core.js";
 
 function wbRow(iso, year, value, name = iso) {
@@ -80,12 +82,30 @@ test("combinedHealthLei averages lifespan and healthspan LEIs", () => {
   closeTo(combinedHealthLei(52.5, 52.5), 0.5);
 });
 
-test("safety index inverts homicides linearly with a 60/100k floor", () => {
-  assert.equal(safetyIndexFromHomicidesPer100k(0), 1);
-  assert.equal(safetyIndexFromHomicidesPer100k(60), 0);
-  closeTo(safetyIndexFromHomicidesPer100k(30), 0.5);
-  assert.equal(safetyIndexFromHomicidesPer100k(120), 0);
-  assert.equal(safetyIndexFromHomicidesPer100k(-5), 1);
+test("safety adds homicide, war and road deaths and inverts them with a 100/100k floor", () => {
+  assert.equal(safetyDeathsPer100k(0.5, 0, 2.3), 2.8);
+  assert.equal(safetyIndexFromDeathsPer100k(0), 1);
+  assert.equal(safetyIndexFromDeathsPer100k(100), 0);
+  closeTo(safetyIndexFromDeathsPer100k(25), 0.75);
+  assert.equal(safetyIndexFromDeathsPer100k(300), 0);
+  assert.equal(safetyIndexFromDeathsPer100k(-5), 1);
+});
+
+test("war deaths are battle deaths per 100k, 0 in peaceful years up to the source's last year", () => {
+  const pop = [2019, 2020, 2021, 2022].flatMap((year) => [
+    wbRow("AAA", year, 2e6),
+    wbRow("BBB", year, 5e6),
+  ]);
+  const battle = [wbRow("AAA", 2020, 1000), wbRow("AAA", 2021, null), wbRow("CCC", 2021, 50)];
+  const byYear = byCountryYear(warDeathRows(battle, pop));
+  assert.equal(byYear.get("AAA").get(2020).value, 50);
+  assert.equal(byYear.get("AAA").get(2019).value, 0);
+  assert.equal(byYear.get("AAA").get(2021).value, 0);
+  assert.equal(byYear.get("BBB").get(2021).value, 0);
+  // The source ends in 2021: 2022 has no row, so it carries 2021 forward.
+  assert.equal(byYear.get("AAA").has(2022), false);
+  // No population, no rate.
+  assert.equal(byYear.has("CCC"), false);
 });
 
 test("income index uses HDI log goalposts $100–$75,000, with no cap above $75,000", () => {
@@ -111,10 +131,10 @@ test("index uses the declared 40/30/20/10 dimension weights", () => {
   const le = 80;
   const hale = 70;
   const gni = 40000;
-  const hom = 2;
+  const deaths = 12;
   const health = combinedHealthLei(le, hale);
   const income = incomeIndexFromGni(gni);
-  const safety = safetyIndexFromHomicidesPer100k(hom);
+  const safety = safetyIndexFromDeathsPer100k(deaths);
   const freedom = 0.8;
   const expected =
     Math.pow(income, INDEX_WEIGHTS.abundance) *
@@ -122,7 +142,7 @@ test("index uses the declared 40/30/20/10 dimension weights", () => {
     Math.pow(health, INDEX_WEIGHTS.health) *
     Math.pow(freedom, INDEX_WEIGHTS.freedom);
   assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
-  closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, hom, hale, 80), expected);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, deaths, hale, 80), expected);
 });
 
 test("the index passes 1 once health or income goes past its goalpost", () => {
@@ -134,9 +154,9 @@ test("the index passes 1 once health or income goes past its goalpost", () => {
   closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.3426, 1e-4);
 });
 
-test("homicide rates at or above 60/100k collapse the index to 0", () => {
-  assert.equal(customIndexAbundanceSafetyHealthFreedomFull(80, 40000, 60, 70, 80), 0);
-  assert.equal(customIndexAbundanceSafetyHealthFreedom(80, 40000, 75, 70, 80), 0);
+test("100 or more violent and road deaths per 100k collapse the index to 0", () => {
+  assert.equal(customIndexAbundanceSafetyHealthFreedomFull(80, 40000, 100, 70, 80), 0);
+  assert.equal(customIndexAbundanceSafetyHealthFreedom(80, 40000, 250, 70, 80), 0);
 });
 
 test("four-pillar index rounds to 3 decimals, Full does not", () => {
@@ -246,11 +266,29 @@ test("mergeRows requires every metric and sorts by index descending", () => {
     ["BBB", { year: 2023, value: 40, name: "Beta" }],
     ["CCC", { year: 2023, value: 80, name: "Gamma" }],
   ]);
-  const merged = mergeRows(le, gni, hom, hale, freedom);
+  const war = new Map([
+    ["AAA", { year: 2023, value: 0, name: "Alpha" }],
+    ["BBB", { year: 2023, value: 4, name: "Beta" }],
+    ["CCC", { year: 2023, value: 0, name: "Gamma" }],
+  ]);
+  const road = new Map([
+    ["AAA", { year: 2019, value: 2.5, name: "Alpha" }],
+    ["BBB", { year: 2019, value: 20, name: "Beta" }],
+    ["CCC", { year: 2019, value: 5, name: "Gamma" }],
+  ]);
+  const merged = mergeRows({ le, gni, homicide: hom, war, road, hale, freedom });
   assert.deepEqual(
     merged.map((r) => r.iso),
     ["AAA", "BBB"]
   );
   assert.ok(merged[0].customIndex > merged[1].customIndex);
   assert.equal(merged[0].haleYear, 2021);
+  assert.equal(merged[0].roadYear, 2019);
+  assert.equal(merged[1].safetyDeathsPer100k, 54);
+  // A country without a road death rate isn't scored.
+  road.delete("AAA");
+  assert.deepEqual(
+    mergeRows({ le, gni, homicide: hom, war, road, hale, freedom }).map((r) => r.iso),
+    ["BBB"]
+  );
 });

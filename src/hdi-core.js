@@ -1,7 +1,10 @@
 /** Shared HDI-style math + merging (used by the app and `scripts/build-data.mjs`). */
 
-/** Homicides per 100,000: 0 = best safety, 60 = floor (worst) for the safety sub-index. */
-const HOMICIDE_RATE_MAX = 60;
+/**
+ * Safety deaths (homicide, war and road crashes) per 100,000 people a year: 0 = best
+ * safety, 100 (1 in 1,000 people) = floor (worst) for the safety pillar.
+ */
+const SAFETY_DEATHS_MAX = 100;
 
 /**
  * Life expectancy and HALE score 0 at 20 years and 1 at 85 years (UNDP's goalposts).
@@ -54,13 +57,18 @@ export function combinedHealthLei(lifeExpectancyYears, haleYears) {
   );
 }
 
+/** Safety deaths per 100,000: homicides, war (battle-related) deaths and road deaths. */
+export function safetyDeathsPer100k(homicides, war, road) {
+  return Number(homicides) + Number(war) + Number(road);
+}
+
 /**
- * Safety index 0–1 from intentional homicide rate (higher = safer).
- * Uses a linear inversion: SI = (max − h) / max with h clamped to [0, max].
+ * Safety index 0–1 from safety deaths per 100,000 (higher = safer).
+ * Uses a linear inversion: SI = (max − d) / max with d clamped to [0, max].
  */
-export function safetyIndexFromHomicidesPer100k(homicidesPer100k) {
-  const h = Math.max(0, Math.min(Number(homicidesPer100k), HOMICIDE_RATE_MAX));
-  return (HOMICIDE_RATE_MAX - h) / HOMICIDE_RATE_MAX;
+export function safetyIndexFromDeathsPer100k(deathsPer100k) {
+  const d = Math.max(0, Math.min(Number(deathsPer100k), SAFETY_DEATHS_MAX));
+  return (SAFETY_DEATHS_MAX - d) / SAFETY_DEATHS_MAX;
 }
 
 /** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its upper cap. */
@@ -81,13 +89,13 @@ export function freedomIndexFromScore(score) {
 export function customIndexAbundanceSafetyHealthFreedomFull(
   lifeExpectancy,
   gniPerCapita,
-  homicidesPer100k,
+  deathsPer100k,
   healthyLifeExpectancy,
   freedomScore
 ) {
   return customIndexFromPillarsFull({
     abundance: incomeIndexFromGni(gniPerCapita),
-    safety: safetyIndexFromHomicidesPer100k(homicidesPer100k),
+    safety: safetyIndexFromDeathsPer100k(deathsPer100k),
     health: combinedHealthLei(lifeExpectancy, healthyLifeExpectancy),
     freedom: freedomIndexFromScore(freedomScore),
   });
@@ -99,7 +107,7 @@ export function customIndexAbundanceSafetyHealthFreedomFull(
 export function customIndexAbundanceSafetyHealthFreedom(
   lifeExpectancy,
   gniPerCapita,
-  homicidesPer100k,
+  deathsPer100k,
   healthyLifeExpectancy,
   freedomScore
 ) {
@@ -108,7 +116,7 @@ export function customIndexAbundanceSafetyHealthFreedom(
       customIndexAbundanceSafetyHealthFreedomFull(
         lifeExpectancy,
         gniPerCapita,
-        homicidesPer100k,
+        deathsPer100k,
         healthyLifeExpectancy,
         freedomScore
       ) * 1000
@@ -119,6 +127,40 @@ export function customIndexAbundanceSafetyHealthFreedom(
 export function isCountryRow(row) {
   const iso = row.countryiso3code;
   return typeof iso === "string" && /^[A-Z]{3}$/.test(iso);
+}
+
+/**
+ * War deaths per 100,000 from the World Bank's battle-related deaths (UCDP), which only
+ * lists country-years with fighting. Every other country-year with a population figure,
+ * up to the latest year the source covers, had no battle deaths and gets a 0 row, so
+ * peaceful countries have a value and the latest year carries forward like other inputs.
+ */
+export function warDeathRows(battleRows, popRows) {
+  const deaths = new Map();
+  let latestYear = -Infinity;
+  for (const row of battleRows) {
+    if (!isCountryRow(row) || row.value == null) continue;
+    const year = parseInt(String(row.date), 10);
+    const value = Number(row.value);
+    if (Number.isNaN(year) || !Number.isFinite(value)) continue;
+    deaths.set(`${row.countryiso3code}|${year}`, value);
+    latestYear = Math.max(latestYear, year);
+  }
+  const out = [];
+  for (const row of popRows) {
+    if (!isCountryRow(row) || row.value == null) continue;
+    const year = parseInt(String(row.date), 10);
+    const pop = Number(row.value);
+    if (Number.isNaN(year) || year > latestYear || !(pop > 0)) continue;
+    const count = deaths.get(`${row.countryiso3code}|${year}`) ?? 0;
+    out.push({
+      countryiso3code: row.countryiso3code,
+      country: row.country,
+      date: String(year),
+      value: (count / pop) * 1e5,
+    });
+  }
+  return out;
 }
 
 /**
@@ -319,24 +361,25 @@ export function adjustedHaleAsOfYear(
 }
 
 /**
- * Health + income + safety (homicide-based SI); health = ½ LE + ½ HALE.
- * @param {Map<string, { year: number, value: number, name: string }>} leMap
- * @param {Map<string, { year: number, value: number, name: string }>} gniMap
- * @param {Map<string, { year: number, value: number, name: string }>} homicideMap
- * @param {Map<string, { year: number, value: number, name: string }>} haleMap
+ * Each country's latest value of every input, scored together; health = ½ LE + ½ HALE.
+ * Every argument maps ISO3 → `{ year, value, name }` (`latestByCountry`).
+ * @param {{ le: Map, gni: Map, homicide: Map, war: Map, road: Map, hale: Map, freedom: Map }} latest
  */
-export function mergeRows(leMap, gniMap, homicideMap, haleMap, freedomMap) {
+export function mergeRows({ le: leMap, gni: gniMap, homicide, war, road, hale: haleMap, freedom: freedomMap }) {
   const merged = [];
   for (const [iso, le] of leMap) {
     const gni = gniMap.get(iso);
-    const hom = homicideMap.get(iso);
+    const hom = homicide.get(iso);
+    const warDeaths = war.get(iso);
+    const roadDeaths = road.get(iso);
     const hale = haleMap.get(iso);
     const freedom = freedomMap.get(iso);
-    if (!gni || !hom || !hale || !freedom) continue;
+    if (!gni || !hom || !warDeaths || !roadDeaths || !hale || !freedom) continue;
+    const deaths = safetyDeathsPer100k(hom.value, warDeaths.value, roadDeaths.value);
     const score = customIndexAbundanceSafetyHealthFreedom(
       le.value,
       gni.value,
-      hom.value,
+      deaths,
       hale.value,
       freedom.value
     );
@@ -354,6 +397,11 @@ export function mergeRows(leMap, gniMap, homicideMap, haleMap, freedomMap) {
       ...(gni.incomeBaseYear && { incomeEstimated: true }),
       homicideYear: hom.year,
       homicidesPer100k: hom.value,
+      warYear: warDeaths.year,
+      warDeathsPer100k: warDeaths.value,
+      roadYear: roadDeaths.year,
+      roadDeathsPer100k: roadDeaths.value,
+      safetyDeathsPer100k: deaths,
       freedomYear: freedom.year,
       freedom: freedom.value,
       customIndex: score,

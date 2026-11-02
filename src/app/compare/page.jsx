@@ -3,7 +3,7 @@ import Compare, { CompareHeader } from "../../components/compare";
 import { YEAR_MIN } from "../../site-years.js";
 export const metadata = {
   title: "Compare countries",
-  description: `Compare countries and World Bank groups side by side: Tomer index, rank, life expectancy, homicides, freedom, income, and their histories since ${YEAR_MIN}.`,
+  description: `Compare countries and World Bank groups side by side: Tomer index, rank, life expectancy, violent and road deaths, freedom, income, and their histories since ${YEAR_MIN}.`,
   alternates: { canonical: "/compare" },
 };
 export default function Page() {

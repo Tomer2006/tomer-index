@@ -1,14 +1,18 @@
+import { metricLabel } from "./metric-defs.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { columnFor } from "./view-model.js";
 
-/** Index inputs in leaderboard column order, named with the column labels. */
+/** Index inputs in leaderboard column order; the death rates use their chart labels. */
 const REQUIRED_INDEX_METRICS = [
-  ["le", "le"],
-  ["hale", "hale"],
-  ["homicidesPer100k", "homicides"],
-  ["freedom", "freedom"],
-  ["gni", "gni"],
-].map(([field, column]) => [field, columnFor(column).label]);
+  ["le", columnFor("le").label],
+  ["hale", columnFor("hale").label],
+  ...["homicidesPer100k", "warDeathsPer100k", "roadDeathsPer100k"].map((key) => [
+    key,
+    metricLabel(key),
+  ]),
+  ["freedom", columnFor("freedom").label],
+  ["gni", columnFor("gni").label],
+];
 
 export const HISTORY_GAPS_LABEL = "History gaps";
 
@@ -17,7 +21,7 @@ const LEGACY_LABELS = {
   "Life exp.": columnFor("le").label,
   HALE: columnFor("hale").label,
   "Abundance (income pc, PPP)": columnFor("gni").label,
-  "Homicides /100k": columnFor("homicides").label,
+  "Homicides /100k": metricLabel("homicidesPer100k"),
   "Personal freedom": columnFor("freedom").label,
 };
 const LEGACY_DESCRIPTION =

@@ -61,12 +61,17 @@ test("every historical snapshot agrees with the committed dataset, including mis
     "hale",
     "gni",
     "homicidesPer100k",
+    "warDeathsPer100k",
+    "roadDeathsPer100k",
+    "safetyDeathsPer100k",
     "freedom",
     "customIndex",
     "leYear",
     "haleYear",
     "gniYear",
     "homicideYear",
+    "warYear",
+    "roadYear",
     "freedomYear",
   ];
   for (let year = YEAR_MIN; year < YEAR_MAX; year++) {
@@ -84,16 +89,16 @@ test("every historical snapshot agrees with the committed dataset, including mis
 
 test("sorting puts missing values last in both directions and honors lower-is-better metrics", () => {
   const rows = [
-    { name: "High", homicidesPer100k: 10 },
-    { name: "Missing", homicidesPer100k: null },
-    { name: "Low", homicidesPer100k: 1 },
+    { name: "High", safetyDeathsPer100k: 10 },
+    { name: "Missing", safetyDeathsPer100k: null },
+    { name: "Low", safetyDeathsPer100k: 1 },
   ];
   assert.deepEqual(
-    sortedRows(rows, "homicides").map((row) => row.name),
+    sortedRows(rows, "deaths").map((row) => row.name),
     ["Low", "High", "Missing"],
   );
   assert.deepEqual(
-    sortedRows(rows, "homicides", false).map((row) => row.name),
+    sortedRows(rows, "deaths", false).map((row) => row.name),
     ["High", "Low", "Missing"],
   );
 });
@@ -133,7 +138,9 @@ test("query readers trim, de-duplicate, upper-case and validate", () => {
   assert.equal(readQuality(params), "all");
   assert.equal(readQuality(new URLSearchParams("quality=incomplete")), "incomplete");
   assert.equal(readSort(params), "tomer");
-  assert.equal(readSort(new URLSearchParams("sort=homicides")), "homicides");
+  assert.equal(readSort(new URLSearchParams("sort=deaths")), "deaths");
+  // The column it replaced falls back to the index.
+  assert.equal(readSort(new URLSearchParams("sort=homicides")), "tomer");
   assert.equal(entryHref("JPN"), "/entry/JPN");
 });
 
@@ -173,33 +180,33 @@ test("ranks count countries only and skip rows missing the sort value", () => {
     safetyIndex: customIndex,
     freedomIndex: customIndex,
     abundanceIndex: customIndex,
-    homicidesPer100k: extra.homicidesPer100k,
+    safetyDeathsPer100k: extra.safetyDeathsPer100k,
     ...extra,
   });
   const rows = [
     point("AAA", 0.9),
     point("GRP", 0.8, { derivedKind: "incomeLevel" }),
-    point("BBB", 0.7, { homicidesPer100k: 3 }),
+    point("BBB", 0.7, { safetyDeathsPer100k: 3 }),
     point("CCC", NaN),
   ];
   const { ranks, total } = tomerRanks(rows);
   assert.deepEqual([...ranks], [["AAA", 1], ["BBB", 2]]);
   assert.equal(total, 2);
-  const byHomicides = countryRanks(sortedRows(rows, "homicides"), "homicides");
-  assert.deepEqual([...byHomicides], [["BBB", 1]]);
+  const byDeaths = countryRanks(sortedRows(rows, "deaths"), "deaths");
+  assert.deepEqual([...byDeaths], [["BBB", 1]]);
   const byName = countryRanks(sortedRows(rows, "name"), "name");
   assert.deepEqual([...byName.keys()], ["AAA", "BBB", "CCC"]);
 });
 
 test("tied values share a rank, so reversed sorts never show out-of-order ranks", () => {
   const rows = [
-    { iso: "OMN", name: "Oman", homicidesPer100k: 0.1 },
-    { iso: "SGP", name: "Singapore", homicidesPer100k: 0.069 },
-    { iso: "WLD", name: "World", derivedKind: "world", homicidesPer100k: 0.069 },
-    { iso: "QAT", name: "Qatar", homicidesPer100k: 0.069 },
-    { iso: "BHR", name: "Bahrain", homicidesPer100k: 0.5 },
+    { iso: "OMN", name: "Oman", safetyDeathsPer100k: 0.1 },
+    { iso: "SGP", name: "Singapore", safetyDeathsPer100k: 0.069 },
+    { iso: "WLD", name: "World", derivedKind: "world", safetyDeathsPer100k: 0.069 },
+    { iso: "QAT", name: "Qatar", safetyDeathsPer100k: 0.069 },
+    { iso: "BHR", name: "Bahrain", safetyDeathsPer100k: 0.5 },
   ];
-  const ranks = countryRanks(sortedRows(rows, "homicides"), "homicides");
+  const ranks = countryRanks(sortedRows(rows, "deaths"), "deaths");
   assert.deepEqual(Object.fromEntries(ranks), {
     QAT: 1,
     SGP: 1,
@@ -207,7 +214,7 @@ test("tied values share a rank, so reversed sorts never show out-of-order ranks"
     BHR: 4,
   });
   // Worst first keeps A–Z inside the tie; the shown ranks still never go up.
-  const shown = sortedRows(rows, "homicides", false)
+  const shown = sortedRows(rows, "deaths", false)
     .filter((row) => ranks.has(row.iso))
     .map((row) => ranks.get(row.iso));
   assert.deepEqual(shown, [4, 3, 1, 1]);
@@ -215,7 +222,7 @@ test("tied values share a rank, so reversed sorts never show out-of-order ranks"
   const { countries } = JSON.parse(
     readFileSync(new URL("../public/data/leaderboard.json", import.meta.url)),
   );
-  for (const key of ["tomer", "le", "hale", "health", "homicides", "freedom", "gni"]) {
+  for (const key of ["tomer", "le", "hale", "health", "deaths", "freedom", "gni"]) {
     const best = countryRanks(sortedRows(countries, key), key);
     for (const bestFirst of [true, false]) {
       const order = sortedRows(countries, key, bestFirst)
@@ -310,9 +317,10 @@ test("committed leaderboard ranks 1..N among countries only", () => {
   const ranks = countryRanks(sortedRows(countries), "tomer");
   const scored = countries.filter((row) => !row.derivedKind);
   assert.equal(ranks.size, scored.length);
-  assert.deepEqual(
-    [...ranks.values()],
-    scored.map((_, i) => i + 1),
+  // Ranks run 1..N; tied scores (countries at war all score 0) share the first rank of the tie.
+  const values = [...ranks.values()];
+  values.forEach((rank, i) =>
+    assert.ok(rank === i + 1 || rank === values[i - 1], `rank ${rank} at ${i + 1}`),
   );
   for (const row of countries.filter((row) => row.derivedKind))
     assert.equal(ranks.has(row.iso), false, row.iso);

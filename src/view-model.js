@@ -6,7 +6,7 @@ import {
   weightedIndexFromPillars,
 } from "./index-weights.js";
 import { formatTomer } from "./index-scale.js";
-import { TOMER_SOURCE_KEYS } from "./metric-defs.js";
+import { SAFETY_SOURCE_KEYS, TOMER_SOURCE_KEYS } from "./metric-defs.js";
 import { geographicRegionForRow } from "./regions.js";
 
 /** Comma-separated query values, trimmed and de-duplicated. */
@@ -197,11 +197,11 @@ export const columns = [
     format: formatTomer,
   },
   {
-    key: "homicides",
-    label: "Homicides per 100k",
-    long: "Intentional homicides per 100,000 people",
-    sources: ["homicideYear"],
-    value: (r) => r.homicidesPer100k,
+    key: "deaths",
+    label: "Violent & road deaths per 100k",
+    long: "Deaths from homicide, war and road crashes per 100,000 people",
+    sources: SAFETY_SOURCE_KEYS,
+    value: (r) => r.safetyDeathsPer100k,
     format: number,
     lower: true,
   },

@@ -45,14 +45,15 @@ Raw observations → fixed goalpost normalization → weighted geometric mean
 | Pillar | Weight | Input | Fixed normalization |
 | --- | ---: | --- | --- |
 | **Health** | 40% | Life expectancy + healthy life expectancy (HALE) | Mean of two life-expectancy indices, each scoring 0 at 20 years and 1 at 85, with no cap above 85 |
-| **Safety** | 30% | Homicides per 100k (intentional homicides per 100,000 people) | Linear inversion from 0 (best) to 60 (floor) |
+| **Safety** | 30% | Deaths per 100k from intentional homicide, war (battle-related deaths) and road crashes | Linear inversion from 0 (best) to 100 (floor) |
 | **Freedom** | 20% | Personal freedom: HFI Personal Freedom categories, excluding Security and Safety | Rescaled from 0–100 to 0–1 |
 | **Abundance** | 10% | Income per person (PPP $): GNI per capita, extended by GDP per capita growth where GNI isn't published | Log scale scoring 0 at $100 and 1 at $75,000, with no cap above $75,000 |
 
 ```text
 LEI(years) = (max(years, 20) − 20) / (85 − 20)
 Health    = ½·LEI(life expectancy) + ½·LEI(HALE)
-Safety    = (60 − clamp(homicides per 100k, 0, 60)) / 60
+Deaths    = homicides + war deaths + road deaths (per 100,000)
+Safety    = (100 − clamp(deaths, 0, 100)) / 100
 Freedom   = personal freedom score / 100
 Abundance = ln(max(income, 100) / 100) / ln(75000 / 100)
 
@@ -61,11 +62,12 @@ Tomer = Health^0.40 · Safety^0.30 · Freedom^0.20 · Abundance^0.10
 
 The geometric mean penalizes imbalance: strength in one dimension cannot fully
 compensate for a near-zero result in another, and a pillar at its worst goalpost
-(for example, 60 or more homicides per 100k) sets the index to 0. The site shows
+(for example, 100 or more violent and road deaths per 100k, as in a war) sets the
+index to 0. The site shows
 scores ×100; the data files store them unscaled.
 
 There is no ceiling at 100. A score of 100 means every goalpost is met. Safety and
-freedom stop there (no homicides, a perfect freedom score), but health keeps rising
+freedom stop there (no violent or road deaths, a perfect freedom score), but health keeps rising
 past 85 years and abundance past $75,000, so a country that lives longer or earns
 more scores above 100. Read the complete assumptions,
 data-freshness caveats, and rationale in
@@ -78,13 +80,14 @@ The tracker uses observations from **2000–2025** and stores the actual source 
 beside every metric. For a displayed year, the pipeline uses the latest observation
 available on or before that year; it never pulls future observations backward.
 Sources lag, so recent years lean on older observations: in the 2025 view, life
-expectancy is from 2024, freedom scores from 2023, and HALE is estimated from WHO's
-2021 values.
+expectancy is from 2024, freedom scores from 2023, road deaths from 2019, and HALE is
+estimated from WHO's 2021 values.
 
 Primary sources:
 
 - [World Bank Open Data](https://data.worldbank.org/) — life expectancy, GNI and GDP
-  per capita (constant 2021 PPP), intentional homicides, population, and country metadata.
+  per capita (constant 2021 PPP), intentional homicides (UNODC), battle-related deaths
+  (UCDP), road traffic deaths (WHO estimates), population, and country metadata.
 - [WHO Global Health Observatory](https://www.who.int/data/gho) — healthy life
   expectancy at birth (`WHOSIS_000002`).
 - [Human Freedom Index 2025](https://www.cato.org/human-freedom-index/2025) — rule of
@@ -225,8 +228,9 @@ it changes.
 - Recent years lean on older observations, and HALE after WHO's latest release is
   estimated from life expectancy; the interface shows every source year and labels
   estimates.
-- Safety is intentionally homicide-only; it does not capture every dimension of crime
-  or personal security.
+- Safety counts deaths from homicide, war and road crashes only: not suicide, other
+  accidents, natural disasters, or crime that doesn't kill. Road deaths end in 2019 and
+  carry forward, and war deaths count in the country where the fighting happens.
 - Freedom is a custom combination of HFI categories, not the published HFI headline
   Personal Freedom score.
 - Before a country's GNI series starts, income is plain GDP per capita, so a break can
