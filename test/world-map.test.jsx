@@ -318,3 +318,53 @@ test("tiny countries get a clickable dot and unscored land is drawn as no data",
   ).toBeTruthy();
   expect(screen.getByText("Malta selected.", { exact: false })).toBeTruthy();
 });
+
+test("a tap picks what is under the finger, not the browser's adjusted target", async () => {
+  window.history.replaceState(null, "", "/map");
+  const { container } = render(<WorldMap />);
+  await waitFor(() =>
+    expect(container.querySelector('.map-dot[data-iso="SGP"]')).toBeTruthy(),
+  );
+  const shape = (code) => container.querySelector(`path.map-country[data-iso="${code}"]`);
+  const iso = () => new URLSearchParams(window.location.search).get("iso");
+  // jsdom has no layout: put Singapore's dot at (100, 100) and every other dot far away.
+  for (const dot of container.querySelectorAll(".map-dot"))
+    dot.getBoundingClientRect = () =>
+      dot.getAttribute("data-iso") === "SGP"
+        ? { x: 100, y: 100, width: 0, height: 0 }
+        : { x: 500, y: 500, width: 0, height: 0 };
+  let underFinger;
+  const original = document.elementFromPoint;
+  document.elementFromPoint = () => underFinger;
+  // Browsers report the adjusted target (here Malaysia) for the whole tap.
+  const tap = (target, [x, y], end = [x, y]) => {
+    const touch = { pointerType: "touch", isPrimary: true, pointerId: 7 };
+    fireEvent.pointerDown(target, { ...touch, clientX: x, clientY: y });
+    fireEvent.pointerUp(target, { ...touch, clientX: end[0], clientY: end[1] });
+    if (end[0] === x && end[1] === y) fireEvent.click(target, { clientX: x, clientY: y });
+  };
+  try {
+    // Sea, 6px from Singapore's dot.
+    underFinger = container.querySelector(".map-ocean");
+    tap(shape("MYS"), [106, 100]);
+    expect(iso()).toBe("SGP");
+    // Land under the finger wins.
+    underFinger = shape("FRA");
+    tap(shape("GBR"), [300, 300]);
+    expect(iso()).toBe("FRA");
+    // Open sea, far from any dot, clears the selection, as a click there does.
+    underFinger = container.querySelector(".map-ocean");
+    tap(shape("BRA"), [250, 250]);
+    expect(iso()).toBeNull();
+    // A finger that moves is panning or scrolling, not picking.
+    underFinger = shape("JPN");
+    tap(shape("JPN"), [300, 300], [340, 300]);
+    expect(iso()).toBeNull();
+  } finally {
+    document.elementFromPoint = original;
+  }
+  // Mouse clicks still go to the clicked shape.
+  fireEvent.pointerDown(shape("JPN"), { pointerType: "mouse", isPrimary: true });
+  fireEvent.click(shape("JPN"));
+  expect(iso()).toBe("JPN");
+});

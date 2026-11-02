@@ -62,6 +62,8 @@ const CLICKABLE_AREA = 100;
 // Dot diameter on screen (px): it grows with the map up to the full size, from a floor.
 const DOT_SIZE = 7,
   MIN_DOT_SIZE = 4;
+// A tap over the sea this close (on-screen px) to an island's dot picks that island.
+const TAP_RADIUS = 16;
 // The latest year's view comes from the leaderboard; past years come from a snapshot.
 const LATEST_VIEW = { year: YEAR_MAX, snapshot: null };
 const tomerColor = metricDefs.find((metric) => metric.key === "customIndex").color;
@@ -250,7 +252,8 @@ export default function WorldMap() {
     detailRef = useRef(null),
     focusDetail = useRef(false),
     fullscreenRef = useRef(false),
-    fullscreenButtonRef = useRef(null);
+    fullscreenButtonRef = useRef(null),
+    tapRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   // On-screen px per map px at 100% zoom.
   const [mapScale, setMapScale] = useState(1);
@@ -591,6 +594,21 @@ export default function WorldMap() {
       top: y > rect.height - 100 ? Math.max(8, y - 90) : y + 16,
     });
   };
+  // Browsers move a tap onto a "better" target nearby, which on a small map is the big
+  // neighbour (Singapore's dot picked Malaysia). So a tap takes the country under the
+  // finger, else the nearest island dot, else nothing.
+  const countryAtTap = (x, y) => {
+    const hit = document.elementFromPoint(x, y);
+    if (hit?.classList.contains("map-country")) return hit.getAttribute("data-iso");
+    let nearest = "",
+      distance = TAP_RADIUS;
+    for (const dot of svgRef.current.querySelectorAll(".map-dot")) {
+      const box = dot.getBoundingClientRect(),
+        gap = Math.hypot(box.x + box.width / 2 - x, box.y + box.height / 2 - y);
+      if (gap <= distance) [nearest, distance] = [dot.getAttribute("data-iso"), gap];
+    }
+    return nearest;
+  };
   const selectedScore = scoreOf(iso),
     selectedQuality = dataQualityForRow(selected, null, qualityByIso),
     scoreLine = (
@@ -727,6 +745,28 @@ export default function WorldMap() {
                 }
               }}
               onPointerLeave={() => tooltipRef.current?.hide()}
+              onPointerDown={(event) => {
+                // A second finger (a pinch) cancels the tap.
+                tapRef.current =
+                  event.pointerType === "touch" && event.isPrimary
+                    ? { id: event.pointerId, x: event.clientX, y: event.clientY }
+                    : null;
+              }}
+              onPointerUp={(event) => {
+                const tap = tapRef.current;
+                if (tap?.id !== event.pointerId) return;
+                // Further than d3-zoom's clickDistance is a pan, not a tap.
+                const moved = Math.hypot(event.clientX - tap.x, event.clientY - tap.y) > 5;
+                tapRef.current = moved ? null : { picked: true };
+                if (!moved) select(countryAtTap(event.clientX, event.clientY));
+              }}
+              onPointerCancel={() => (tapRef.current = null)}
+              onClickCapture={(event) => {
+                // The click that ends a tap goes to the browser's adjusted target: skip it.
+                if (!tapRef.current?.picked) return;
+                tapRef.current = null;
+                event.stopPropagation();
+              }}
             >
               <defs>
                 <pattern
