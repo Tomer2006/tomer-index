@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeAll, expect, test, vi } from "vitest";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -9,7 +10,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WorldMap from "../src/components/world-map";
+import WorldMap, { WorldMapPreview } from "../src/components/world-map";
 import { YEAR_MAX } from "../src/site-years.js";
 import {
   loadEntrySeries,
@@ -367,4 +368,23 @@ test("a tap picks what is under the finger, not the browser's adjusted target", 
   fireEvent.pointerDown(shape("JPN"), { pointerType: "mouse", isPrimary: true });
   fireEvent.click(shape("JPN"));
   expect(iso()).toBe("JPN");
+});
+
+test("the prerendered preview is the map's own loading state, inert, and loads nothing", async () => {
+  // The prerender can't see the URL, so the preview ignores it.
+  window.history.replaceState(null, "", "/map?year=2005&iso=JPN");
+  for (const load of [loadLeaderboardData, loadWorldData, loadYearSnapshot]) load.mockClear();
+  const { container } = render(<WorldMapPreview description="About the map." />);
+  await act(() => Promise.resolve());
+  expect(container.querySelector(".map-page").hasAttribute("inert")).toBe(true);
+  expect(container.querySelector(".year-output").textContent).toBe(String(YEAR_MAX));
+  expect(container.querySelector(".map-detail-empty")).toBeTruthy();
+  expect(legendText(container)).toContain("Loading scores…");
+  // An empty bar holds the scale's place, so the legend keeps its size; no ticks are made up.
+  const bar = container.querySelector(".map-legend-scale .map-legend-bar");
+  expect(bar.children).toHaveLength(0);
+  expect(bar.getAttribute("aria-hidden")).toBe("true");
+  expect(container.querySelector(".map-legend-ticks")).toBeNull();
+  for (const load of [loadLeaderboardData, loadWorldData, loadYearSnapshot])
+    expect(load).not.toHaveBeenCalled();
 });

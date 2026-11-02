@@ -170,10 +170,12 @@ function MapLegend({ paint, year, loadingYear, failedYear, custom, status }) {
           </span>
         )}
       </p>
-      {stops.length > 0 && (
-        <div className="map-legend-scale">
-          <ol className="map-legend-bar">
-            {COLORS.map((color, i) => (
+      {/* While scores load, an empty bar holds the scale's place (no made-up ticks),
+          so the legend keeps its size and nothing below it moves. */}
+      <div className="map-legend-scale">
+        <ol className="map-legend-bar" aria-hidden={!stops.length || undefined}>
+          {stops.length > 0 &&
+            COLORS.map((color, i) => (
               <li
                 className="map-legend-stop"
                 key={color}
@@ -184,7 +186,8 @@ function MapLegend({ paint, year, loadingYear, failedYear, custom, status }) {
                 </span>
               </li>
             ))}
-          </ol>
+        </ol>
+        {stops.length > 0 && (
           <div className="map-legend-ticks" aria-hidden="true">
             {stops.map((value, i) => (
               <span key={i} style={{ left: `${(i / COLORS.length) * 100}%` }}>
@@ -192,8 +195,8 @@ function MapLegend({ paint, year, loadingYear, failedYear, custom, status }) {
               </span>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
       <ul className="map-legend-keys">
         <li className="map-legend-key map-legend-key-empty">No data</li>
         <li className="map-legend-key map-legend-key-incomplete">History gaps</li>
@@ -234,6 +237,28 @@ function ScoreLine({ score, fill, label, rank, total }) {
 
 export default function WorldMap() {
   const [params, update] = useQuery();
+  return <WorldMapView params={params} update={update} />;
+}
+
+const DEFAULT_PARAMS = new URLSearchParams();
+/**
+ * The Suspense fallback the page prerenders (the live map reads the URL, so it
+ * renders only in the browser): the default view in its loading state, inert, so
+ * the page looks the same before and after the live map replaces it. `description`
+ * is shown instead when JavaScript is off.
+ */
+export function WorldMapPreview({ description }) {
+  return (
+    <WorldMapView
+      params={DEFAULT_PARAMS}
+      update={() => {}}
+      preview
+      description={description}
+    />
+  );
+}
+
+function WorldMapView({ params, update, preview = false, description }) {
   const year = readYear(params),
     weights = readWeights(params),
     iso = readIso(params);
@@ -259,9 +284,9 @@ export default function WorldMap() {
   const [mapScale, setMapScale] = useState(1);
   const [fullscreen, setFullscreen] = useState(false);
   const pastYear = year !== YEAR_MAX;
-  const leaderboard = useDataset("leaderboard"),
-    world = useDataset("world"),
-    snapshot = useDataset(`year:${year}`, pastYear);
+  const leaderboard = useDataset("leaderboard", !preview),
+    world = useDataset("world", !preview),
+    snapshot = useDataset(`year:${year}`, !preview && pastYear);
   const statusDatasets = [
     leaderboard,
     world,
@@ -684,7 +709,13 @@ export default function WorldMap() {
       style={{ "--tomer-color": tomerColor }}
     >
       <Header title="Tomer index by country" kicker="World map" />
-      <div className="map-page">
+      {preview && (
+        <noscript>
+          <p className="lede">{description}</p>
+          <p className="status">The interactive map needs JavaScript.</p>
+        </noscript>
+      )}
+      <div className="map-page" inert={preview || undefined}>
         <section className="map-controls" aria-label="Map controls">
           <YearControl
             id="map-year-slider"

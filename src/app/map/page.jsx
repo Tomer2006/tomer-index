@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import WorldMap from "../../components/world-map";
-import { Header } from "../../components/shared";
+import WorldMap, { WorldMapPreview } from "../../components/world-map";
 import { scoredCountries } from "../../leaderboard-file.js";
 import { YEAR_MAX, YEAR_MIN } from "../../site-years.js";
 
@@ -12,14 +11,7 @@ export const metadata = {
 };
 export default function Page() {
   return (
-    <Suspense
-      fallback={
-        <main id="main" className="map-main">
-          <Header title="Tomer index by country" kicker="World map" />
-          <p className="lede">{DESCRIPTION}</p>
-        </main>
-      }
-    >
+    <Suspense fallback={<WorldMapPreview description={DESCRIPTION} />}>
       <WorldMap />
     </Suspense>
   );

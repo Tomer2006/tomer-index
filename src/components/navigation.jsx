@@ -40,6 +40,7 @@ export default function Navigation() {
   const pathname = usePathname();
   const navRef = useRef(null);
   // On narrow screens the links scroll sideways; keep the current one in view.
+  // (A script in the layout does this for the first page, before it paints.)
   useEffect(() => {
     const nav = navRef.current;
     const current = nav?.querySelector('[aria-current="page"]');

@@ -20,6 +20,16 @@ export const metadata = {
 
 export const viewport = { themeColor: "#0f1218", colorScheme: "dark" };
 
+// On phones the nav links scroll sideways. Center the current page's link while the
+// HTML is parsed, before the first paint, so the row doesn't jump when the page
+// becomes interactive (Navigation's effect does the same on later page changes).
+const CENTER_CURRENT_NAV_LINK = `(() => {
+  const nav = document.querySelector(".site-nav");
+  const current = nav?.querySelector('[aria-current="page"]');
+  if (current && nav.scrollWidth > nav.clientWidth)
+    nav.scrollLeft = current.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2;
+})();`;
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -29,6 +39,7 @@ export default function RootLayout({ children }) {
         </a>
         <div id="app">
           <Navigation />
+          <script dangerouslySetInnerHTML={{ __html: CENTER_CURRENT_NAV_LINK }} />
           <div className="site-page">{children}</div>
           <SiteFooter />
         </div>
