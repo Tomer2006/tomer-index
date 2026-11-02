@@ -3,10 +3,19 @@
  * files (public/data/leaderboard.json + series.json, minified) plus a full
  * pretty-printed archive payload (data-archive/countries.json, not shipped).
  * Run: npm run build-data (needs network once; commit the JSON for offline builds).
+ *
+ * Every request is retried with backoff and must return a complete, error-free
+ * payload, otherwise the build fails. Before writing, the result is compared with
+ * the committed public/data files and nothing is written if coverage shrinks
+ * (pass --force to write anyway). HFI_FILE=<path> reads the Human Freedom Index
+ * from a browser-downloaded JSON or CSV file instead of the bot-protected URL.
+ *
+ * Importing this module only defines the helpers (for tests); the build runs only
+ * when the file is executed directly.
  */
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rename, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 
 import {
   latestByCountry,
@@ -60,25 +69,189 @@ const HFI_FREEDOM_COMPONENTS = [
 /** WHO GHO: Healthy life expectancy (HALE) at birth, both sexes. This is the only non-World Bank source. */
 const WHO_HALE_URL = "https://ghoapi.azureedge.net/api/WHOSIS_000002";
 const WHO_HALE_FILTER = "SpatialDimType eq 'COUNTRY' and Dim1 eq 'SEX_BTSX'";
+/** WHO GHO OData max `$top` is 1000 per request. */
+const WHO_PAGE_SIZE = 1000;
+/** WHO publishes HALE for ~185 countries; far fewer means a broken response. */
+const WHO_HALE_MIN_COUNTRIES = 150;
 
-async function fetchWorldBankJson(urlString, indicator) {
-  const maxAttempts = 5;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const res = await fetch(urlString);
-    if (res.ok) return res.json();
-    const retry =
-      res.status === 400 ||
-      res.status === 429 ||
-      res.status === 502 ||
-      res.status === 503 ||
-      res.status === 504;
-    if (retry && attempt < maxAttempts - 1) {
-      await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
-      continue;
+/** Per attempt; without it a stalled request would hang for undici's 5-minute default. */
+const REQUEST_TIMEOUT_MS = 60_000;
+const REQUEST_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 1000;
+
+/**
+ * Committed data is replaced only if no coverage figure drops by more than this
+ * share (see `sanityProblems`); `--force` overrides.
+ */
+export const SHRINK_TOLERANCE = 0.02;
+
+/**
+ * World Bank residual classifications: lending type LNX and income level INX are both
+ * named "Not classified" and aren't meaningful peer groups, so they never become group rows.
+ */
+export const UNCLASSIFIED_GROUP_IDS = new Set(["LNX", "INX"]);
+
+function isTransientStatus(status) {
+  return status === 408 || status === 429 || status >= 500;
+}
+
+/** The World Bank API answers valid requests with sporadic HTTP 400s, so those are retried too. */
+function isTransientWorldBankStatus(status) {
+  return status === 400 || isTransientStatus(status);
+}
+
+function textSnippet(text) {
+  const flat = String(text).replace(/\s+/g, " ").trim();
+  return flat.length > 120 ? `${flat.slice(0, 120)}…` : flat;
+}
+
+/**
+ * GET a JSON document. Network errors, timeouts, unparsable bodies, error payloads
+ * (`validate` returns a message) and transient HTTP statuses (`retryStatus`; by default
+ * 408, 429, 5xx) are retried with exponential backoff; other non-2xx statuses fail at
+ * once. Never resolves with an error body.
+ */
+export async function fetchJsonWithRetry(
+  url,
+  {
+    label,
+    validate = () => null,
+    retryStatus = isTransientStatus,
+    attempts = REQUEST_ATTEMPTS,
+    timeoutMs = REQUEST_TIMEOUT_MS,
+    retryDelayMs = RETRY_DELAY_MS,
+    fetchImpl = globalThis.fetch,
+  } = {}
+) {
+  let lastError = null;
+  let attempt = 0;
+  while (attempt < attempts) {
+    attempt += 1;
+    let retryable = true;
+    try {
+      const res = await fetchImpl(url, { signal: AbortSignal.timeout(timeoutMs) });
+      if (!res.ok) {
+        retryable = retryStatus(res.status);
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error(`response is not JSON: ${textSnippet(text)}`);
+      }
+      const problem = validate(json);
+      if (problem) throw new Error(problem);
+      return json;
+    } catch (error) {
+      lastError = error;
+      if (!retryable) break;
     }
-    throw new Error(`World Bank request failed (${res.status}) for ${indicator}`);
+    if (attempt < attempts) {
+      await new Promise((r) => setTimeout(r, retryDelayMs * 2 ** (attempt - 1)));
+    }
   }
-  throw new Error(`World Bank request failed for ${indicator}`);
+  throw new Error(
+    `${label} request failed after ${attempt} attempt${attempt === 1 ? "" : "s"}: ${lastError?.message} (${url})`,
+    { cause: lastError }
+  );
+}
+
+/**
+ * World Bank API v2 answers errors with HTTP 200 and `[{ message: [...] }]`; a valid page
+ * is `[meta, rows]`. Returns the problem as text, or null for a valid page.
+ */
+export function worldBankPayloadError(json) {
+  if (!Array.isArray(json)) return "World Bank response is not a JSON array";
+  const messages = json[0]?.message;
+  if (messages) {
+    const text = (Array.isArray(messages) ? messages : [messages])
+      .map((m) =>
+        typeof m === "object" ? [m?.id, m?.key, m?.value].filter(Boolean).join(" ") : m
+      )
+      .join("; ");
+    return `World Bank error: ${text || "unspecified"}`;
+  }
+  if (json.length < 2 || typeof json[0] !== "object" || json[0] === null) {
+    return "World Bank response has no page metadata";
+  }
+  return null;
+}
+
+/** OData error bodies are `{ error: { message } }`; a valid page has a `value` array. */
+export function whoPayloadError(json) {
+  if (Array.isArray(json?.value)) return null;
+  const message = json?.error?.message;
+  return message ? `WHO GHO error: ${message}` : "WHO GHO response has no value array";
+}
+
+/**
+ * Every row of a paged World Bank API v2 list. Throws unless each page is valid and the
+ * rows add up to the `total` the API announced.
+ */
+export async function fetchWorldBankPages(path, params, label, http = {}) {
+  const out = [];
+  let expected = null;
+  for (let page = 1; ; page++) {
+    const url = new URL(`${WB_BASE}${path}`);
+    url.searchParams.set("format", "json");
+    for (const [key, value] of Object.entries(params)) {
+      if (value != null) url.searchParams.set(key, value);
+    }
+    url.searchParams.set("page", String(page));
+
+    const [meta, data] = await fetchJsonWithRetry(url.toString(), {
+      label,
+      validate: worldBankPayloadError,
+      retryStatus: isTransientWorldBankStatus,
+      ...http,
+    });
+    const pages = Number(meta.pages);
+    const total = Number(meta.total);
+    if (!Number.isInteger(pages) || !Number.isInteger(total)) {
+      throw new Error(`${label}: page ${page} has no page count or total`);
+    }
+    if (expected && (pages !== expected.pages || total !== expected.total)) {
+      throw new Error(
+        `${label}: the dataset changed while paging (${expected.total} rows/${expected.pages} pages, then ${total}/${pages})`
+      );
+    }
+    expected = { pages, total };
+    if (page <= pages && !data?.length) {
+      throw new Error(`${label}: page ${page} of ${pages} has no rows`);
+    }
+    if (data?.length) out.push(...data);
+    if (page >= pages) break;
+  }
+  if (!out.length) throw new Error(`${label}: the World Bank returned no rows`);
+  if (out.length !== expected.total) {
+    throw new Error(`${label}: received ${out.length} of ${expected.total} rows`);
+  }
+  return out;
+}
+
+/** Every row matching an OData filter from the WHO GHO HALE endpoint, in a stable order. */
+export async function fetchWhoPages(filter, orderBy, label, http = {}) {
+  const out = [];
+  for (let skip = 0; ; skip += WHO_PAGE_SIZE) {
+    /** OData $-params: build query string manually (URLSearchParams mishandles $ keys in some runtimes). */
+    const qs = [
+      `$filter=${encodeURIComponent(filter)}`,
+      `$orderby=${orderBy}`,
+      `$top=${WHO_PAGE_SIZE}`,
+      `$skip=${skip}`,
+      "$format=json",
+    ].join("&");
+    const json = await fetchJsonWithRetry(`${WHO_HALE_URL}?${qs}`, {
+      label,
+      validate: whoPayloadError,
+      ...http,
+    });
+    out.push(...json.value);
+    if (json.value.length < WHO_PAGE_SIZE) break;
+  }
+  return out;
 }
 
 /**
@@ -123,44 +296,170 @@ const WORLD_BANK_INPUTS = {
   },
 };
 
-async function fetchHfiPersonalFreedom() {
-  let data;
+/**
+ * Personal-freedom rows from, in order: the HFI_FILE override, the HFI download, or (when
+ * the download fails, as it does whenever the site serves its bot challenge) the exact-year
+ * freedom observations stored in the committed series.json. The cached fallback is loud,
+ * records when its data was retrieved, and `cachedFreedomLosses` stops a build that would
+ * drop any of it.
+ * @param {object | null} committedSeries — parsed public/data/series.json, or null
+ * @param {string} generatedAt — this build's timestamp
+ */
+export async function fetchHfiPersonalFreedom(committedSeries, generatedAt, http = {}) {
+  const file = process.env.HFI_FILE;
+  if (file) {
+    // An explicit override never falls back: a bad file must stop the build.
+    const rows = hfiRowsFromColumns(hfiColumnsFromText(await readFile(file, "utf8")));
+    if (!rows.length) throw new Error(`HFI_FILE ${file} has no usable personal-freedom rows`);
+    console.log(`Human Freedom Index read from HFI_FILE (${rows.length} observations).`);
+    return {
+      rows,
+      status: "file",
+      file: basename(file),
+      retrievedAt: (await stat(file)).mtime.toISOString(),
+    };
+  }
   try {
-    const res = await fetch(HFI_URL);
-    if (!res.ok) throw new Error(`Human Freedom Index request failed (${res.status})`);
-    const text = await res.text();
-    data = JSON.parse(text);
+    const data = await fetchJsonWithRetry(HFI_URL, {
+      label: "Human Freedom Index",
+      attempts: 2,
+      validate: (json) =>
+        json?.year && typeof json.year === "object" ? null : "response has no year column",
+      ...http,
+    });
+    const rows = hfiRowsFromColumns(data);
+    if (!rows.length) throw new Error("Human Freedom Index download has no usable rows");
+    return { rows, status: "downloaded", retrievedAt: generatedAt };
   } catch (error) {
-    try {
-      const cached = JSON.parse(await readFile(SERIES_OUT, "utf8"));
-      const rows = [];
-      for (const [iso, series] of Object.entries(cached.entrySeries ?? {})) {
-        if (!/^[A-Z]{3}$/.test(iso)) continue;
-        for (const point of series.points ?? []) {
-          if (
-            point.freedomYear === point.year &&
-            Number.isFinite(point.freedom) &&
-            point.year >= YEAR_MIN &&
-            point.year <= YEAR_MAX
-          ) {
-            rows.push({
-              countryiso3code: iso,
-              date: String(point.year),
-              value: point.freedom,
-              country: { value: iso },
-            });
-          }
-        }
+    const rows = cachedHfiRows(committedSeries);
+    if (!rows.length) throw error;
+    const previous = committedSeries.sourceRefresh?.humanFreedomIndex;
+    const retrievedAt =
+      previous?.retrievedAt ??
+      (previous?.status === "downloaded" ? committedSeries.generatedAt : null);
+    const countries = new Set(rows.map((row) => row.countryiso3code)).size;
+    console.warn(
+      [
+        "",
+        "!!! WARNING: Human Freedom Index download failed — reusing committed freedom data.",
+        `!!! Reason: ${error.message}`,
+        `!!! Reusing ${rows.length} observations for ${countries} countries from series.json (built ${committedSeries.generatedAt ?? "unknown"}).`,
+        `!!! HFI data originally retrieved: ${retrievedAt ?? "unknown (before that build)"}.`,
+        "!!! New or revised HFI values are not included. To refresh, download the HFI JSON or",
+        "!!! CSV in a browser and rerun with HFI_FILE=<path>.",
+        "",
+      ].join("\n")
+    );
+    return {
+      rows,
+      status: "cached",
+      retrievedAt,
+      cachedFrom: committedSeries.generatedAt,
+      reason: error.message,
+    };
+  }
+}
+
+/** Exact-year freedom observations a previous build stored in series.json. */
+export function cachedHfiRows(series) {
+  const rows = [];
+  for (const [iso, entry] of Object.entries(series?.entrySeries ?? {})) {
+    if (!/^[A-Z]{3}$/.test(iso)) continue;
+    for (const point of entry.points ?? []) {
+      if (
+        point.freedomYear === point.year &&
+        Number.isFinite(point.freedom) &&
+        point.year >= YEAR_MIN &&
+        point.year <= YEAR_MAX
+      ) {
+        rows.push({
+          countryiso3code: iso,
+          date: String(point.year),
+          value: point.freedom,
+          country: { value: iso },
+        });
       }
-      if (!rows.length) throw error;
-      console.warn(
-        `Human Freedom Index download unavailable; using ${rows.length} cached observations.`
-      );
-      return { rows, status: "cached" };
-    } catch {
-      throw error;
     }
   }
+  return rows;
+}
+
+/**
+ * ISO codes whose reused freedom observations would be missing from the new series. Writing
+ * such a build would lose them for good, since the next fallback reads this build's output.
+ */
+export function cachedFreedomLosses(cachedRows, entrySeries) {
+  const lost = new Set();
+  for (const row of cachedRows) {
+    const year = Number(row.date);
+    const point = entrySeries[row.countryiso3code]?.points?.find((p) => p.year === year);
+    if (point?.freedomYear !== year || point.freedom !== row.value) {
+      lost.add(row.countryiso3code);
+    }
+  }
+  return [...lost].sort();
+}
+
+const HFI_MISSING_CELLS = new Set(["", "-", "NA", "N/A", ".."]);
+const HFI_CSV_ALIASES = { iso_code: "iso", iso3: "iso", country: "countries" };
+
+/**
+ * An HFI file (the column-oriented JSON download, or the CSV export) as the JSON's
+ * `{ field: { rowKey: value } }` shape. CSV gaps become null, like the JSON's.
+ */
+export function hfiColumnsFromText(text) {
+  const source = String(text).replace(/^\uFEFF/, "");
+  if (source.trimStart().startsWith("{")) return JSON.parse(source);
+  const [header = [], ...records] = parseCsv(source);
+  const columns = {};
+  header.forEach((rawName, index) => {
+    const name = rawName.trim().toLowerCase();
+    const field = HFI_CSV_ALIASES[name] ?? name;
+    if (!field || columns[field]) return;
+    columns[field] = {};
+    records.forEach((record, row) => {
+      const cell = (record[index] ?? "").trim();
+      columns[field][row] = HFI_MISSING_CELLS.has(cell.toUpperCase()) ? null : cell;
+    });
+  });
+  return columns;
+}
+
+function parseCsv(text) {
+  const records = [];
+  let record = [];
+  let field = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch !== "\"") field += ch;
+      else if (text[i + 1] === "\"") field += text[++i];
+      else quoted = false;
+    } else if (ch === "\"") {
+      quoted = true;
+    } else if (ch === ",") {
+      record.push(field);
+      field = "";
+    } else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      record.push(field);
+      records.push(record);
+      record = [];
+      field = "";
+    } else {
+      field += ch;
+    }
+  }
+  if (field || record.length) {
+    record.push(field);
+    records.push(record);
+  }
+  return records.filter((r) => r.some((cell) => cell.trim()));
+}
+
+/** HFI column-oriented data → WDI-style personal-freedom rows (0–100). */
+export function hfiRowsFromColumns(data) {
   const rows = [];
   for (const key of Object.keys(data.year ?? {})) {
     const year = Number(data.year[key]);
@@ -193,7 +492,7 @@ async function fetchHfiPersonalFreedom() {
       country: { value: data.countries?.[key] ?? iso },
     });
   }
-  return { rows, status: "downloaded" };
+  return rows;
 }
 
 function yearWindowFromRange(range) {
@@ -274,65 +573,43 @@ function worldAggregateTomerSeries(
  * Fetches WHO global HALE and returns the same array shape as `haleHistoryByIso` for ISO `WLD`.
  * @returns {ReturnType<typeof haleHistoryByIso>}
  */
-async function fetchHaleWldMapFromGlobalWho() {
+async function fetchHaleWldMapFromGlobalWho(http = {}) {
   const out = [];
-  const pageSize = 1000;
-  let skip = 0;
-  for (;;) {
-    const qs = [
-      `$filter=${encodeURIComponent(WHO_HALE_GLOBAL_FILTER)}`,
-      `$orderby=TimeDim`,
-      `$top=${pageSize}`,
-      `$skip=${skip}`,
-      "$format=json",
-    ].join("&");
-    const res = await fetch(`${WHO_HALE_URL}?${qs}`);
-    if (!res.ok) {
-      throw new Error(`WHO GHO global HALE request failed (${res.status})`);
-    }
-    const json = await res.json();
-    const chunk = json.value ?? [];
-    for (const r of chunk) {
-      if (r.NumericValue == null || Number.isNaN(Number(r.NumericValue))) continue;
-      const y = r.TimeDim;
-      const year = typeof y === "number" ? y : parseInt(String(y), 10);
-      if (Number.isNaN(year)) continue;
-      out.push({ year, value: Number(r.NumericValue) });
-    }
-    if (chunk.length < pageSize) break;
-    skip += pageSize;
+  const rows = await fetchWhoPages(
+    WHO_HALE_GLOBAL_FILTER,
+    "TimeDim",
+    "WHO GHO global HALE",
+    http
+  );
+  for (const r of rows) {
+    if (r.NumericValue == null || Number.isNaN(Number(r.NumericValue))) continue;
+    const y = r.TimeDim;
+    const year = typeof y === "number" ? y : parseInt(String(y), 10);
+    if (Number.isNaN(year)) continue;
+    out.push({ year, value: Number(r.NumericValue) });
   }
+  if (!out.length) throw new Error("WHO GHO returned no global HALE values");
   out.sort((a, b) => a.year - b.year);
   const m = new Map();
   m.set(WB_WLD, out);
   return m;
 }
 
-async function fetchAllPages(indicator, dateRange = DATE_RANGE, source = null) {
-  const out = [];
-  let page = 1;
-  for (;;) {
-    const url = new URL(
-      `${WB_BASE}/v2/country/all/indicator/${encodeURIComponent(indicator)}`
-    );
-    url.searchParams.set("format", "json");
-    url.searchParams.set("date", dateRange);
-    url.searchParams.set("per_page", WB_PER_PAGE);
-    url.searchParams.set("page", String(page));
-    if (source) url.searchParams.set("source", source);
-
-    const json = await fetchWorldBankJson(url.toString(), indicator);
-    const [meta, data] = json;
-    if (!data?.length) break;
-    out.push(...data);
-    const pages = meta?.pages ?? 1;
-    if (page >= pages) break;
-    page += 1;
-  }
-  return out;
+export async function fetchAllPages(
+  indicator,
+  dateRange = DATE_RANGE,
+  source = null,
+  http = {}
+) {
+  return fetchWorldBankPages(
+    `/v2/country/all/indicator/${encodeURIComponent(indicator)}`,
+    { date: dateRange, per_page: WB_PER_PAGE, source },
+    `World Bank ${indicator}`,
+    http
+  );
 }
 
-function summarizeWorldBankRows(rows, expectedIndicator) {
+export function summarizeWorldBankRows(rows, expectedIndicator) {
   const countries = new Set();
   let earliestYear = Infinity;
   let latestYear = -Infinity;
@@ -360,17 +637,17 @@ function summarizeWorldBankRows(rows, expectedIndicator) {
   };
 }
 
-async function fetchAllWorldBankInputs() {
+async function fetchAllWorldBankInputs(http = {}) {
   console.log("Downloading all World Bank inputs first ...");
   const entries = await Promise.all(
     Object.entries(WORLD_BANK_INPUTS).map(async ([key, spec]) => {
       console.log("Fetching", spec.indicator, "...");
-      const rows = await fetchAllPages(spec.indicator, spec.dateRange, spec.source);
+      const rows = await fetchAllPages(spec.indicator, spec.dateRange, spec.source, http);
       return [key, { ...spec, rows }];
     })
   );
   console.log("Fetching World Bank country metadata ...");
-  const countryMeta = await fetchWorldBankCountryMeta();
+  const countryMeta = await fetchWorldBankCountryMeta(http);
   const data = Object.fromEntries(entries);
   const summary = Object.fromEntries(
     entries.map(([key, item]) => [
@@ -399,7 +676,7 @@ async function fetchAllWorldBankInputs() {
 }
 
 /** Latest HALE (years) per ISO3 from WHO GHO rows. */
-function latestHaleByIso(rows) {
+export function latestHaleByIso(rows) {
   const map = new Map();
   for (const r of rows) {
     if (r.SpatialDimType !== "COUNTRY" || r.Dim1 !== "SEX_BTSX") continue;
@@ -416,74 +693,65 @@ function latestHaleByIso(rows) {
   return map;
 }
 
-async function fetchAllWhoHale() {
-  const out = [];
-  /** WHO GHO OData max `$top` is 1000 per request. */
-  const pageSize = 1000;
-  let skip = 0;
-  for (;;) {
-    /** OData $-params: build query string manually (URLSearchParams mishandles $ keys in some runtimes). */
-    const qs = [
-      `$filter=${encodeURIComponent(WHO_HALE_FILTER)}`,
-      `$top=${pageSize}`,
-      `$skip=${skip}`,
-      "$format=json",
-    ].join("&");
-    const res = await fetch(`${WHO_HALE_URL}?${qs}`);
-    if (!res.ok) {
-      throw new Error(`WHO GHO HALE request failed (${res.status})`);
-    }
-    const json = await res.json();
-    const chunk = json.value ?? [];
-    if (!chunk.length) break;
-    out.push(...chunk);
-    if (chunk.length < pageSize) break;
-    skip += pageSize;
+/**
+ * WHO country HALE rows, ordered so `$skip` paging can't skip or repeat rows. Throws on any
+ * failed page and when far fewer countries than WHO publishes come back.
+ */
+export async function fetchAllWhoHale({
+  minCountries = WHO_HALE_MIN_COUNTRIES,
+  ...http
+} = {}) {
+  const rows = await fetchWhoPages(WHO_HALE_FILTER, "SpatialDim,TimeDim", "WHO GHO HALE", http);
+  const countries = new Set(
+    rows.filter((r) => r.NumericValue != null).map((r) => r.SpatialDim)
+  ).size;
+  if (countries < minCountries) {
+    throw new Error(
+      `WHO GHO returned HALE for only ${countries} countries (expected at least ${minCountries})`
+    );
   }
-  return out;
+  return rows;
 }
 
-async function fetchWorldBankCountryMeta() {
+async function fetchWorldBankCountryMeta(http = {}) {
+  const list = await fetchWorldBankPages(
+    "/v2/country",
+    { per_page: "1000" },
+    "World Bank country metadata",
+    http
+  );
+  return countryMetaFromWorldBank(list);
+}
+
+/** World Bank /v2/country rows → ISO → { name, region, adminregion, incomeLevel, lendingType }. */
+export function countryMetaFromWorldBank(list) {
   const map = new Map();
-  let page = 1;
-  for (;;) {
-    const url = new URL(`${WB_BASE}/v2/country`);
-    url.searchParams.set("format", "json");
-    url.searchParams.set("per_page", "1000");
-    url.searchParams.set("page", String(page));
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`World Bank country metadata failed (${res.status})`);
-    const json = await res.json();
-    const [meta, list] = json;
-    for (const c of list ?? []) {
-      if (typeof c.id !== "string" || !/^[A-Z]{3}$/.test(c.id)) continue;
-      const groupOrNull = (g, rename = {}) => {
-        const id = String(g?.id ?? "").trim();
-        const name = String(g?.value ?? "").trim();
-        if (!id || id === "NA" || !name || name === "Aggregates") return null;
-        return { id, name: rename[id] ?? name };
-      };
-      const region = groupOrNull(c.region);
-      if (!region) continue;
-      map.set(c.id, {
-        name: c.name,
-        region,
-        adminregion: groupOrNull(c.adminregion),
-        incomeLevel: groupOrNull(c.incomeLevel),
-        lendingType: groupOrNull(c.lendingType, {
-          IBD: "IBRD only",
-          IDX: "IDA only",
-          IDB: "IDA blend",
-        }),
-      });
-    }
-    if (page >= (meta?.pages ?? 1)) break;
-    page += 1;
+  for (const c of list ?? []) {
+    if (typeof c.id !== "string" || !/^[A-Z]{3}$/.test(c.id)) continue;
+    const groupOrNull = (g, rename = {}) => {
+      const id = String(g?.id ?? "").trim();
+      const name = String(g?.value ?? "").trim();
+      if (!id || id === "NA" || !name || name === "Aggregates") return null;
+      return { id, name: rename[id] ?? name };
+    };
+    const region = groupOrNull(c.region);
+    if (!region) continue;
+    map.set(c.id, {
+      name: c.name,
+      region,
+      adminregion: groupOrNull(c.adminregion),
+      incomeLevel: groupOrNull(c.incomeLevel),
+      lendingType: groupOrNull(c.lendingType, {
+        IBD: "IBRD only",
+        IDX: "IDA only",
+        IDB: "IDA blend",
+      }),
+    });
   }
   return map;
 }
 
-function groupDefsForCountry(meta) {
+export function groupDefsForCountry(meta) {
   const defs = [{ iso: "WLD", name: "World", kind: "world" }];
 
   if (meta.region) {
@@ -545,13 +813,13 @@ function groupDefsForCountry(meta) {
 
   const seen = new Set();
   return defs.filter((d) => {
-    if (seen.has(d.iso)) return false;
+    if (seen.has(d.iso) || UNCLASSIFIED_GROUP_IDS.has(d.iso)) return false;
     seen.add(d.iso);
     return true;
   });
 }
 
-function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
+export function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
   const buckets = new Map();
 
   function addToBucket(def, row, pop) {
@@ -639,7 +907,7 @@ function rounded(value, digits) {
   return Math.round(value * scale) / scale;
 }
 
-function observationAsOfYear(yearMap, year, minSourceYear) {
+export function observationAsOfYear(yearMap, year, minSourceYear) {
   if (!yearMap?.size) return null;
   let best = null;
   for (const [candidateYear, row] of yearMap) {
@@ -678,7 +946,7 @@ function rawPillarValues(point) {
   };
 }
 
-function applyAbsolutePillars(point) {
+export function applyAbsolutePillars(point) {
   const raw = rawPillarValues(point);
   if (!raw) return false;
   point.abundanceIndex = rounded(raw.abundance, 6);
@@ -697,7 +965,7 @@ function applyAbsolutePillars(point) {
   return true;
 }
 
-function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMax) {
+export function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMax) {
   const years = annualRange(yearMin, yearMax);
   const pointByIsoYear = new Map();
   const cohort = countryRows
@@ -752,7 +1020,7 @@ function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMax) {
   return { cohort, points };
 }
 
-function buildCountrySeries(iso, leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, yearMin, yearMax) {
+export function buildCountrySeries(iso, leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, yearMin, yearMax) {
   const leM = leByCY.get(iso);
   const gniM = gniByCY.get(iso);
   const homM = homByCY.get(iso);
@@ -844,7 +1112,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
   if (values.haleEstimated) bucket.estimatedHaleMembers += 1;
 }
 
-function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
+export function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
   const byIso = new Map();
   const years = annualRange(yearMin, yearMax);
 
@@ -925,7 +1193,7 @@ function indexSortValue(row) {
   return typeof v === "number" && Number.isFinite(v) ? v : NaN;
 }
 
-function sortRowsByIndex(rows) {
+export function sortRowsByIndex(rows) {
   return rows.sort((a, b) => {
     const av = indexSortValue(a);
     const bv = indexSortValue(b);
@@ -938,7 +1206,7 @@ function sortRowsByIndex(rows) {
   });
 }
 
-function rowsForDisplayYear(rows, entrySeries, displayYear) {
+export function rowsForDisplayYear(rows, entrySeries, displayYear) {
   return sortRowsByIndex(
     rows.map((row) => {
       const point = entrySeries[row.iso]?.points?.find((p) => p.year === displayYear);
@@ -968,7 +1236,144 @@ function rowsForDisplayYear(rows, entrySeries, displayYear) {
   );
 }
 
+/** Values the pre-write guard counts, each with the field holding its source year. */
+const COVERAGE_FIELDS = [
+  ["le", "leYear"],
+  ["hale", "haleYear"],
+  ["gni", "gniYear"],
+  ["homicidesPer100k", "homicideYear"],
+  ["freedom", "freedomYear"],
+  ["customIndex", null],
+];
+
+/**
+ * Coverage of one leaderboard.json + series.json pair: scored countries, groups, the
+ * fixed-cohort size, and per value the countries that have it in their latest point and the
+ * same-year source observations across all country histories.
+ */
+export function datasetStats(leaderboard, series) {
+  const rows = leaderboard?.countries ?? [];
+  const groupIso = new Set(rows.filter((row) => row.derivedKind).map((row) => row.iso));
+  const countries = {};
+  const observations = {};
+  for (const [field] of COVERAGE_FIELDS) {
+    countries[field] = 0;
+    observations[field] = 0;
+  }
+  for (const [iso, entry] of Object.entries(series?.entrySeries ?? {})) {
+    if (groupIso.has(iso)) continue;
+    const points = entry.points ?? [];
+    const latest = points.reduce((best, p) => (!best || p.year > best.year ? p : best), null);
+    for (const [field, yearField] of COVERAGE_FIELDS) {
+      if (Number.isFinite(latest?.[field])) countries[field] += 1;
+      for (const point of points) {
+        if (Number.isFinite(point[field]) && (!yearField || point[yearField] === point.year)) {
+          observations[field] += 1;
+        }
+      }
+    }
+  }
+  const trend = leaderboard?.globalAverageSeries?.points ?? [];
+  return {
+    scoredIso: rows
+      .filter((row) => !row.derivedKind && Number.isFinite(row.customIndex))
+      .map((row) => row.iso)
+      .sort(),
+    unscoredIso: rows.filter((row) => !Number.isFinite(row.customIndex)).map((row) => row.iso),
+    groupIso: [...groupIso].sort(),
+    cohortSize: leaderboard?.globalAverageSeries?.cohortSize ?? 0,
+    trendIsFinite: trend.length > 0 && trend.every((point) => Number.isFinite(point.value)),
+    countries,
+    observations,
+  };
+}
+
+function isoList(isos) {
+  const shown = isos.slice(0, 15).join(", ");
+  return isos.length > 15 ? `${shown} and ${isos.length - 15} more` : shown;
+}
+
+/**
+ * Reasons not to replace the committed data with `next` (both from `datasetStats`): any
+ * figure falling by more than `tolerance`, a missing group, or an unusable result.
+ * `previous` is null when there is no committed data to compare with.
+ */
+export function sanityProblems(previous, next, tolerance = SHRINK_TOLERANCE) {
+  const problems = [];
+  if (!next.scoredIso.length) problems.push("no country has a Tomer index");
+  if (next.unscoredIso.length) {
+    problems.push(`rows without a Tomer index: ${isoList(next.unscoredIso)}`);
+  }
+  if (!next.trendIsFinite) {
+    problems.push("the fixed-cohort trend is empty or has non-finite values");
+  }
+  if (!previous) return problems;
+
+  const shrank = (label, before, after, detail = "") => {
+    if (after < before * (1 - tolerance)) {
+      problems.push(`${label} fell from ${before} to ${after}${detail}`);
+    }
+  };
+  const dropped = previous.scoredIso.filter((iso) => !next.scoredIso.includes(iso));
+  shrank(
+    "scored countries",
+    previous.scoredIso.length,
+    next.scoredIso.length,
+    dropped.length ? ` (dropped: ${isoList(dropped)})` : ""
+  );
+  shrank("fixed-cohort size", previous.cohortSize, next.cohortSize);
+  for (const [field] of COVERAGE_FIELDS) {
+    shrank(
+      `countries with ${field} in their latest year`,
+      previous.countries[field],
+      next.countries[field]
+    );
+    shrank(`${field} observations`, previous.observations[field], next.observations[field]);
+  }
+  const lostGroups = previous.groupIso.filter((iso) => !next.groupIso.includes(iso));
+  if (lostGroups.length) problems.push(`groups missing: ${isoList(lostGroups)}`);
+  return problems;
+}
+
+/**
+ * Printed when `sanityProblems` stops the write. The npm script is the way to force it:
+ * its postbuild-data hook also runs build-world (shapes for newly scored countries) and
+ * split-data, which a direct `node scripts/build-data.mjs --force` would skip.
+ */
+export function shrinkRefusalMessage(problems) {
+  const list = problems.map((problem) => `  - ${problem}`).join("\n");
+  return `Refusing to overwrite public/data: compared with the committed files, this build looks degraded:\n${list}\nNothing was written. If the change is expected, run \`npm run build-data -- --force\` (it then runs build-world and split-data too).`;
+}
+
+/** Parsed committed JSON, or null when the file doesn't exist yet. */
+async function readCommittedJson(file) {
+  let text;
+  try {
+    text = await readFile(file, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(
+      `Committed ${file} is not valid JSON (${error.message}); restore or delete it`
+    );
+  }
+}
+
+/** Writes every file to `<file>.tmp` first, so a failure can't leave a half-written mix. */
+async function writeFilesAtomically(files) {
+  for (const [file, text] of files) await writeFile(`${file}.tmp`, text, "utf8");
+  for (const [file] of files) await rename(`${file}.tmp`, file);
+}
+
 async function main() {
+  const force = process.argv.slice(2).includes("--force");
+  const generatedAt = new Date().toISOString();
+  const committedLeaderboard = await readCommittedJson(LEADERBOARD_OUT);
+  const committedSeries = await readCommittedJson(SERIES_OUT);
   const { data: worldBankData, countryMeta, summary: worldBankAudit } =
     await fetchAllWorldBankInputs();
   const leRows = worldBankData.lifeExpectancy.rows;
@@ -977,7 +1382,7 @@ async function main() {
   const incomeRows = incomeRowsWithGdpFallback(gniRows, gdpRows);
   const homRows = worldBankData.intentionalHomicidesPer100k.rows;
   console.log("Fetching Human Freedom Index personal-freedom scores …");
-  const freedomDownload = await fetchHfiPersonalFreedom();
+  const freedomDownload = await fetchHfiPersonalFreedom(committedSeries, generatedAt);
   const freedomRows = freedomDownload.rows;
   const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
@@ -1071,7 +1476,7 @@ async function main() {
       : "";
 
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     yearWindow: DATE_RANGE,
     worldBankAudit,
     sourceRefresh: {
@@ -1081,10 +1486,15 @@ async function main() {
         latestObservationYear: Math.max(...haleRows.map((row) => Number(row.TimeDim))),
       },
       humanFreedomIndex: {
+        // "downloaded", "file" (HFI_FILE) or "cached" (reused from the committed series.json).
         status: freedomDownload.status,
         edition: 2025,
         latestObservationYear: Math.max(...freedomRows.map((row) => Number(row.date))),
         url: HFI_URL,
+        retrievedAt: freedomDownload.retrievedAt,
+        file: freedomDownload.file,
+        cachedFrom: freedomDownload.cachedFrom,
+        reason: freedomDownload.reason,
       },
     },
     indicators: {
@@ -1156,17 +1566,50 @@ async function main() {
     yearWindow: payload.yearWindow,
     entrySeries,
   };
+
+  if (!committedLeaderboard || !committedSeries) {
+    console.warn("No committed public/data to compare with; skipping the shrink check.");
+  }
+  const problems = sanityProblems(
+    committedLeaderboard && committedSeries
+      ? datasetStats(committedLeaderboard, committedSeries)
+      : null,
+    datasetStats(leaderboardPayload, seriesPayload)
+  );
+  if (freedomDownload.status === "cached") {
+    const lost = cachedFreedomLosses(freedomRows, entrySeries);
+    if (lost.length) {
+      problems.push(
+        `reused HFI freedom data would be lost for ${isoList(lost)}; the next build reuses this one's output, so it could never come back`
+      );
+    }
+  }
+  if (problems.length) {
+    if (!force) {
+      console.error(shrinkRefusalMessage(problems));
+      process.exitCode = 1;
+      return;
+    }
+    const list = problems.map((problem) => `  - ${problem}`).join("\n");
+    console.warn(`--force: writing despite:\n${list}`);
+  }
+
   await mkdir(DATA_DIR, { recursive: true });
   await mkdir(ARCHIVE_DIR, { recursive: true });
   // Archive payload stays pretty-printed for inspection; the web files are
   // minified because they ship to the browser.
-  await writeFile(OUT, JSON.stringify(payload, null, 2), "utf8");
-  await writeFile(LEADERBOARD_OUT, JSON.stringify(leaderboardPayload), "utf8");
-  await writeFile(SERIES_OUT, JSON.stringify(seriesPayload), "utf8");
+  await writeFilesAtomically([
+    [OUT, JSON.stringify(payload, null, 2)],
+    [LEADERBOARD_OUT, JSON.stringify(leaderboardPayload)],
+    [SERIES_OUT, JSON.stringify(seriesPayload)],
+  ]);
   console.log(`Wrote ${countries.length} leaderboard rows → ${LEADERBOARD_OUT}`);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+// Run only when executed (`node scripts/build-data.mjs`), never when imported by tests.
+if (import.meta.main) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

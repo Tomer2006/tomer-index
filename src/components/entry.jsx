@@ -1,109 +1,141 @@
 "use client";
-import { useEffect } from "react";
 import Link from "next/link";
-import { useDataset, useQuery } from "./hooks";
+import { useDataset } from "./hooks";
 import {
   Header,
   DataStatus,
   MetricCell,
   QualityBadge,
   PillarBars,
+  SourceBadge,
 } from "./shared";
 import HistoryChart from "./history-chart";
-import { columns } from "../view-model.js";
+import { columnFor, columns } from "../view-model.js";
 import { metricDefs } from "../metric-defs.js";
-import { dataQualityForRow } from "../data-quality.js";
-import { YEAR_MAX } from "../site-years.js";
+import { YEAR_MAX, YEAR_MIN } from "../site-years.js";
+import {
+  entryKicker,
+  entrySummary,
+  rankLabel,
+} from "../entry-summary.js";
 
-export default function Entry() {
-  const [params] = useQuery();
-  const iso = (params.get("iso") ?? "").trim().toUpperCase();
-  const leaderboard = useDataset("leaderboard"),
-    history = useDataset("series");
-  const datasets = [leaderboard, history],
-    countries = leaderboard.data?.countries ?? [],
-    series = history.data?.entrySeries ?? {};
-  const row = countries.find((row) => row.iso === iso),
-    points = series[iso]?.points ?? [];
-  useEffect(() => {
-    if (row) document.title = `${row.name} history — Tomer index`;
-  }, [row]);
-  return (
-    <>
-      <Header
-        title={
-          row ? (
-            <>
-              {row.name}
-              <QualityBadge
-                quality={dataQualityForRow(
-                  row,
-                  series,
-                  leaderboard.data?.qualityByIso,
-                )}
-              />
-            </>
-          ) : (
-            "Entry history"
-          )
-        }
-        kicker={
-          row ? `${row.derivedKind ?? iso} history` : "Tomer index history"
-        }
-      />
-      <DataStatus datasets={datasets} />
-      {datasets.every((dataset) => dataset.data) &&
-        (!row ? (
+const tomerColumn = columnFor("tomer"),
+  statColumns = columns.filter((column) => column !== tomerColumn);
+const tomerColor = metricDefs.find((metric) => metric.key === "customIndex").color;
+
+/**
+ * One country's or group's page. The static /entry/[iso] route passes the
+ * prerendered `summary`, so only the history has to load; without it the
+ * leaderboard is fetched to find the row.
+ */
+export default function Entry({ iso, summary: initial = null }) {
+  const leaderboard = useDataset("leaderboard", !initial),
+    history = useDataset(`entry:${iso}`, Boolean(iso));
+  const summary =
+    initial ?? (leaderboard.data ? entrySummary(leaderboard.data, iso) : null);
+  if (!summary)
+    return (
+      <main id="main" className="entry-page">
+        <Header
+          title={leaderboard.data ? "Country not found" : "Country history"}
+        />
+        <DataStatus datasets={[leaderboard]} />
+        {leaderboard.data && (
           <p role="alert" className="status error">
             {iso
-              ? `No leaderboard entry found for ${iso}.`
-              : "Missing entry id."}{" "}
-            <Link href="/">Choose an entry</Link>
+              ? `No country or group matches “${iso}”.`
+              : "No country code given."}{" "}
+            <Link href="/">Browse the leaderboard</Link>
           </p>
-        ) : (
-          <main className="entry-page">
-            <div className="entry-latest">
-              <section className="entry-summary">
-                <div>
-                  <h2 className="entry-summary-title">
-                    Latest leaderboard values
-                  </h2>
-                  <p className="entry-summary-sub muted">
-                    Series through {points.at(-1)?.year ?? YEAR_MAX}
-                    {points.at(-1)?.n ? ` · ${points.at(-1).n} members` : ""}
-                  </p>
-                </div>
-                <div className="entry-stats">
-                  <div className="entry-stat">
-                    <span className="entry-stat-label">Rank</span>
-                    <strong>
-                      {countries.findIndex((item) => item.iso === iso) + 1}
-                    </strong>
-                  </div>
-                  {columns.map((column) => (
-                    <div className="entry-stat" key={column.key}>
-                      <span className="entry-stat-label">{column.label}</span>
-                      <strong>
-                        <MetricCell row={row} column={column} year={YEAR_MAX} />
-                      </strong>
-                    </div>
-                  ))}
-                </div>
-                <PillarBars row={row} />
-              </section>
-            </div>
-            <div className="metric-grid">
-              {metricDefs.map((metric) => (
-                <HistoryChart
-                  key={metric.key}
-                  metric={metric}
-                  showMarkers={false}
-                  series={[{ iso, name: row.name, points }]}
-                />
-              ))}
-            </div>
-          </main>
+        )}
+      </main>
+    );
+  const { row } = summary;
+  return (
+    <main id="main" className="entry-page">
+      <Header
+        title={
+          <>
+            {row.name}
+            <QualityBadge quality={summary.quality} />
+          </>
+        }
+        kicker={entryKicker(row)}
+      />
+      <EntrySummary summary={summary} />
+      <section className="entry-history" aria-labelledby="entry-history-title">
+        <h2 id="entry-history-title" className="entry-section-title">
+          History, {YEAR_MIN}–{YEAR_MAX}
+        </h2>
+        <DataStatus datasets={[history]} />
+        {history.data && (
+          <div className="metric-grid">
+            {metricDefs.map((metric) => (
+              <HistoryChart
+                key={metric.key}
+                metric={metric}
+                showMarkers={false}
+                series={[{ iso, name: row.name, points: history.data.points }]}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+function EntrySummary({ summary }) {
+  const { row } = summary;
+  const iso = encodeURIComponent(row.iso);
+  return (
+    <section
+      className="entry-summary"
+      aria-labelledby="entry-headline-label"
+      style={{ "--tomer-color": tomerColor }}
+    >
+      <div className="entry-headline">
+        <h2 id="entry-headline-label" className="entry-headline-label">
+          {tomerColumn.label} · {YEAR_MAX}
+        </h2>
+        <p className="entry-headline-value">
+          {tomerColumn.format(tomerColumn.value(row))}
+        </p>
+        <p className="entry-headline-rank">{rankLabel(summary)}</p>
+        <p className="entry-headline-sources muted">
+          Source years
+          <SourceBadge
+            row={row}
+            sources={tomerColumn.sources}
+            year={YEAR_MAX}
+            compact
+          />
+        </p>
+        <PillarBars row={row} />
+      </div>
+      <dl className="entry-stats">
+        {statColumns.map((column) => (
+          <div className="entry-stat" key={column.key} data-metric={column.key}>
+            <dt className="entry-stat-label">{column.long}</dt>
+            <dd>
+              <MetricCell row={row} column={column} year={YEAR_MAX} />
+            </dd>
+          </div>
         ))}
-    </>
+      </dl>
+      <nav className="entry-actions" aria-label={`More on ${row.name}`}>
+        <Link className="btn primary" href={`/compare?picks=${iso}`}>
+          Compare with others
+        </Link>
+        {!row.derivedKind && (
+          <Link className="btn" href={`/map?iso=${iso}`}>
+            View on map
+          </Link>
+        )}
+        <Link className="btn" href="/">
+          ← Back to the leaderboard
+        </Link>
+      </nav>
+    </section>
   );
 }

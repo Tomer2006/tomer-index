@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "next dev --port 5173",
     "build-data": "node scripts/build-data.mjs",
+    "postbuild-data": "npm run build-world && npm run split-data",
+    "split-data": "node scripts/split-data.mjs",
+    "predev": "npm run split-data",
+    "prebuild": "npm run split-data",
     "build-world": "node scripts/build-world.mjs",
     "build": "next build",
     "start": "next start --port 3000",

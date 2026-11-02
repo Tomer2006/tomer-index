@@ -3,4 +3,5 @@ dist/
 .next/
 out/
 data-archive/
+public/app-data/
 .DS_Store

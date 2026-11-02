@@ -4,3 +4,29 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[headers]]
+  for = "/app-data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Browsers and crawlers request /favicon.ico directly; serve the site's icon
+# instead of Netlify's default one.
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/favicon.svg"
+  status = 301
+  force = true
+
+# Some crawlers and bookmark tools probe the conventional Apple icon paths.
+[[redirects]]
+  from = "/apple-touch-icon.png"
+  to = "/apple-icon"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/apple-touch-icon-precomposed.png"
+  to = "/apple-icon"
+  status = 301
+  force = true

@@ -23,4 +23,22 @@
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
+  /* Preflight's 50% currentColor is ~4.4:1 on the input fill; muted is ~5.2:1. */
+  ::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+}
+
+/* Unlayered so it beats component sizes: iOS Safari zooms into any focused
+   field under 16px and stays zoomed after blur. */
+@media (pointer: coarse) {
+  input:not([type]),
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
 }

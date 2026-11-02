@@ -2,6 +2,10 @@
  * Converts world-atlas countries-110m TopoJSON into a GeoJSON keyed by ISO3
  * alpha-3. Run once with `npm run build-world`. The runtime never sees
  * topojson — it just reads the produced GeoJSON.
+ *
+ * Scored countries too small for the 110m atlas (Malta, Singapore, …) are taken
+ * from countries-50m, and the atlas features without a numeric id stay on the map
+ * as unscored land. Coordinates are rounded to 2 decimals (<0.03 px at 1× zoom).
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -11,7 +15,10 @@ import { feature } from "topojson-client";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const TOPOJSON = join(ROOT, "node_modules/world-atlas/countries-110m.json");
+const TOPOJSON_50M = join(ROOT, "node_modules/world-atlas/countries-50m.json");
+const LEADERBOARD = join(ROOT, "public/data/leaderboard.json");
 const OUT = join(ROOT, "public/data/world.geojson");
+const DIGITS = 2;
 
 /** Numeric ISO 3166-1 → alpha-3, covering the rows in world-atlas. */
 const NUM_TO_ISO3 = {
@@ -57,37 +64,109 @@ const NUM_TO_ISO3 = {
   850: "VIR", 854: "BFA", 858: "URY", 860: "UZB", 862: "VEN", 876: "WLF",
   882: "WSM", 887: "YEM", 894: "ZMB",
 };
+/**
+ * Atlas features without an ISO numeric id. They are drawn as unscored land so they
+ * don't show as holes; XKX is the World Bank code (it joins if Kosovo is ever scored),
+ * SOL/CYN are Natural Earth codes that never match a leaderboard row.
+ */
+const BY_NAME = {
+  Kosovo: { id: "XKX", name: "Kosovo" },
+  Somaliland: { id: "SOL", name: "Somaliland" },
+  "N. Cyprus": { id: "CYN", name: "Northern Cyprus" },
+};
+
+const round = (value) => Number(value.toFixed(DIGITS));
+/** Twice the planar signed area of a ring; its sign is the ring's winding. */
+function signedArea(ring) {
+  let sum = 0;
+  for (let i = 0; i < ring.length - 1; i++)
+    sum += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+  return sum;
+}
+/**
+ * Rounds a ring and drops repeated points. Rings that collapse or flip winding are
+ * dropped (null), since d3-geo would read a flipped ring as covering the whole globe.
+ */
+function roundRing(ring) {
+  const out = [];
+  for (const [x, y] of ring) {
+    const point = [round(x), round(y)];
+    const last = out.at(-1);
+    if (!last || last[0] !== point[0] || last[1] !== point[1]) out.push(point);
+  }
+  if (out.length < 4) return null;
+  const before = signedArea(ring),
+    after = signedArea(out);
+  return after !== 0 && Math.sign(after) === Math.sign(before) ? out : null;
+}
+function roundPolygon(rings) {
+  const [outer, ...holes] = rings.map(roundRing);
+  return outer ? [outer, ...holes.filter(Boolean)] : null;
+}
+function roundGeometry(geometry) {
+  const polygons = (
+    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates
+  )
+    .map(roundPolygon)
+    .filter(Boolean);
+  if (!polygons.length) throw new Error("Geometry vanished after rounding");
+  return polygons.length === 1
+    ? { type: "Polygon", coordinates: polygons[0] }
+    : { type: "MultiPolygon", coordinates: polygons };
+}
+
+async function readCountries(file) {
+  const topo = JSON.parse(await readFile(file, "utf8"));
+  const layer = topo.objects?.countries;
+  if (!layer) throw new Error(`Expected layer 'countries' in ${file}`);
+  return feature(topo, layer).features;
+}
+function toFeature(f) {
+  const named = f.id === undefined ? BY_NAME[f.properties?.name] : null;
+  const id = named?.id ?? NUM_TO_ISO3[parseInt(f.id, 10)];
+  if (!id) return null;
+  return {
+    type: "Feature",
+    id,
+    properties: { name: named?.name ?? f.properties?.name ?? "" },
+    geometry: roundGeometry(f.geometry),
+  };
+}
 
 async function main() {
-  const text = await readFile(TOPOJSON, "utf8");
-  const topo = JSON.parse(text);
-  const layer = topo.objects?.countries;
-  if (!layer) throw new Error("Expected world-atlas countries-110m.json layer 'countries'");
-  const collection = feature(topo, layer);
-
-  let mapped = 0;
-  let dropped = 0;
   const features = [];
-  for (const f of collection.features) {
-    const num = parseInt(f.id, 10);
-    const iso3 = NUM_TO_ISO3[num];
-    if (!iso3) {
-      dropped += 1;
-      continue;
-    }
-    mapped += 1;
-    features.push({
-      type: "Feature",
-      id: iso3,
-      properties: { iso3, name: f.properties?.name ?? "" },
-      geometry: f.geometry,
-    });
+  let dropped = 0;
+  for (const f of await readCountries(TOPOJSON)) {
+    const out = toFeature(f);
+    if (out) features.push(out);
+    else dropped += 1;
   }
+
+  const { countries } = JSON.parse(await readFile(LEADERBOARD, "utf8"));
+  const have = new Set(features.map((f) => f.id));
+  const missing = new Set(
+    countries
+      .filter((row) => !row.derivedKind && !have.has(row.iso))
+      .map((row) => row.iso),
+  );
+  const added = [];
+  for (const f of await readCountries(TOPOJSON_50M)) {
+    const out = toFeature(f);
+    if (out && missing.has(out.id)) {
+      features.push(out);
+      added.push(out.id);
+      missing.delete(out.id);
+    }
+  }
+  if (missing.size)
+    console.warn(`No atlas shape for: ${[...missing].join(", ")}`);
 
   const out = { type: "FeatureCollection", features };
   await mkdir(join(ROOT, "public/data"), { recursive: true });
   await writeFile(OUT, JSON.stringify(out));
-  console.log(`Wrote ${mapped} country features (${dropped} dropped) → ${OUT}`);
+  console.log(
+    `Wrote ${features.length} country features (${dropped} dropped; from 50m: ${added.join(", ") || "none"}) → ${OUT}`,
+  );
 }
 
 main().catch((e) => {
