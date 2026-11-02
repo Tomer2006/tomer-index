@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import Link from "next/link";
 import { Header } from "../../components/shared";
-import { INDEX_WEIGHTS } from "../../hdi-core.js";
+import {
+  customIndexAbundanceSafetyHealthFreedomFull,
+  INDEX_WEIGHTS,
+} from "../../hdi-core.js";
 import {
   readLeaderboardFile,
   scoredCountries,
@@ -32,12 +35,25 @@ const SECTIONS = {
 const percent = (key) => `${Math.round(INDEX_WEIGHTS[key] * 100)}%`;
 const exponent = (key) => INDEX_WEIGHTS[key].toFixed(2);
 
+/** A future country with no homicides and full freedom, for the "no ceiling" example. */
+const futureScore = (lifeExpectancy, hale, income) =>
+  Math.round(
+    100 *
+      customIndexAbundanceSafetyHealthFreedomFull(
+        lifeExpectancy,
+        income,
+        0,
+        hale,
+        100,
+      ),
+  );
+
 const PILLARS = [
   {
     key: "health",
     name: "Health",
     input: "Life expectancy and Healthy life expectancy (HALE), averaged",
-    goalposts: "20 → 85 years",
+    goalposts: "20 → 85 years, then higher",
   },
   {
     key: "safety",
@@ -55,7 +71,7 @@ const PILLARS = [
     key: "abundance",
     name: "Abundance",
     input: "Income per person (PPP $)",
-    goalposts: "$100 → $75,000 (log scale)",
+    goalposts: "$100 → $75,000 (log scale), then higher",
   },
 ];
 
@@ -151,12 +167,19 @@ export default function Page() {
         <article className="prose">
           <Section id="at-a-glance">
             <p>
-              The Tomer index scores countries, and groups of countries, from
-              0 to 100 on four pillars: health, safety, freedom, and abundance.
-              Each pillar is scaled from 0 to 1 against fixed goalposts, and the
-              four are combined into a weighted geometric mean for every year
-              from {YEAR_MIN} to {YEAR_MAX}. The site shows the result ×100; the
-              downloadable files keep the 0–1 values.
+              The Tomer index scores countries, and groups of countries, on four
+              pillars: health, safety, freedom, and abundance. Each pillar is
+              scaled against fixed goalposts, 0 at the worst and 1 at the best,
+              and the four are combined into a weighted geometric mean for every
+              year from {YEAR_MIN} to {YEAR_MAX}. The site shows the result ×100;
+              the downloadable files keep the unscaled values.
+            </p>
+            <p>
+              <strong>100 is a mark, not a ceiling.</strong> A country scores
+              100 when it meets every best goalpost. Health and abundance keep
+              rising past theirs, so a country that lives longer than 85 years or
+              earns more than $75,000 a person can score above 100 (see{" "}
+              <a href="#combining">Combining the pillars</a>).
             </p>
             <div className="methodology-table-wrap">
               <table className="methodology-table">
@@ -168,7 +191,7 @@ export default function Page() {
                       Weight
                     </th>
                     <th scope="col">Input</th>
-                    <th scope="col">Goalposts (worst → best)</th>
+                    <th scope="col">Goalposts (0 → 1)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -255,14 +278,16 @@ export default function Page() {
               Health: ½ life expectancy + ½ HALE
             </PillarHeading>
             <p>
-              Both inputs use UNDP’s life-table goalposts: 20 years (worst) and
-              85 years (best). The pillar averages life expectancy (LE) and
-              healthy life expectancy (HALE), so a country is rewarded both for
-              living long and for living well.
+              Both inputs use UNDP’s life-table goalposts: 20 years scores 0 and
+              85 years scores 1. Unlike UNDP’s index, 85 is not a cap: each year
+              beyond it counts as much as a year below it, so the pillar keeps
+              rising as lifespans grow. The pillar averages life expectancy (LE)
+              and healthy life expectancy (HALE), so a country is rewarded both
+              for living long and for living well.
             </p>
             <Formula
               lines={[
-                "LEI(years) = (clamp(years, 20, 85) − 20) / (85 − 20)",
+                "LEI(years) = (max(years, 20) − 20) / (85 − 20)",
                 "Health     = ½·LEI(LE) + ½·LEI(HALE)",
               ]}
             />
@@ -332,17 +357,17 @@ export default function Page() {
               (same units) since that year. It doesn’t substitute GDP itself,
               which can sit far from GNI: Tajikistan’s GDP per person is about
               half its GNI. Before a country’s first GNI value, GDP per person is
-              used as published. The value is mapped to 0–1 between $100 and
-              $75,000, the same goalposts UNDP uses for the HDI. Log scaling
-              means each doubling of income adds a fixed amount, not a fixed
-              fraction.
+              used as published. On a log scale, $100 scores 0 and $75,000
+              scores 1, the same goalposts UNDP uses for the HDI. Unlike the
+              HDI, income above $75,000 still counts. Log scaling means each
+              doubling of income adds a fixed amount, not a fixed fraction, so
+              richer countries need ever larger gains to move the pillar.
             </p>
             <Formula
               lines={[
                 "Income    = GNI per person if published that year,",
                 "            otherwise latest GNI × (GDP now / GDP in that GNI year)",
-                "Abundance = (ln(clamp(income, 100, 75000)) − ln(100))",
-                "            / (ln(75000) − ln(100))",
+                "Abundance = ln(max(income, 100) / 100) / ln(75000 / 100)",
               ]}
             />
             <p>
@@ -354,9 +379,8 @@ export default function Page() {
 
           <Section id="combining">
             <p>
-              Each pillar is normalized to 0–1 against the fixed goalposts
-              above, and the normalized values go straight into the geometric
-              mean. There is no yearly ranking or rescaling step, so scores are
+              Each pillar is normalized against the fixed goalposts above, and
+              the normalized values go straight into the geometric mean. There is no yearly ranking or rescaling step, so scores are
               absolute and comparable across countries and years.
             </p>
             <p>
@@ -382,6 +406,17 @@ export default function Page() {
               homicides per 100k, or life expectancy and HALE both at 20 years
               or less. In the current data, {facts.zeroScores} country-years
               score exactly 0 this way.
+            </p>
+            <p>
+              <strong>The index has no ceiling.</strong> Safety and freedom
+              stop at 1: a country can’t have fewer than zero homicides or more
+              than a perfect freedom score. Health and abundance have no upper
+              limit, so a country that meets every goalpost scores 100 and one
+              that goes further scores more. With no homicides and full
+              freedom, life expectancy of 100 years, HALE of 90, and $150,000 a
+              person would score about {futureScore(100, 90, 150000)}; 150
+              years, HALE of 140, and $1,000,000 a person would score about{" "}
+              {futureScore(150, 140, 1e6)}.
             </p>
             <p>
               On the leaderboard and map you can set your own weights. They are

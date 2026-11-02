@@ -1605,13 +1605,13 @@ async function main() {
     derivedRows:
       "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, safety, life expectancy, and population; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is used for abundance; a year without GNI moves the latest GNI by the change in GDP per capita (PPP) since then, and plain GDP per capita stands in only before a country's first GNI year.",
     healthPillar:
-      "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
+      "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85.",
     safetyNote:
       "Safety uses intentional homicides/100k only (comparable worldwide). Theft, assault, and sexual violence are not mixed in because definitions and reporting differ by country.",
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:
-      "Every base pillar is normalized against fixed goalposts, then combined directly. Scores are absolute and do not depend on other countries or the selected year.",
+      "Every base pillar is normalized against fixed goalposts, then combined directly. Scores are absolute and do not depend on other countries or the selected year. Safety and freedom top out at 1 (no homicides, a perfect freedom score); health (above 85 years) and abundance (above $75,000) keep rising, so the index has no ceiling.",
     indexWeights: INDEX_WEIGHTS,
     globalAverageSeries: {
       definition:

@@ -170,7 +170,7 @@ test("phones get compact, fully tappable cards instead of the table", async () =
     "/entry/CHE",
   );
   expect(cards[0].querySelector(".leaderboard-card-pillars").textContent).toBe(
-    "Health 89 · Safety 99 · Freedom 98 · Abundance 100",
+    "Health 89 · Safety 99 · Freedom 98 · Abundance 101",
   );
   const world = within(document.body)
     .getByRole("link", { name: "World" })

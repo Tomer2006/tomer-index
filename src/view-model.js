@@ -167,7 +167,7 @@ export const columns = [
   {
     key: "tomer",
     label: "Tomer index",
-    long: "Tomer index (0–100)",
+    long: "Tomer index (100 = every goalpost met)",
     sources: TOMER_SOURCE_KEYS,
     value: weightedIndexFromPillars,
     format: formatTomer,
@@ -191,7 +191,7 @@ export const columns = [
   {
     key: "health",
     label: "Health score",
-    long: "Health pillar score (0–100)",
+    long: "Health pillar score (100 = life expectancy and HALE of 85)",
     sources: ["leYear", "haleYear"],
     value: (r) => r.healthIndex,
     format: formatTomer,

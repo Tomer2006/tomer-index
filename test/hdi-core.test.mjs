@@ -65,12 +65,13 @@ test("income rows use GNI, extend it by GDP growth, and use plain GDP only befor
 const closeTo = (actual, expected, eps = 1e-9) =>
   assert.ok(Math.abs(actual - expected) < eps, `expected ${actual} ≈ ${expected}`);
 
-test("leiFromYears uses 20–85 goalposts and clamps outside them", () => {
+test("leiFromYears scores 20 years 0 and 85 years 1, with no cap above 85", () => {
   assert.equal(leiFromYears(20), 0);
   assert.equal(leiFromYears(85), 1);
   closeTo(leiFromYears(52.5), 0.5);
   assert.equal(leiFromYears(10), 0);
-  assert.equal(leiFromYears(100), 1);
+  // Each year past 85 adds as much as a year below it.
+  closeTo(leiFromYears(150), 2);
 });
 
 test("combinedHealthLei averages lifespan and healthspan LEIs", () => {
@@ -87,15 +88,16 @@ test("safety index inverts homicides linearly with a 60/100k floor", () => {
   assert.equal(safetyIndexFromHomicidesPer100k(-5), 1);
 });
 
-test("income index uses HDI log goalposts $100–$75,000 and clamps", () => {
+test("income index uses HDI log goalposts $100–$75,000, with no cap above $75,000", () => {
   assert.equal(incomeIndexFromGni(100), 0);
-  assert.equal(incomeIndexFromGni(75000), 1);
+  closeTo(incomeIndexFromGni(75000), 1);
   assert.equal(incomeIndexFromGni(50), 0);
-  assert.equal(incomeIndexFromGni(1e6), 1);
-  // Log scaling: a doubling adds a constant amount.
+  // Log scaling: a doubling adds a constant amount, above the goalpost too.
   const step = incomeIndexFromGni(200) - incomeIndexFromGni(100);
-  const step2 = incomeIndexFromGni(400) - incomeIndexFromGni(200);
-  closeTo(step, step2);
+  closeTo(incomeIndexFromGni(400) - incomeIndexFromGni(200), step);
+  closeTo(incomeIndexFromGni(150000) - incomeIndexFromGni(75000), step);
+  // $75,000² / $100 is as far above the goalpost as $75,000 is above $100.
+  closeTo(incomeIndexFromGni(75000 * 750), 2);
 });
 
 test("freedom index maps the 0-100 personal-freedom score to 0-1 and clamps", () => {
@@ -121,6 +123,15 @@ test("index uses the declared 40/30/20/10 dimension weights", () => {
     Math.pow(freedom, INDEX_WEIGHTS.freedom);
   assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
   closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, hom, hale, 80), expected);
+});
+
+test("the index passes 1 once health or income goes past its goalpost", () => {
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(85, 75000, 0, 85, 100), 1);
+  const longer = customIndexAbundanceSafetyHealthFreedomFull(100, 75000, 0, 90, 100);
+  const richer = customIndexAbundanceSafetyHealthFreedomFull(85, 150000, 0, 85, 100);
+  assert.ok(longer > 1, `longer lives score ${longer}`);
+  assert.ok(richer > 1, `higher income scores ${richer}`);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.3426, 1e-4);
 });
 
 test("homicide rates at or above 60/100k collapse the index to 0", () => {

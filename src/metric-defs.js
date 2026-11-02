@@ -22,14 +22,14 @@ export function compactNumber(n, digits = 1) {
 /**
  * Chart/table metric definitions shared by the entry and compare pages.
  * `axis(value, step)` prints a y tick with the precision its tick step needs;
- * `max` caps the axis for bounded scores (every metric is non-negative).
+ * `max` caps the axis for bounded scores (every metric is non-negative; the Tomer
+ * index has none, since health and abundance keep rising past their goalposts).
  */
 export const metricDefs = [
   {
     key: "customIndex",
     color: "#a78bfa",
     label: "Tomer index",
-    max: 1,
     axis: (v, step = 0.001) => formatTomerAxis(v, stepDecimals(step * 100)),
     value: (v) => formatTomer(v),
   },

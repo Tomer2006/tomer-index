@@ -194,7 +194,7 @@ test("year control shows its range and pillar bars read in weight order", () => 
     <>
       <YearControl year={2010} onChange={() => {}} />
       <PillarBars
-        row={{ healthIndex: 0.9, safetyIndex: 0.5, freedomIndex: 0.25, abundanceIndex: 1 }}
+        row={{ healthIndex: 0.9, safetyIndex: 0.5, freedomIndex: 0.25, abundanceIndex: 1.067 }}
       />
     </>,
   );
@@ -205,12 +205,12 @@ test("year control shows its range and pillar bars read in weight order", () => 
   const bars = [...document.querySelectorAll(".pillar-bar")].map(
     (bar) => bar.textContent,
   );
-  expect(bars).toEqual([
-    "Health90 of 100",
-    "Safety50 of 100",
-    "Freedom25 of 100",
-    "Abundance100 of 100",
-  ]);
+  expect(bars).toEqual(["Health90", "Safety50", "Freedom25", "Abundance107"]);
+  // A pillar past its goalpost fills its bar without overflowing it.
+  const widths = [...document.querySelectorAll(".pillar-bar-fill")].map(
+    (fill) => fill.style.width,
+  );
+  expect(widths).toEqual(["90%", "50%", "25%", "100%"]);
 });
 
 test("a load error shows visitor copy and Retry reloads every failed dataset", async () => {

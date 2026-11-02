@@ -42,10 +42,19 @@ const FILES = [
 ];
 
 const FIELDS = [
-  ["customIndex", <>Tomer index on a 0–1 scale. The site shows it ×100.</>],
+  [
+    "customIndex",
+    <>
+      Tomer index, where 1 means every goalpost is met; it can go higher. The
+      site shows it ×100.
+    </>,
+  ],
   [
     "healthIndex, safetyIndex, freedomIndex, abundanceIndex",
-    <>Pillar scores, 0–1.</>,
+    <>
+      Pillar scores from 0. Safety and freedom stop at 1; health and abundance
+      pass 1 above 85 years and $75,000.
+    </>,
   ],
   [
     "le, hale, haleEstimated",

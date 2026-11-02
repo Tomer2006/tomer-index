@@ -3,9 +3,16 @@
 /** Homicides per 100,000: 0 = best safety, 60 = floor (worst) for the safety sub-index. */
 const HOMICIDE_RATE_MAX = 60;
 
-/** UNDP-style life table goalposts (years), applied to both life expectancy and HALE. */
+/**
+ * Life expectancy and HALE score 0 at 20 years and 1 at 85 years (UNDP's goalposts).
+ * 85 is a mark, not a ceiling: every year beyond it adds the same amount.
+ */
 const LE_MIN = 20;
-const LE_MAX = 85;
+const LE_MARK = 85;
+
+/** Income scores 0 at $100 and 1 at $75,000 (UNDP's goalposts), with no ceiling. */
+const INCOME_MIN = 100;
+const INCOME_MARK = 75000;
 
 /** User-defined importance weights; sum to 1. */
 export const INDEX_WEIGHTS = Object.freeze({
@@ -15,7 +22,10 @@ export const INDEX_WEIGHTS = Object.freeze({
   freedom: 0.2,
 });
 
-/** Weighted geometric mean of pillars normalized against fixed goalposts. */
+/**
+ * Weighted geometric mean of pillars normalized against fixed goalposts. Safety and
+ * freedom top out at 1; health and abundance keep rising past it, so the index does too.
+ */
 export function customIndexFromPillarsFull({ abundance, safety, health, freedom }) {
   return (
     Math.pow(abundance, INDEX_WEIGHTS.abundance) *
@@ -26,16 +36,16 @@ export function customIndexFromPillarsFull({ abundance, safety, health, freedom 
 }
 
 /**
- * Life Expectancy Index from years at birth (same formula as UNDP LEI for full lifespan).
+ * Life Expectancy Index from years at birth (UNDP's LEI formula without its upper cap).
  * @param {number} years — life expectancy or HALE
  */
 export function leiFromYears(years) {
-  const y = Math.max(LE_MIN, Math.min(Number(years), LE_MAX));
-  return (y - LE_MIN) / (LE_MAX - LE_MIN);
+  const y = Math.max(LE_MIN, Number(years));
+  return (y - LE_MIN) / (LE_MARK - LE_MIN);
 }
 
 /**
- * Health pillar: ½ lifespan (life expectancy) + ½ healthspan (HALE), each as LEI-style 0–1.
+ * Health pillar: ½ lifespan (life expectancy) + ½ healthspan (HALE), each as an LEI.
  */
 export function combinedHealthLei(lifeExpectancyYears, haleYears) {
   return (
@@ -53,10 +63,10 @@ export function safetyIndexFromHomicidesPer100k(homicidesPer100k) {
   return (HOMICIDE_RATE_MAX - h) / HOMICIDE_RATE_MAX;
 }
 
-/** Abundance pillar 0-1 from GNI per capita (PPP) using HDI log goalposts. */
+/** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its upper cap. */
 export function incomeIndexFromGni(gniPerCapita) {
-  const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
-  return (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
+  const gni = Math.max(INCOME_MIN, Number(gniPerCapita));
+  return Math.log(gni / INCOME_MIN) / Math.log(INCOME_MARK / INCOME_MIN);
 }
 
 /** Freedom pillar 0-1 from the HFI-derived Personal Freedom score (0-100). */
@@ -75,17 +85,11 @@ export function customIndexAbundanceSafetyHealthFreedomFull(
   healthyLifeExpectancy,
   freedomScore
 ) {
-  const health = combinedHealthLei(lifeExpectancy, healthyLifeExpectancy);
-  const gni = Math.max(100, Math.min(Number(gniPerCapita), 75000));
-  const incomeIndex =
-    (Math.log(gni) - Math.log(100)) / (Math.log(75000) - Math.log(100));
-  const si = safetyIndexFromHomicidesPer100k(homicidesPer100k);
-  const freedom = freedomIndexFromScore(freedomScore);
   return customIndexFromPillarsFull({
-    abundance: incomeIndex,
-    safety: si,
-    health,
-    freedom,
+    abundance: incomeIndexFromGni(gniPerCapita),
+    safety: safetyIndexFromHomicidesPer100k(homicidesPer100k),
+    health: combinedHealthLei(lifeExpectancy, healthyLifeExpectancy),
+    freedom: freedomIndexFromScore(freedomScore),
   });
 }
 
