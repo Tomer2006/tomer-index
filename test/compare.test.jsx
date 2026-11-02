@@ -231,8 +231,8 @@ test("ranks count countries only, groups are unranked, and best values are marke
   const note = document.querySelector(".compare-table-note").textContent;
   for (const text of [
     "marks the best value",
-    "“est.” = estimated healthy life expectancy",
-    "“GDP” = GDP used where GNI isn’t published",
+    "“est.” = estimated from an earlier year’s value",
+    "“GDP” = GDP used before a country’s GNI starts",
     "“*” = at least one input estimated or GDP",
     `Amber years are 5+ years older than ${YEAR_MAX}.`,
   ])

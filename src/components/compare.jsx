@@ -603,9 +603,9 @@ export default function Compare() {
                       </>
                     )}
                     The small year under a value is its source year (“est.” =
-                    estimated healthy life expectancy, “GDP” = GDP used where
-                    GNI isn’t published, “*” = at least one input estimated or
-                    GDP).{" "}
+                    estimated from an earlier year’s value, “GDP” = GDP used
+                    before a country’s GNI starts, “*” = at least one input
+                    estimated or GDP).{" "}
                     <span className="compare-table-note-stale">Amber</span>{" "}
                     years are {STALE_YEARS}+ years older than {view.year}.
                   </p>

@@ -58,11 +58,15 @@ const FIELDS = [
   ["homicidesPer100k", <>Intentional homicides per 100,000 people.</>],
   ["freedom", <>Personal freedom score, 0–100.</>],
   [
-    "gni, incomeSource",
+    "gni, incomeSource, incomeEstimated",
     <>
-      Income per person in constant 2021 PPP dollars. Despite the name,{" "}
-      <code>gni</code> holds GDP per person when <code>incomeSource</code> is
-      “GDP”; groups whose members use both say “mixed”.
+      Income per person in constant 2021 PPP dollars.{" "}
+      <code>incomeEstimated</code> is true when that year has no published GNI
+      and the latest GNI (from <code>gniYear</code>) was moved by the change in
+      GDP per person since then (for a group, when any member’s was). Despite
+      the name, <code>gni</code> holds GDP per person when{" "}
+      <code>incomeSource</code> is “GDP”, which happens only before a
+      country’s GNI starts; groups whose members use both say “mixed”.
     </>,
   ],
   [

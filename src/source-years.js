@@ -31,15 +31,15 @@ function yearPart(row, key) {
   const value = row?.[key];
   if (typeof value !== "number" && value !== "mixed") return null;
   const year = typeof value === "number" ? value : null;
-  const estimated = key === "haleYear" && Boolean(row?.haleEstimated);
-  const label =
-    key === "gniYear"
-      ? incomeLabel(row)
-      : estimated
-        ? year === null
-          ? "HALE est."
-          : "HALE est. from"
-        : (METRIC_LABELS[key] ?? "Source");
+  const estimated =
+    (key === "haleYear" && Boolean(row?.haleEstimated)) ||
+    (key === "gniYear" && Boolean(row?.incomeEstimated));
+  const name = key === "gniYear" ? incomeLabel(row) : (METRIC_LABELS[key] ?? "Source");
+  const label = !estimated
+    ? name
+    : year === null
+      ? `${name} est.`
+      : `${name} est. from`;
   return {
     key,
     label,
@@ -83,14 +83,21 @@ function yearRange(years) {
 function notes(row, parts, displayYear) {
   const out = [];
   const shownYear = typeof row?.year === "number" ? row.year : displayYear;
-  const hale = parts.find((part) => part.estimated && part.year !== null);
+  const estimate = (key) =>
+    parts.find((part) => part.key === key && part.estimated && part.year !== null);
+  const target = typeof shownYear === "number" ? ` for ${shownYear}` : "";
+  const hale = estimate("haleYear"),
+    income = estimate("gniYear");
   if (hale) {
     const le = typeof row?.leYear === "number" ? ` (${row.leYear})` : "";
-    const target = typeof shownYear === "number" ? ` for ${shownYear}` : "";
     out.push(
       `HALE${target} estimated from WHO's ${hale.year} value, adjusted by life expectancy${le}.`,
     );
   }
+  if (income)
+    out.push(
+      `Income${target} estimated from ${income.year} GNI, adjusted by the change in GDP per person since then.`,
+    );
   if (parts.some((part) => part.gdp))
     out.push("Income uses GDP per person because GNI isn't published.");
   for (const part of parts) {
@@ -106,10 +113,10 @@ function notes(row, parts, displayYear) {
 /**
  * Everything a source-year badge shows, or null when there is nothing to flag.
  * Full badges (entry, compare, map) list each input whose year differs from the
- * displayed one: `Life exp. 2024, HALE est. from 2021`. Compact badges (leaderboard
- * cells and cards) always show a year, a `2021–2024` range for multi-input
+ * displayed one: `Life exp. 2024, HALE est. from 2021, GNI est. from 2024`. Compact
+ * badges (leaderboard cells and cards) always show a year, a `2021–2024` range for multi-input
  * columns, or `mixed` for groups, keeping their qualifiers: `est. 2021` for
- * estimated HALE, `GDP 2025` for the GDP fallback, and `*` on a range when any
+ * estimated HALE or income, `GDP 2005` for plain GDP, and `*` on a range when any
  * input is estimated or GDP. `current` marks a plain year equal to the displayed
  * one (muted styling); `stale` marks inputs STALE_YEARS or more years old.
  * `description` is the full text for tooltips and screen readers.

@@ -37,6 +37,9 @@ const {
   cachedHfiRows,
   cachedFreedomLosses,
   fetchHfiPersonalFreedom,
+  cachedHaleRows,
+  cachedHaleLosses,
+  fetchWhoHaleOrCached,
   datasetStats,
   sanityProblems,
   shrinkRefusalMessage,
@@ -614,6 +617,38 @@ test("the cached HFI fallback reads exact-year observations and flags any it wou
   assert.deepEqual(cachedFreedomLosses(rows, { AAA: COMMITTED_SERIES.entrySeries.AAA }), [
     "BBB",
   ]);
+});
+
+test("a failing WHO API falls back to the committed exact-year HALE and flags any it would lose", async (t) => {
+  const warn = t.mock.method(console, "warn", () => {});
+  const committed = {
+    generatedAt: "2026-09-10T09:09:49.305Z",
+    sourceRefresh: { whoHale: { status: "downloaded" } },
+    entrySeries: {
+      AAA: {
+        points: [
+          { year: 2021, hale: 70.12, haleYear: 2021 },
+          { year: 2022, hale: 70.5, haleYear: 2021, haleEstimated: true },
+        ],
+      },
+      // Groups store no source years, so nothing of theirs is reused.
+      WLD: { points: [{ year: 2021, hale: 63.4, haleEstimated: undefined }] },
+    },
+  };
+  const down = scriptedFetch([() => new Response("Server Error 500", { status: 500 })]);
+  const fallback = await fetchWhoHaleOrCached(committed, "now", { fetchImpl: down.impl, ...NO_WAIT });
+  assert.equal(fallback.status, "cached");
+  assert.deepEqual(fallback.rows, [
+    { SpatialDimType: "COUNTRY", SpatialDim: "AAA", Dim1: "SEX_BTSX", TimeDim: 2021, NumericValue: 70.12 },
+  ]);
+  assert.equal(fallback.retrievedAt, committed.generatedAt);
+  assert.match(fallback.reason, /HTTP 500/);
+  assert.match(warn.mock.calls[0].arguments[0], /WARNING: WHO GHO HALE download failed/);
+  // The rows read back exactly as WHO rows would.
+  assert.deepEqual(haleHistoryByIso(fallback.rows).get("AAA"), [{ year: 2021, value: 70.12 }]);
+  assert.deepEqual(cachedHaleLosses(fallback.rows, committed.entrySeries), []);
+  assert.deepEqual(cachedHaleLosses(fallback.rows, { WLD: committed.entrySeries.WLD }), ["AAA"]);
+  assert.deepEqual(cachedHaleRows(null), []);
 });
 
 test("a blocked HFI download falls back loudly and records the reused data's date", async (t) => {

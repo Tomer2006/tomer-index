@@ -47,7 +47,7 @@ Raw observations → fixed goalpost normalization → weighted geometric mean
 | **Health** | 40% | Life expectancy + healthy life expectancy (HALE) | Mean of two life-expectancy indices, each using 20–85 year goalposts |
 | **Safety** | 30% | Homicides per 100k (intentional homicides per 100,000 people) | Linear inversion from 0 (best) to 60 (floor) |
 | **Freedom** | 20% | Personal freedom: HFI Personal Freedom categories, excluding Security and Safety | Rescaled from 0–100 to 0–1 |
-| **Abundance** | 10% | Income per person (PPP $): GNI per capita, with GDP where GNI isn't published | Log-scaled between $100 and $75,000 |
+| **Abundance** | 10% | Income per person (PPP $): GNI per capita, extended by GDP per capita growth where GNI isn't published | Log-scaled between $100 and $75,000 |
 
 ```text
 Health    = ½·LEI(life expectancy) + ½·LEI(HALE)
@@ -86,8 +86,10 @@ Primary sources:
   law, movement, religion, association, expression, and relationships.
 
 When annual WHO HALE is unavailable, the tracker preserves the latest reported
-`life expectancy − HALE` gap and applies it to that year's life expectancy. Estimated
-values are labeled in the interface.
+`life expectancy − HALE` gap, keeping its sign, and applies it to that year's life
+expectancy. When a year has no published GNI, the latest GNI is moved by the change in
+GDP per capita since then; GDP itself is used only before a country's GNI series
+starts. Estimated values are labeled in the interface.
 
 Group rows (World, regions, income groups, and lending groups) are computed by
 `scripts/build-data.mjs` rather than imported as published series. For each year,
@@ -205,7 +207,9 @@ to write if country or metric coverage drops sharply (a sign of a failed downloa
 run `npm run build-data -- --force` to write anyway. The Human Freedom Index download
 is usually blocked by a bot check, in which case the committed freedom data is reused
 and a warning is printed; to refresh it, download the HFI file in a browser and run
-`HFI_FILE=<path> npm run build-data`.
+`HFI_FILE=<path> npm run build-data`. Likewise, if the WHO GHO API fails (it answered
+every request with HTTP 500 from late October 2026), the committed WHO HALE
+observations are reused with a warning, and the next run that reaches WHO refreshes them.
 
 It then runs `build-world` and `split-data` to refresh the map shapes and `public/app-data`. The year window is set by
 `YEAR_MIN` and `YEAR_MAX` in `src/site-years.js`; update the coverage badge above when
@@ -220,7 +224,8 @@ it changes.
   or personal security.
 - Freedom is a custom combination of HFI categories, not the published HFI headline
   Personal Freedom score.
-- Switching from GNI to the GDP fallback can introduce a break in an income series.
+- Before a country's GNI series starts, income is plain GDP per capita, so a break can
+  remain in the year its GNI starts.
 - Group averages change membership over time as more countries have complete data.
 - This is a personal composite and is not endorsed by UNDP, the World Bank, WHO,
   Cato Institute, or Fraser Institute.

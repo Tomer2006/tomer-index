@@ -28,24 +28,37 @@ function wbRow(iso, year, value, name = iso) {
   };
 }
 
-test("income rows prefer annual GNI and use GDP only for missing country-years", () => {
+test("income rows use GNI, extend it by GDP growth, and use plain GDP only before GNI starts", () => {
   const rows = incomeRowsWithGdpFallback(
     [wbRow("AAA", 2022, 12000), wbRow("BBB", 2023, 9000)],
-    [wbRow("AAA", 2022, 18000), wbRow("AAA", 2023, 19000), wbRow("CCC", 2023, 7000)]
+    [
+      wbRow("AAA", 2021, 17000),
+      wbRow("AAA", 2022, 18000),
+      wbRow("AAA", 2023, 19800),
+      wbRow("CCC", 2023, 7000),
+    ]
   );
   const byYear = byCountryYear(rows);
 
+  // Before AAA's first GNI, GDP as published (later GNI is never pulled backward).
+  assert.deepEqual(byYear.get("AAA").get(2021), {
+    value: 17000,
+    name: "AAA",
+    incomeSource: "GDP",
+  });
   assert.deepEqual(byYear.get("AAA").get(2022), {
     value: 12000,
     name: "AAA",
     incomeSource: "GNI",
   });
-  assert.deepEqual(byYear.get("AAA").get(2023), {
-    value: 19000,
-    name: "AAA",
-    incomeSource: "GDP",
-  });
+  // 2023 has no GNI: 2022's GNI grows with GDP (+10%), not a switch to GDP's level.
+  const estimated = byYear.get("AAA").get(2023);
+  assert.ok(Math.abs(estimated.value - 13200) < 1e-6, `${estimated.value} ≈ 13200`);
+  assert.equal(estimated.incomeSource, "GNI");
+  assert.equal(estimated.incomeBaseYear, 2022);
+  assert.equal(latestByCountry(rows).get("AAA").incomeBaseYear, 2022);
   assert.equal(latestByCountry(rows).get("BBB").incomeSource, "GNI");
+  assert.equal(latestByCountry(rows).get("BBB").incomeBaseYear, undefined);
   assert.equal(latestByCountry(rows).get("CCC").incomeSource, "GDP");
 });
 
@@ -177,6 +190,23 @@ test("adjustedHaleAsOfYear preserves the latest reported unhealthy-life gap", ()
     adjustmentYear: 2024,
     baselineLifeExpectancyYear: 2021,
   });
+});
+
+test("adjustedHaleAsOfYear keeps a negative gap instead of dropping HALE to life expectancy", () => {
+  // Nigeria-like: WHO's HALE is above the World Bank's life expectancy.
+  const history = haleHistoryByIso([
+    { SpatialDimType: "COUNTRY", SpatialDim: "NGA", Dim1: "SEX_BTSX", TimeDim: 2021, NumericValue: 54.95 },
+  ]);
+  const lifeExpectancy = new Map([
+    [2021, { value: 53.46, name: "Nigeria" }],
+    [2022, { value: 54.08, name: "Nigeria" }],
+    [2023, { value: 18, name: "Nigeria" }],
+  ]);
+  const in2022 = adjustedHaleAsOfYear(history, "NGA", 2022, lifeExpectancy, 2000);
+  closeTo(in2022.value, 55.57, 1e-9);
+  assert.equal(in2022.estimated, true);
+  // Still never below the 20-year goalpost (18 + 1.49 would be).
+  assert.equal(adjustedHaleAsOfYear(history, "NGA", 2023, lifeExpectancy, 2000).value, 20);
 });
 
 test("mergeRows requires every metric and sorts by index descending", () => {

@@ -118,27 +118,53 @@ export function isCountryRow(row) {
 }
 
 /**
- * Build one annual PPP-income series, preferring GNI and using GDP only for
- * country-years where GNI has no published value.
+ * Build one annual PPP-income series. Published GNI is used as is. A year without GNI
+ * takes the latest earlier GNI and moves it by the change in GDP per capita since that
+ * year, so a missing GNI year never swaps in the other measure (Tajikistan's GDP is
+ * half its GNI). Such rows keep `incomeSource: "GNI"` and carry `incomeBaseYear`, the
+ * GNI year they start from. Plain GDP is used only before a country's first year with
+ * both, since later observations are never pulled backward.
  */
 export function incomeRowsWithGdpFallback(gniRows, gdpRows) {
-  const selected = new Map();
+  const byCountry = new Map();
 
-  function addRows(rows, incomeSource, overwrite) {
+  function addRows(rows, measure) {
     for (const row of rows) {
       if (!isCountryRow(row) || row.value == null) continue;
       const year = parseInt(String(row.date), 10);
       const value = Number(row.value);
       if (Number.isNaN(year) || !Number.isFinite(value)) continue;
-      const key = `${row.countryiso3code}:${year}`;
-      if (!overwrite && selected.has(key)) continue;
-      selected.set(key, { ...row, incomeSource });
+      const iso = row.countryiso3code;
+      if (!byCountry.has(iso)) byCountry.set(iso, new Map());
+      const years = byCountry.get(iso);
+      years.set(year, { ...years.get(year), [measure]: { ...row, value } });
     }
   }
 
-  addRows(gdpRows, "GDP", false);
-  addRows(gniRows, "GNI", true);
-  return [...selected.values()];
+  addRows(gniRows, "gni");
+  addRows(gdpRows, "gdp");
+  const out = [];
+  for (const years of byCountry.values()) {
+    // The latest year with both measures, and GNI as a multiple of GDP in that year.
+    let base = null;
+    for (const year of [...years.keys()].sort((a, b) => a - b)) {
+      const { gni, gdp } = years.get(year);
+      if (gni) {
+        out.push({ ...gni, incomeSource: "GNI" });
+        if (gdp?.value > 0) base = { year, ratio: gni.value / gdp.value };
+      } else if (base) {
+        out.push({
+          ...gdp,
+          value: gdp.value * base.ratio,
+          incomeSource: "GNI",
+          incomeBaseYear: base.year,
+        });
+      } else {
+        out.push({ ...gdp, incomeSource: "GDP" });
+      }
+    }
+  }
+  return out;
 }
 
 /** @param {object[]} rows World Bank API rows */
@@ -155,6 +181,7 @@ export function latestByCountry(rows) {
     if (!prev || year > prev.year) {
       const observation = { year, value, name };
       if (r.incomeSource) observation.incomeSource = r.incomeSource;
+      if (r.incomeBaseYear) observation.incomeBaseYear = r.incomeBaseYear;
       map.set(iso, observation);
     }
   }
@@ -178,6 +205,7 @@ export function byCountryYear(rows) {
     if (!map.has(iso)) map.set(iso, new Map());
     const observation = { value, name };
     if (r.incomeSource) observation.incomeSource = r.incomeSource;
+    if (r.incomeBaseYear) observation.incomeBaseYear = r.incomeBaseYear;
     map.get(iso).set(year, observation);
   }
   return map;
@@ -241,7 +269,9 @@ export function haleAsOfYear(haleHistory, iso, year, minSourceYear = -Infinity) 
 /**
  * HALE for a displayed year. Exact WHO observations are returned unchanged.
  * Otherwise preserve the latest observed LE - HALE gap and apply it to the
- * current life-expectancy value.
+ * current life-expectancy value. The gap keeps its sign: WHO's HALE can exceed the
+ * World Bank's life expectancy (Nigeria's does), and a gap clamped at 0 would drop
+ * HALE to life expectancy in the first estimated year.
  */
 export function adjustedHaleAsOfYear(
   haleHistory,
@@ -273,8 +303,8 @@ export function adjustedHaleAsOfYear(
   const currentLe = lifeExpectancyAsOf(year);
   if (!baselineLe || !currentLe) return reported;
 
-  const unhealthyYears = Math.max(0, baselineLe.value - reported.value);
-  const value = Math.max(20, Math.min(currentLe.value, currentLe.value - unhealthyYears));
+  const unhealthyYears = baselineLe.value - reported.value;
+  const value = Math.max(20, currentLe.value - unhealthyYears);
   return {
     year: reported.year,
     value,
@@ -313,9 +343,11 @@ export function mergeRows(leMap, gniMap, homicideMap, haleMap, freedomMap) {
       le: le.value,
       haleYear: hale.year,
       hale: hale.value,
-      gniYear: gni.year,
+      // Estimated income is dated by the GNI year it starts from, as estimated HALE is.
+      gniYear: gni.incomeBaseYear ?? gni.year,
       gni: gni.value,
       incomeSource: gni.incomeSource,
+      ...(gni.incomeBaseYear && { incomeEstimated: true }),
       homicideYear: hom.year,
       homicidesPer100k: hom.value,
       freedomYear: freedom.year,

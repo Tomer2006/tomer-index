@@ -130,8 +130,8 @@ function LeaderboardLede() {
       A 0–100 score against fixed goalposts, weighting {DEFAULT_MIX}.{" "}
       <span className="leaderboard-lede-years">
         Small numbers under each value are the years its data comes from
-        (“est.” = estimated healthy life expectancy, “GDP” = GDP used where GNI
-        isn’t published).
+        (“est.” = estimated from an earlier year’s value, “GDP” = GDP used
+        before a country’s GNI starts).
       </span>{" "}
       <Link href="/methodology">How it’s calculated</Link>
     </p>

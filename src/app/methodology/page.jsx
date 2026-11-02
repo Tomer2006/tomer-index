@@ -74,7 +74,7 @@ function dataFacts() {
     haleYear: Math.max(...sourceYears("haleYear")),
     freedomYear: Math.max(...sourceYears("freedomYear")),
     oldestHomicideYear: Math.min(...sourceYears("homicideYear")),
-    gdpCount: countries.filter((row) => row.incomeSource === "GDP").length,
+    estimatedIncomeCount: countries.filter((row) => row.incomeEstimated).length,
     zeroScores: countries.reduce(
       (sum, row) =>
         sum +
@@ -216,11 +216,13 @@ export default function Page() {
                 {facts.haleYear}”).
               </li>
               <li>
-                <strong>GDP stands in where GNI isn’t published.</strong> In{" "}
-                {YEAR_MAX}, {facts.gdpCount} of {facts.countryCount} countries
-                use GDP per person. The two measures are related but not
-                identical, so a switch between them can create a break in a
-                country’s income series.
+                <strong>Income without a published GNI is estimated.</strong>{" "}
+                In {YEAR_MAX}, {facts.estimatedIncomeCount} of{" "}
+                {facts.countryCount} countries have no GNI value yet, so their
+                latest GNI is moved by the change in GDP per person since then
+                (see <a href="#pillars">Abundance</a>). Before a country’s GNI
+                series starts, GDP per person is used as published, so a break
+                can remain in the year its GNI starts.
               </li>
               <li>
                 Safety is homicide-only. Countries with few homicides but high
@@ -277,10 +279,13 @@ export default function Page() {
               ]}
             />
             <p>
-              The gap is never negative, so estimated HALE never exceeds current
-              life expectancy, and it never goes below 20 years. Estimated
-              values are labeled <strong>est.</strong> with the latest WHO source
-              year, for example “HALE est. from {facts.haleYear}”.
+              The gap keeps its sign. Life expectancy comes from the World Bank
+              and HALE from WHO, so in a few countries, such as Nigeria, WHO’s
+              HALE is above the World Bank’s life expectancy; estimated HALE
+              then stays above it by the same margin instead of dropping to it.
+              Estimated HALE never goes below 20 years. Estimated values are
+              labeled <strong>est.</strong> with the latest WHO source year, for
+              example “HALE est. from {facts.haleYear}”.
             </p>
 
             <PillarHeading pillar="safety">
@@ -320,20 +325,31 @@ export default function Page() {
               Abundance: income per person, log scale
             </PillarHeading>
             <p>
-              World Bank GNI per person in constant 2021 PPP dollars is
-              preferred for each country-year. When that year has no GNI value,
-              GDP per person in the same constant 2021 PPP units is used
-              instead. The value is mapped to 0–1 between $100 and $75,000, the
-              same goalposts UNDP uses for the HDI. Log scaling means each
-              doubling of income adds a fixed amount, not a fixed fraction.
+              Income is World Bank GNI per person in constant 2021 PPP dollars.
+              GNI is published later than GDP, and for some countries only for
+              some years. When a year has no GNI value, the tracker takes the
+              latest earlier GNI and moves it by the change in GDP per person
+              (same units) since that year. It doesn’t substitute GDP itself,
+              which can sit far from GNI: Tajikistan’s GDP per person is about
+              half its GNI. Before a country’s first GNI value, GDP per person is
+              used as published. The value is mapped to 0–1 between $100 and
+              $75,000, the same goalposts UNDP uses for the HDI. Log scaling
+              means each doubling of income adds a fixed amount, not a fixed
+              fraction.
             </p>
             <Formula
               lines={[
-                "Income    = GNI per person if published, otherwise GDP per person",
+                "Income    = GNI per person if published that year,",
+                "            otherwise latest GNI × (GDP now / GDP in that GNI year)",
                 "Abundance = (ln(clamp(income, 100, 75000)) − ln(100))",
                 "            / (ln(75000) − ln(100))",
               ]}
             />
+            <p>
+              Estimated income is labeled <strong>est.</strong> with the year of
+              the GNI it starts from, for example “GNI est. from{" "}
+              {YEAR_MAX - 1}”; plain GDP is labeled <strong>GDP</strong>.
+            </p>
           </Section>
 
           <Section id="combining">
@@ -400,10 +416,10 @@ export default function Page() {
               unchanged.
             </p>
             <p>
-              Income is chosen year by year, GNI where it is published for that
-              year and GDP otherwise, before back-fill. So a recent GDP value
-              takes precedence over an older GNI value. The source badge shows
-              whether a displayed income value is GNI or GDP.
+              Income is the other exception: years after a country’s latest GNI
+              follow the change in GDP per person, as described under{" "}
+              <a href="#pillars">Abundance</a>. Only when GDP is missing too is
+              the latest income value carried forward unchanged.
             </p>
           </Section>
 
@@ -478,8 +494,8 @@ export default function Page() {
                 capita, PPP (constant 2021 international $),{" "}
                 <code>NY.GNP.PCAP.PP.KD</code>, the preferred measure; and GDP
                 per capita, PPP (constant 2021 international $),{" "}
-                <code>NY.GDP.PCAP.PP.KD</code>, used only for country-years
-                without GNI.
+                <code>NY.GDP.PCAP.PP.KD</code>, used only to extend GNI to years
+                without it, or before a country’s GNI starts.
               </li>
               <li>
                 <strong>Population</strong> (weights for group averages): World

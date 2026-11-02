@@ -281,7 +281,7 @@ const WORLD_BANK_INPUTS = {
   },
   gdpPerCapita: {
     indicator: WB_GDP,
-    label: "GDP per capita, PPP (constant 2021 international $; GNI fallback only)",
+    label: "GDP per capita, PPP (constant 2021 international $; only extends GNI)",
     dateRange: DATE_RANGE,
   },
   intentionalHomicidesPer100k: {
@@ -713,6 +713,82 @@ export async function fetchAllWhoHale({
   return rows;
 }
 
+/**
+ * WHO country HALE rows from the GHO download or, when it fails (from late October 2026
+ * the API answered every request with HTTP 500), the exact WHO observations stored in the
+ * committed series.json. Like the HFI fallback, it is loud, records when its data was
+ * retrieved, and `cachedHaleLosses` stops a build that would drop any of it.
+ * @param {object | null} committedSeries — parsed public/data/series.json, or null
+ * @param {string} generatedAt — this build's timestamp
+ */
+export async function fetchWhoHaleOrCached(committedSeries, generatedAt, http = {}) {
+  try {
+    return { rows: await fetchAllWhoHale(http), status: "downloaded", retrievedAt: generatedAt };
+  } catch (error) {
+    const rows = cachedHaleRows(committedSeries);
+    if (!rows.length) throw error;
+    const previous = committedSeries.sourceRefresh?.whoHale;
+    const retrievedAt =
+      previous?.retrievedAt ??
+      (previous?.status === "downloaded" ? committedSeries.generatedAt : null);
+    const countries = new Set(rows.map((row) => row.SpatialDim)).size;
+    console.warn(
+      [
+        "",
+        "!!! WARNING: WHO GHO HALE download failed — reusing committed HALE data.",
+        `!!! Reason: ${error.message}`,
+        `!!! Reusing ${rows.length} observations for ${countries} countries from series.json (built ${committedSeries.generatedAt ?? "unknown"}).`,
+        `!!! WHO data originally retrieved: ${retrievedAt ?? "unknown (before that build)"}.`,
+        "!!! New or revised WHO values are not included; rerun once the GHO API answers.",
+        "",
+      ].join("\n")
+    );
+    return {
+      rows,
+      status: "cached",
+      retrievedAt,
+      cachedFrom: committedSeries.generatedAt,
+      reason: error.message,
+    };
+  }
+}
+
+/** Exact-year WHO HALE observations a previous build stored in series.json, as GHO rows. */
+export function cachedHaleRows(series) {
+  const rows = [];
+  for (const [iso, entry] of Object.entries(series?.entrySeries ?? {})) {
+    if (!/^[A-Z]{3}$/.test(iso)) continue;
+    for (const point of entry.points ?? []) {
+      if (
+        point.haleYear === point.year &&
+        !point.haleEstimated &&
+        Number.isFinite(point.hale)
+      ) {
+        rows.push({
+          SpatialDimType: "COUNTRY",
+          SpatialDim: iso,
+          Dim1: "SEX_BTSX",
+          TimeDim: point.year,
+          NumericValue: point.hale,
+        });
+      }
+    }
+  }
+  return rows;
+}
+
+/** ISO codes whose reused HALE observations would be missing from the new series. */
+export function cachedHaleLosses(cachedRows, entrySeries) {
+  const lost = new Set();
+  for (const row of cachedRows) {
+    const point = entrySeries[row.SpatialDim]?.points?.find((p) => p.year === row.TimeDim);
+    if (point?.haleYear !== row.TimeDim || point.hale !== row.NumericValue) {
+      lost.add(row.SpatialDim);
+    }
+  }
+  return [...lost].sort();
+}
+
 async function fetchWorldBankCountryMeta(http = {}) {
   const list = await fetchWorldBankPages(
     "/v2/country",
@@ -1049,8 +1125,9 @@ export function buildCountrySeries(iso, leByCY, gniByCY, homByCY, freedomByCY, p
     }
     if (gniY) {
       point.gni = rounded(gniY.value, 2);
-      point.gniYear = gniY.year;
+      point.gniYear = gniY.incomeBaseYear ?? gniY.year;
       point.incomeSource = gniY.incomeSource;
+      if (gniY.incomeBaseYear) point.incomeEstimated = true;
     }
     if (homY) {
       point.homicidesPer100k = rounded(homY.value, 3);
@@ -1097,6 +1174,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
       gniMembers: 0,
       gdpMembers: 0,
       estimatedHaleMembers: 0,
+      estimatedIncomeMembers: 0,
     };
     buckets.set(def.iso, bucket);
   }
@@ -1110,6 +1188,7 @@ function addWeightedYearBucket(buckets, def, values, pop) {
   if (values.incomeSource === "GDP") bucket.gdpMembers += 1;
   else bucket.gniMembers += 1;
   if (values.haleEstimated) bucket.estimatedHaleMembers += 1;
+  if (values.incomeEstimated) bucket.estimatedIncomeMembers += 1;
 }
 
 export function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, popByCY, haleHistory, countryMeta, yearMin, yearMax) {
@@ -1141,6 +1220,7 @@ export function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, p
         haleEstimated: hale.estimated,
         gni: gniY.value,
         incomeSource: gniY.incomeSource,
+        incomeEstimated: Boolean(gniY.incomeBaseYear),
         hom: homY.value,
         freedom: freedomY.value,
       };
@@ -1159,7 +1239,7 @@ export function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, p
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) as an annual fallback when GNI is missing, intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
+            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) to extend GNI to years without it, intentional homicides/100k, population, and grouping metadata; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
           points: [],
         });
       }
@@ -1175,6 +1255,7 @@ export function buildDerivedGroupSeries(leByCY, gniByCY, homByCY, freedomByCY, p
             : bucket.gdpMembers
               ? "GDP"
               : "GNI",
+        incomeEstimated: bucket.estimatedIncomeMembers > 0 || undefined,
         homicidesPer100k: rounded(homicidesPer100k, 3),
         freedom: rounded(freedom, 2),
         population: Math.round(bucket.pop),
@@ -1221,6 +1302,7 @@ export function rowsForDisplayYear(rows, entrySeries, displayYear) {
         gni: point.gni,
         gniYear: point.gniYear ?? row.gniYear,
         incomeSource: point.incomeSource ?? row.incomeSource,
+        incomeEstimated: point.incomeEstimated ?? false,
         homicidesPer100k: point.homicidesPer100k,
         homicideYear: point.homicideYear ?? row.homicideYear,
         freedom: point.freedom,
@@ -1386,9 +1468,10 @@ async function main() {
   const freedomRows = freedomDownload.rows;
   const popRows = worldBankData.population.rows;
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
+  const haleDownload = await fetchWhoHaleOrCached(committedSeries, generatedAt);
   // Same cap as the WDI fetch: drop observations past the display window at the
   // source so every downstream consumer (latest rows, histories) is bounded.
-  const haleRows = (await fetchAllWhoHale()).filter((r) => {
+  const haleRows = haleDownload.rows.filter((r) => {
     const y = typeof r.TimeDim === "number" ? r.TimeDim : parseInt(String(r.TimeDim), 10);
     return Number.isFinite(y) && y <= SERIES_YEAR_MAX;
   });
@@ -1438,7 +1521,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, with GDP fallback), safety (intentional homicides/100k), life expectancy, and population; WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap and apply it to current life expectancy. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, extended by GDP per capita growth), safety (intentional homicides/100k), life expectancy, and population; WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then (incomeEstimated); plain GDP is used only before a country's first GNI year. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
@@ -1482,8 +1565,12 @@ async function main() {
     sourceRefresh: {
       worldBank: { status: "downloaded" },
       whoHale: {
-        status: "downloaded",
+        // "downloaded" or "cached" (reused from the committed series.json).
+        status: haleDownload.status,
         latestObservationYear: Math.max(...haleRows.map((row) => Number(row.TimeDim))),
+        retrievedAt: haleDownload.retrievedAt,
+        cachedFrom: haleDownload.cachedFrom,
+        reason: haleDownload.reason,
       },
       humanFreedomIndex: {
         // "downloaded", "file" (HFI_FILE) or "cached" (reused from the committed series.json).
@@ -1509,14 +1596,14 @@ async function main() {
     },
     sourcePolicy: {
       worldBank:
-        "World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) only as an annual fallback when GNI is missing, intentional homicides/100k, population, and country/group metadata.",
+        "World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) only to extend GNI to years without it (or, before a country's first GNI year, in its place), intentional homicides/100k, population, and country/group metadata.",
       whoGho:
-        "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes. Missing annual HALE values are estimated by preserving the latest reported life-expectancy-minus-HALE gap and applying it to current life expectancy.",
+        "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes. Missing annual HALE values are estimated by preserving the latest reported life-expectancy-minus-HALE gap, keeping its sign, and applying it to current life expectancy.",
       humanFreedomIndex:
         "Freedom is derived from the Cato Institute and Fraser Institute Human Freedom Index 2025 Personal Freedom categories, excluding Security and Safety to keep it distinct from the tracker’s Safety pillar.",
     },
     derivedRows:
-      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, safety, life expectancy, and population; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is preferred for abundance; GDP per capita (PPP) is substituted only for country-years without GNI.",
+      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, safety, life expectancy, and population; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is used for abundance; a year without GNI moves the latest GNI by the change in GDP per capita (PPP) since then, and plain GDP per capita stands in only before a country's first GNI year.",
     healthPillar:
       "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); same 20–85 goalposts for both.",
     safetyNote:
@@ -1581,6 +1668,14 @@ async function main() {
     if (lost.length) {
       problems.push(
         `reused HFI freedom data would be lost for ${isoList(lost)}; the next build reuses this one's output, so it could never come back`
+      );
+    }
+  }
+  if (haleDownload.status === "cached") {
+    const lost = cachedHaleLosses(haleRows, entrySeries);
+    if (lost.length) {
+      problems.push(
+        `reused WHO HALE data would be lost for ${isoList(lost)}; the next build reuses this one's output, so it could never come back`
       );
     }
   }

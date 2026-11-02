@@ -15,7 +15,7 @@ import {
 } from "../src/index-weights.js";
 
 const TOMER = ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"];
-// A 2025 row like Switzerland's: estimated HALE, GDP income, older inputs.
+// Estimated HALE, plain GDP income (as before a country's GNI starts), older inputs.
 const row = {
   iso: "CHE",
   leYear: 2024,
@@ -57,6 +57,30 @@ test("estimated HALE explains its source year in the description", () => {
     /HALE for 2025 estimated from WHO's 2021 value, adjusted by life expectancy \(2024\)\./,
   );
   assert.match(sourceBadge(row, ["gniYear"], 2025).description, /GDP per person/);
+});
+
+test("estimated income is labeled like estimated HALE, from the GNI year it starts from", () => {
+  const estimated = { ...row, gniYear: 2024, incomeSource: "GNI", incomeEstimated: true };
+  assert.equal(sourceBadge(estimated, ["gniYear"], 2025, { compact: true }).text, "est. 2024");
+  const badge = sourceBadge(estimated, ["gniYear"], 2025);
+  assert.equal(badge.text, "GNI est. from 2024");
+  assert.equal(
+    badge.description,
+    "Source year: GNI est. from 2024. Income for 2025 estimated from 2024 GNI, adjusted by the change in GDP per person since then.",
+  );
+  // Both estimates explain themselves, and the range gets its asterisk.
+  const both = sourceBadge({ ...estimated, incomeSource: "GNI" }, TOMER, 2025);
+  assert.match(both.description, /HALE for 2025 estimated from WHO's 2021 value/);
+  assert.match(both.description, /Income for 2025 estimated from 2024 GNI/);
+  assert.equal(
+    sourceBadge({ ...estimated, haleEstimated: false }, TOMER, 2025, { compact: true }).text,
+    "2021–2024*",
+  );
+  // Published GNI in the shown year needs no badge at all.
+  assert.equal(
+    sourceYearSummary({ gniYear: 2025, incomeSource: "GNI", incomeEstimated: false }, ["gniYear"], 2025),
+    "",
+  );
 });
 
 test("source years five or more years old are flagged as stale", () => {
