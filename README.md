@@ -45,7 +45,7 @@ Raw observations → fixed goalpost normalization → weighted geometric mean
 | Pillar | Weight | Input | Fixed normalization |
 | --- | ---: | --- | --- |
 | **Health** | 40% | Life expectancy + healthy life expectancy (HALE) | Mean of two life-expectancy indices, each scoring 0 at 20 years and 1 at 85, with no cap above 85 |
-| **Safety** | 30% | Deaths per 100k from intentional homicide, war (battle-related deaths) and road crashes | Linear inversion from 0 (best) to 100 (floor) |
+| **Safety** | 30% | Deaths per 100k from intentional homicide, war (counted for the country whose people died) and road crashes | Linear inversion from 0 (best) to 100 (floor) |
 | **Freedom** | 20% | Personal freedom: HFI Personal Freedom categories, excluding Security and Safety | Rescaled from 0–100 to 0–1 |
 | **Abundance** | 10% | Income per person (PPP $): GNI per capita, extended by GDP per capita growth where GNI isn't published | Log scale scoring 0 at $100 and 1 at $75,000, with no cap above $75,000 |
 
@@ -86,8 +86,10 @@ estimated from WHO's 2021 values.
 Primary sources:
 
 - [World Bank Open Data](https://data.worldbank.org/) — life expectancy, GNI and GDP
-  per capita (constant 2021 PPP), intentional homicides (UNODC), battle-related deaths
-  (UCDP), road traffic deaths (WHO estimates), population, and country metadata.
+  per capita (constant 2021 PPP), intentional homicides (UNODC), road traffic deaths
+  (WHO estimates), population, and country metadata.
+- [UCDP Georeferenced Event Dataset](https://ucdp.uu.se/downloads/) — war deaths
+  (state-based conflict and one-sided violence), split by the side that died.
 - [WHO Global Health Observatory](https://www.who.int/data/gho) — healthy life
   expectancy at birth (`WHOSIS_000002`).
 - [Human Freedom Index 2025](https://www.cato.org/human-freedom-index/2025) — rule of
@@ -230,11 +232,11 @@ it changes.
   estimates.
 - Safety counts deaths from homicide, war and road crashes only: not suicide, other
   accidents, natural disasters, or crime that doesn't kill. Road deaths end in 2019 and
-  carry forward, and war deaths count in the country where the fighting happens.
+  carry forward, and an armed group's fighters count for the country where they died.
 - Freedom is a custom combination of HFI categories, not the published HFI headline
   Personal Freedom score.
 - Before a country's GNI series starts, income is plain GDP per capita, so a break can
   remain in the year its GNI starts.
 - Group averages change membership over time as more countries have complete data.
 - This is a personal composite and is not endorsed by UNDP, the World Bank, WHO,
-  Cato Institute, or Fraser Institute.
+  UCDP, Cato Institute, or Fraser Institute.

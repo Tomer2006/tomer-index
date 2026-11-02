@@ -258,11 +258,11 @@ export default function Page() {
                 death, the rate is modeled rather than counted.
               </li>
               <li>
-                <strong>War deaths count where the fighting happens.</strong>{" "}
-                Soldiers killed abroad don’t count for their own country, and
-                fighting in a territory the source files under a country, such
-                as Gaza under Israel, counts for that country. Civilians killed
-                outside battles (one-sided violence) aren’t counted.
+                <strong>War deaths are split by who died.</strong> UCDP records
+                a government’s soldiers separately, but not which country an
+                armed group’s fighters came from, so they count where they
+                died. Its counts are conservative: deaths it can’t confirm
+                aren’t included.
               </li>
               <li>
                 Safety leaves out suicide, other accidents such as falls,
@@ -285,7 +285,7 @@ export default function Page() {
               </li>
               <li>
                 The Tomer index is not endorsed by UNDP, the World Bank, WHO,
-                the Cato Institute, or the Fraser Institute. It is a personal
+                UCDP, the Cato Institute, or the Fraser Institute. It is a personal
                 composite built around health, safety, freedom, and abundance.
               </li>
             </ul>
@@ -350,12 +350,19 @@ export default function Page() {
               ]}
             />
             <p>
-              War deaths are the battle-related deaths recorded by the Uppsala
-              Conflict Data Program (UCDP), divided by the population of the
-              country where the fighting took place. UCDP lists only years with
-              fighting, so every other year counts as 0, and the latest year (
-              {facts.warYear}) carries forward. Road deaths are WHO estimates
-              and end in {facts.roadYear}; later years use that year’s rate.
+              War deaths come from the Uppsala Conflict Data Program’s event
+              data (UCDP GED, through {facts.warYear}): people killed in fighting
+              involving a government, and civilians killed on purpose by armed
+              forces or groups. Each death counts for the country whose people
+              died: a government’s soldiers for their own country, wherever they
+              fell, and civilians and members of armed groups for the country
+              where they died. So Russia counts its soldiers killed in Ukraine,
+              and deaths in Gaza and the West Bank count for Palestine, which
+              the index doesn’t score, not Israel. Fighting between gangs or
+              militias is left out, as
+              homicide figures already include most of it, and years without
+              recorded deaths count as 0. Road deaths are WHO estimates and end
+              in {facts.roadYear}; later years use that year’s rate.
               Crime that doesn’t kill isn’t used, because property crime,
               assault, and sexual-violence statistics aren’t comparable across
               countries: definitions, reporting culture, and survey methods
@@ -555,9 +562,10 @@ export default function Page() {
                 originally from UNODC.
               </li>
               <li>
-                <strong>War deaths</strong> (battle-related deaths, divided by
-                population): World Bank <code>VC.BTL.DETH</code>, originally
-                from the Uppsala Conflict Data Program.
+                <strong>War deaths</strong> (state-based and one-sided
+                violence, by the country whose people died, divided by its
+                population): Uppsala Conflict Data Program Georeferenced Event
+                Dataset (UCDP GED) 26.1.
               </li>
               <li>
                 <strong>Road deaths</strong> (road traffic deaths per 100,000

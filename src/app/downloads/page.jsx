@@ -67,9 +67,9 @@ const FIELDS = [
   [
     "homicidesPer100k, warDeathsPer100k, roadDeathsPer100k, safetyDeathsPer100k",
     <>
-      Deaths per 100,000 people from intentional homicide, war (battle-related
-      deaths, 0 in years without fighting), and road crashes, and their total,
-      which the safety pillar scores.
+      Deaths per 100,000 people from intentional homicide, war (counted for the
+      country whose people died, 0 in years without any), and road crashes, and
+      their total, which the safety pillar scores.
     </>,
   ],
   ["freedom", <>Personal freedom score, 0–100.</>],

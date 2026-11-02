@@ -25,11 +25,16 @@ vi.mock("../src/data-loader.js", () => ({
 const read = (file) => JSON.parse(readFileSync(resolve("public/data", file)));
 const allLeaderboard = read("leaderboard.json"),
   history = read("series.json");
-// The top 35 rows include group rows (North America, High income) between countries.
+// The top rows down to the first country below North America, so a group row sits
+// between countries, plus High income and the World: under one page of phone cards.
+const lastRow = allLeaderboard.countries.findIndex(
+  (row, index, rows) =>
+    !row.derivedKind && rows.slice(0, index).some((above) => above.iso === "NAC"),
+);
 const leaderboard = {
   ...allLeaderboard,
   countries: allLeaderboard.countries.filter(
-    (row, index) => index < 35 || ["JPN", "WLD", "HIC"].includes(row.iso),
+    (row, index) => index <= lastRow || ["HIC", "WLD"].includes(row.iso),
   ),
 };
 const countryCount = leaderboard.countries.filter(

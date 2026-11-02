@@ -57,7 +57,7 @@ export function combinedHealthLei(lifeExpectancyYears, haleYears) {
   );
 }
 
-/** Safety deaths per 100,000: homicides, war (battle-related) deaths and road deaths. */
+/** Safety deaths per 100,000: homicides, war deaths and road deaths. */
 export function safetyDeathsPer100k(homicides, war, road) {
   return Number(homicides) + Number(war) + Number(road);
 }
@@ -130,15 +130,15 @@ export function isCountryRow(row) {
 }
 
 /**
- * War deaths per 100,000 from the World Bank's battle-related deaths (UCDP), which only
- * lists country-years with fighting. Every other country-year with a population figure,
- * up to the latest year the source covers, had no battle deaths and gets a 0 row, so
+ * War deaths per 100,000 from death counts (UCDP, by the country whose people died), which
+ * only list country-years with deaths. Every other country-year with a population figure,
+ * up to the latest year the source covers, had no war deaths and gets a 0 row, so
  * peaceful countries have a value and the latest year carries forward like other inputs.
  */
-export function warDeathRows(battleRows, popRows) {
+export function warDeathRows(deathRows, popRows) {
   const deaths = new Map();
   let latestYear = -Infinity;
-  for (const row of battleRows) {
+  for (const row of deathRows) {
     if (!isCountryRow(row) || row.value == null) continue;
     const year = parseInt(String(row.date), 10);
     const value = Number(row.value);

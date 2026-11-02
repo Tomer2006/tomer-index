@@ -5,6 +5,7 @@ import { REPO_URL } from "../site.js";
 const SOURCES = [
   ["World Bank Open Data", "https://data.worldbank.org/"],
   ["WHO Global Health Observatory", "https://www.who.int/data/gho"],
+  ["Uppsala Conflict Data Program", "https://ucdp.uu.se/"],
   ["Cato Human Freedom Index", "https://www.cato.org/human-freedom-index/2025"],
 ];
 
@@ -30,7 +31,7 @@ export default function SiteFooter() {
         </p>
         <p>
           A personal composite index, not endorsed by UNDP, the World Bank,
-          WHO, Cato Institute or Fraser Institute.
+          WHO, UCDP, Cato Institute or Fraser Institute.
         </p>
       </div>
       <nav className="site-footer-links" aria-label="Footer">

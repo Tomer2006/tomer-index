@@ -32,6 +32,7 @@ test("footer credits the sources, the data date, and the repo", () => {
   for (const name of [
     "World Bank Open Data",
     "WHO Global Health Observatory",
+    "Uppsala Conflict Data Program",
     "Cato Human Freedom Index",
     "Methodology",
     "Downloads",

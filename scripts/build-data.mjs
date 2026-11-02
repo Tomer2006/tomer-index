@@ -1,5 +1,5 @@
 /**
- * Fetches World Bank indicators plus WHO GHO HALE and writes the web data
+ * Fetches World Bank indicators, WHO GHO HALE and UCDP war deaths and writes the web data
  * files (public/data/leaderboard.json + series.json, minified) plus a full
  * pretty-printed archive payload (data-archive/countries.json, not shipped).
  * Run: npm run build-data (needs network once; commit the JSON for offline builds).
@@ -8,7 +8,8 @@
  * payload, otherwise the build fails. Before writing, the result is compared with
  * the committed public/data files and nothing is written if coverage shrinks
  * (pass --force to write anyway). HFI_FILE=<path> reads the Human Freedom Index
- * from a browser-downloaded JSON or CSV file instead of the bot-protected URL.
+ * from a browser-downloaded JSON or CSV file instead of the bot-protected URL, and
+ * UCDP_GED_FILE=<path> reads the UCDP event data from a downloaded .zip or .csv.
  *
  * Importing this module only defines the helpers (for tests); the build runs only
  * when the file is executed directly.
@@ -36,6 +37,7 @@ import {
 } from "../src/hdi-core.js";
 import { dataQualityForSeries } from "../src/data-quality.js";
 import { YEAR_MAX, YEAR_MIN } from "../src/site-years.js";
+import { fetchUcdpWarDeaths, UCDP_GED_URL, UCDP_GED_VERSION } from "./ucdp-ged.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -51,8 +53,6 @@ const WB_GNI = "NY.GNP.PCAP.PP.KD";
 const WB_GDP = "NY.GDP.PCAP.PP.KD";
 /** Intentional homicides per 100,000 (UNODC via WDI). */
 const WB_HOMICIDE = "VC.IHR.PSRC.P5";
-/** Battle-related deaths, a count (UCDP via WDI); divided by population for a rate. */
-const WB_BATTLE = "VC.BTL.DETH";
 /** Road traffic deaths per 100,000 (WHO estimates via WDI). */
 const WB_ROAD = "SH.STA.TRAF.P5";
 /** Total population — weights the global time series. */
@@ -292,11 +292,6 @@ const WORLD_BANK_INPUTS = {
   intentionalHomicidesPer100k: {
     indicator: WB_HOMICIDE,
     label: "Intentional homicides (per 100,000 people)",
-    dateRange: DATE_RANGE,
-  },
-  battleDeaths: {
-    indicator: WB_BATTLE,
-    label: "Battle-related deaths (number of people; only country-years with fighting)",
     dateRange: DATE_RANGE,
   },
   roadDeathsPer100k: {
@@ -1201,7 +1196,7 @@ export function buildDerivedGroupSeries(inputs, haleHistory, countryMeta, yearMi
       if (!byIso.has(bucket.iso)) {
         byIso.set(bucket.iso, {
           definition:
-            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) to extend GNI to years without it, intentional homicides/100k, battle-related deaths, road traffic deaths/100k, population, and grouping metadata; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
+            `Population-weighted annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) to extend GNI to years without it, intentional homicides/100k, road traffic deaths/100k, population, and grouping metadata; UCDP supplies war deaths; WHO GHO supplies HALE only. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. Future observations are not pulled backward.`,
           points: [],
         });
       }
@@ -1442,7 +1437,9 @@ async function main() {
   const freedomDownload = await fetchHfiPersonalFreedom(committedSeries, generatedAt);
   const freedomRows = freedomDownload.rows;
   const popRows = worldBankData.population.rows;
-  const warRows = warDeathRows(worldBankData.battleDeaths.rows, popRows);
+  console.log(`Reading UCDP GED ${UCDP_GED_VERSION} war deaths …`);
+  const warDeaths = await fetchUcdpWarDeaths();
+  const warRows = warDeathRows(warDeaths.rows, popRows);
   console.log("Fetching WHO HALE (WHOSIS_000002) …");
   const haleDownload = await fetchWhoHaleOrCached(committedSeries, generatedAt);
   // Same cap as the WDI fetch: drop observations past the display window at the
@@ -1500,7 +1497,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, extended by GDP per capita growth), safety (intentional homicides, battle-related deaths, and road traffic deaths per 100k; years without battle deaths count as 0), life expectancy, and population; WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then (incomeEstimated); plain GDP is used only before a country's first GNI year. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, extended by GDP per capita growth), safety (intentional homicides and road traffic deaths per 100k), life expectancy, and population; UCDP supplies war deaths, counted for the country whose people died (years without any count as 0); WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then (incomeEstimated); plain GDP is used only before a country's first GNI year. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
@@ -1558,6 +1555,14 @@ async function main() {
         cachedFrom: freedomDownload.cachedFrom,
         reason: freedomDownload.reason,
       },
+      ucdpGed: {
+        // "downloaded" or "file" (UCDP_GED_FILE).
+        status: warDeaths.status,
+        version: UCDP_GED_VERSION,
+        url: UCDP_GED_URL,
+        events: warDeaths.eventCount,
+        latestObservationYear: warDeaths.latestYear,
+      },
     },
     indicators: {
       lifeExpectancy: WB_LE,
@@ -1565,7 +1570,7 @@ async function main() {
       gniPerCapita: WB_GNI,
       gdpPerCapitaFallback: WB_GDP,
       intentionalHomicidesPer100k: WB_HOMICIDE,
-      battleRelatedDeaths: WB_BATTLE,
+      warDeaths: `UCDP Georeferenced Event Dataset ${UCDP_GED_VERSION}: state-based and one-sided violence`,
       roadTrafficDeathsPer100k: WB_ROAD,
       freedomPersonalFreedomSubIndex:
         "Human Freedom Index 2025 Personal Freedom components excluding Security and Safety, rescaled to 0-100",
@@ -1573,18 +1578,20 @@ async function main() {
     },
     sourcePolicy: {
       worldBank:
-        "World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) only to extend GNI to years without it (or, before a country's first GNI year, in its place), intentional homicides/100k, battle-related deaths (UCDP), road traffic deaths/100k (WHO estimates), population, and country/group metadata.",
+        "World Bank supplies life expectancy, GNI per capita (PPP), GDP per capita (PPP) only to extend GNI to years without it (or, before a country's first GNI year, in its place), intentional homicides/100k, road traffic deaths/100k (WHO estimates), population, and country/group metadata.",
+      ucdp:
+        "War deaths come from the UCDP Georeferenced Event Dataset (state-based conflict and one-sided violence against civilians). Each death counts for the country whose people died: a government's soldiers for that government's country (the first listed, for a coalition), and armed groups, civilians and unidentified dead for the country where they died, with Gaza and the West Bank counted as Palestine.",
       whoGho:
         "HALE is the only WHO GHO input: WHOSIS_000002, healthy life expectancy at birth, both sexes. Missing annual HALE values are estimated by preserving the latest reported life-expectancy-minus-HALE gap, keeping its sign, and applying it to current life expectancy.",
       humanFreedomIndex:
         "Freedom is derived from the Cato Institute and Fraser Institute Human Freedom Index 2025 Personal Freedom categories, excluding Security and Safety to keep it distinct from the tracker’s Safety pillar.",
     },
     derivedRows:
-      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, safety, life expectancy, and population; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is used for abundance; a year without GNI moves the latest GNI by the change in GDP per capita (PPP) since then, and plain GDP per capita stands in only before a country's first GNI year.",
+      "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, homicide and road deaths, life expectancy, and population; UCDP for war deaths; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is used for abundance; a year without GNI moves the latest GNI by the change in GDP per capita (PPP) since then, and plain GDP per capita stands in only before a country's first GNI year.",
     healthPillar:
       "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85.",
     safetyNote:
-      "Safety scores deaths per 100k from intentional homicide, war (battle-related deaths, counted in the country where the fighting took place, divided by its population), and road crashes, linearly from 0 (score 1) to 100 or more (score 0). Country-years with no recorded battle deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
+      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, linearly from 0 (score 1) to 100 or more (score 0). Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:
