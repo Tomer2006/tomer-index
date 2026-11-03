@@ -22,7 +22,7 @@ or side-by-side comparisons.
 
 ## What you can explore
 
-- Rank and filter countries by year, region, income level, row type, or data quality.
+- Rank and filter countries by year, region, income level, or row type.
 - Use 20 detailed geographic region filters alongside the seven broad World Bank groups.
   Membership follows [UN M49](https://unstats.un.org/unsd/methodology/m49/), including
   its intermediate regions. These filters select countries; the regional group rows
@@ -208,7 +208,7 @@ back-fill and HALE-estimation rules, calculates the absolute pillar and final sc
 and writes:
 
 - `public/data/leaderboard.json` — the latest year's rows for every country and group,
-  data-quality flags, and a population-weighted series for a fixed set of countries
+  and a population-weighted series for a fixed set of countries
   scored in every year (not charted on the site).
 - `public/data/series.json` — yearly histories for every country and group.
 - `data-archive/countries.json` — a readable full payload for local inspection

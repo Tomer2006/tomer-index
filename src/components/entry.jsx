@@ -5,7 +5,6 @@ import {
   Header,
   DataStatus,
   MetricCell,
-  QualityBadge,
   PillarBars,
   SourceBadge,
 } from "./shared";
@@ -53,15 +52,7 @@ export default function Entry({ iso, summary: initial = null }) {
   const { row } = summary;
   return (
     <main id="main" className="entry-page">
-      <Header
-        title={
-          <>
-            {row.name}
-            <QualityBadge quality={summary.quality} />
-          </>
-        }
-        kicker={entryKicker(row)}
-      />
+      <Header title={row.name} kicker={entryKicker(row)} />
       <EntrySummary summary={summary} />
       <section className="entry-history" aria-labelledby="entry-history-title">
         <h2 id="entry-history-title" className="entry-section-title">

@@ -1,6 +1,5 @@
 import { LeaderboardCard, TableRow } from "./leaderboard";
 import { readLeaderboardFile } from "../leaderboard-file.js";
-import { dataQualityForRow } from "../data-quality.js";
 import { metricDefs } from "../metric-defs.js";
 import { YEAR_MAX } from "../site-years.js";
 import {
@@ -23,13 +22,12 @@ const SNAPSHOT_ROWS = 25;
  * live view will use.
  */
 export default function LeaderboardSnapshot() {
-  const { countries: rows, qualityByIso } = readLeaderboardFile();
+  const { countries: rows } = readLeaderboardFile();
   const weights = readWeights(new URLSearchParams());
   const sorted = sortedRows(rows);
   const ranks = countryRanks(sorted);
   const top = sorted.slice(0, SNAPSHOT_ROWS);
   const groupCount = rows.filter((row) => row.derivedKind).length;
-  const quality = (row) => dataQualityForRow(row, null, qualityByIso);
   const tomerColor = metricDefs.find(
     (metric) => metric.key === "customIndex",
   ).color;
@@ -47,7 +45,6 @@ export default function LeaderboardSnapshot() {
             key={row.iso}
             row={row}
             rank={ranks.get(row.iso)}
-            quality={quality(row)}
             sort="tomer"
             weights={weights}
             scoreLabel={columnFor("tomer").label}
@@ -92,7 +89,6 @@ export default function LeaderboardSnapshot() {
                 key={row.iso}
                 row={row}
                 rank={ranks.get(row.iso)}
-                quality={quality(row)}
                 year={YEAR_MAX}
                 weights={weights}
               />

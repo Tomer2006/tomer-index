@@ -6,7 +6,6 @@ import {
   sourceYearSummary,
   STALE_YEARS,
 } from "../src/source-years.js";
-import { dataQualityForRow, dataQualityForSeries } from "../src/data-quality.js";
 import { formatInt, formatTick, stepDecimals } from "../src/format.js";
 import { compactNumber, metricDefs } from "../src/metric-defs.js";
 import {
@@ -132,48 +131,6 @@ test("war and road deaths get their own badge labels and stale-data notes", () =
   assert.equal(badge.text, "2019–2024");
   assert.equal(badge.stale, true);
   assert.match(badge.description, /Latest road death data is from 2019 \(6 years earlier\)\./);
-});
-
-test("history gaps are described with canonical labels and year ranges", () => {
-  const points = [2000, 2001, 2002, 2003, 2004].map((year) => ({
-    year,
-    le: 80,
-    hale: 70,
-    gni: 40000,
-    homicidesPer100k: year < 2003 ? null : 1,
-    warDeathsPer100k: 0,
-    roadDeathsPer100k: year === 2001 ? null : 4,
-    freedom: year === 2000 ? null : 90,
-    customIndex: year < 2003 ? null : 0.9,
-  }));
-  const quality = dataQualityForSeries({ points });
-  assert.equal(quality.label, "History gaps");
-  assert.equal(
-    quality.description,
-    "Some years between 2000 and 2025 are missing at least one index input (Homicides per 100k: 2000–2002; Road deaths per 100k: 2001; Freedom: 2000).",
-  );
-  assert.equal(quality.badPoints, 3);
-  assert.equal(dataQualityForSeries({ points: points.slice(3) }), null);
-});
-
-test("dataQualityForRow rewords stored notes and needs no entry series", () => {
-  const qualityByIso = {
-    GRC: {
-      label: "Incomplete data",
-      description: "Homicides /100k and Personal freedom missing for 1 yearly point out of 26 points.",
-      badPoints: 1,
-      totalPoints: 26,
-    },
-  };
-  const quality = dataQualityForRow({ iso: "GRC" }, null, qualityByIso);
-  assert.equal(quality.label, "History gaps");
-  assert.equal(
-    quality.description,
-    "Some years between 2000 and 2025 are missing at least one index input (Homicides per 100k and Freedom missing in 1 of 26 years).",
-  );
-  assert.equal(dataQualityForRow({ iso: "GRC" }, null, qualityByIso), quality);
-  assert.equal(dataQualityForRow({ iso: "JPN" }, null, qualityByIso), null);
-  assert.equal(dataQualityForRow({ iso: "JPN" }, null, null), null);
 });
 
 test("numbers use en-US formatting and tick precision follows the step", () => {

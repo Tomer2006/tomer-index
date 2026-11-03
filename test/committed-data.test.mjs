@@ -57,9 +57,6 @@ test("every row has one history and every history belongs to a row", () => {
   const rowIso = leaderboard.countries.map((row) => row.iso);
   assert.equal(new Set(rowIso).size, rowIso.length);
   assert.deepEqual([...rowIso].sort(), Object.keys(entrySeries).sort());
-  for (const iso of Object.keys(leaderboard.qualityByIso)) {
-    assert.ok(entrySeries[iso], `qualityByIso.${iso} has no history`);
-  }
 });
 
 test("every scored country has all inputs and pillars in the latest year, matching its row", () => {

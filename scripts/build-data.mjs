@@ -37,7 +37,6 @@ import {
   warDeathRows,
   INDEX_WEIGHTS,
 } from "../src/hdi-core.js";
-import { dataQualityForSeries } from "../src/data-quality.js";
 import { YEAR_MAX, YEAR_MIN } from "../src/site-years.js";
 import { fetchUcdpWarDeaths, UCDP_GED_URL, UCDP_GED_VERSION } from "./ucdp-ged.mjs";
 
@@ -1625,11 +1624,6 @@ async function main() {
     countries,
   };
 
-  const qualityByIso = Object.fromEntries(
-    Object.entries(entrySeries)
-      .map(([iso, series]) => [iso, dataQualityForSeries(series)])
-      .filter(([, quality]) => quality)
-  );
   const leaderboardPayload = {
     generatedAt: payload.generatedAt,
     sourceRefresh: payload.sourceRefresh,
@@ -1643,7 +1637,6 @@ async function main() {
     pillarNormalization: payload.pillarNormalization,
     indexWeights: payload.indexWeights,
     globalAverageSeries: payload.globalAverageSeries,
-    qualityByIso,
     countries,
   };
   const seriesPayload = {

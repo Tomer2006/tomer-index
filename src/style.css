@@ -436,18 +436,6 @@ a {
   font-size: 0.85rem;
 }
 
-/* The legend for the "History gaps" badge sits right after its chips. */
-.data-quality-filter {
-  flex: 0 1 auto;
-}
-
-.data-quality-note {
-  flex: 1 1 320px;
-  margin: 0;
-  padding-bottom: 0.3rem;
-  color: var(--muted);
-  font-size: 0.86rem;
-}
 
 .leaderboard-lede {
   margin: 0.5rem 0 0;
@@ -1221,12 +1209,6 @@ a {
   stroke-width: 1;
 }
 
-.map-country.is-incomplete {
-  stroke: var(--warning);
-  stroke-width: 0.85;
-  stroke-dasharray: 2 2;
-}
-
 .map-country.is-no-data {
   stroke: rgba(139, 149, 168, 0.35);
 }
@@ -1297,13 +1279,6 @@ a {
   margin-bottom: 0.15rem;
 }
 
-.map-tooltip-quality {
-  display: block;
-  margin-top: 0.2rem;
-  color: #c9ad73;
-  font-size: 0.72rem;
-}
-
 .map-legend-key {
   display: inline-flex;
   align-items: center;
@@ -1327,12 +1302,6 @@ a {
     #232a37 0 2px,
     #465269 2px 3.5px
   );
-}
-
-.map-legend-key-incomplete::before {
-  background: transparent;
-  border-color: var(--warning);
-  border-style: dashed;
 }
 
 .map-detail-panel {
@@ -1768,12 +1737,6 @@ a {
 
 .compare-head-title .compare-head-name {
   color: var(--text);
-}
-
-.compare-table thead .data-quality-badge {
-  display: block;
-  width: fit-content;
-  margin: 0.3rem 0 0 auto;
 }
 
 .compare-table tbody th {
@@ -2339,10 +2302,6 @@ table {
   border-radius: 8px;
 }
 
-.leaderboard-card .data-quality-badge {
-  z-index: 1;
-}
-
 .leaderboard-card:has(a:focus-visible) {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -2452,21 +2411,6 @@ table {
   font-variant-numeric: tabular-nums;
 }
 
-.data-quality-badge {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  max-width: 100%;
-  margin-left: 0.45rem;
-  color: #c9ad73;
-  font-family: var(--font);
-  font-size: 0.68rem;
-  font-weight: 550;
-  line-height: 1.2;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
 .source-year-badge {
   display: inline-flex;
   align-items: center;
@@ -2505,14 +2449,11 @@ table {
 }
 
 /* Tooltip that also works for touch (tap focuses) and keyboard users. */
-.data-quality-badge[data-tip],
 .source-year-badge[data-tip] {
   position: relative;
   cursor: help;
 }
 
-.data-quality-badge[data-tip]:hover::after,
-.data-quality-badge[data-tip]:focus::after,
 .source-year-badge[data-tip]:hover::after,
 .source-year-badge[data-tip]:focus::after {
   content: attr(data-tip);
@@ -2541,7 +2482,7 @@ table {
 /* shared.jsx measures the badge on hover/focus and sets data-tip-x/-y plus the
    --tip-* offsets: the tip then uses fixed positioning, so table scroll boxes
    can't clip it, and aligns to the badge's start or end near a viewport edge. */
-:is(.data-quality-badge, .source-year-badge)[data-tip-x]:is(:hover, :focus)::after {
+.source-year-badge[data-tip-x]:is(:hover, :focus)::after {
   position: fixed;
   top: var(--tip-top);
   right: auto;
@@ -2553,23 +2494,23 @@ table {
   background: rgba(15, 18, 24, 0.97);
 }
 
-:is(.data-quality-badge, .source-year-badge)[data-tip-x="center"]:is(:hover, :focus)::after {
+.source-year-badge[data-tip-x="center"]:is(:hover, :focus)::after {
   left: var(--tip-center);
   transform: translateX(-50%);
 }
 
-:is(.data-quality-badge, .source-year-badge)[data-tip-x="end"]:is(:hover, :focus)::after {
+.source-year-badge[data-tip-x="end"]:is(:hover, :focus)::after {
   right: var(--tip-right);
   left: auto;
 }
 
-:is(.data-quality-badge, .source-year-badge)[data-tip-y="above"]:is(:hover, :focus)::after {
+.source-year-badge[data-tip-y="above"]:is(:hover, :focus)::after {
   top: auto;
   bottom: var(--tip-bottom);
 }
 
 /* Escape hides the open tip until the pointer or focus leaves the badge. */
-:is(.data-quality-badge, .source-year-badge)[data-tip][data-tip-dismissed]::after {
+.source-year-badge[data-tip][data-tip-dismissed]::after {
   display: none;
 }
 
@@ -2578,12 +2519,6 @@ table {
   color: #e5b567;
   text-decoration: underline dotted;
   text-underline-offset: 2px;
-}
-
-/* Offset with `top`, not a transform: a transform would trap the fixed tooltip. */
-.hero h1 .data-quality-badge {
-  top: -0.2em;
-  margin-left: 0.6rem;
 }
 
 .empty {

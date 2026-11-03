@@ -1,6 +1,5 @@
 // Pure helpers shared by the server entry pages (metadata, prerendered summary)
 // and the client <Entry> component, so both describe a row the same way.
-import { dataQualityForRow } from "./data-quality.js";
 import { YEAR_MAX, YEAR_MIN } from "./site-years.js";
 import { columnFor, kindLabel, tomerRanks } from "./view-model.js";
 
@@ -13,7 +12,7 @@ export function ordinal(n) {
   return `${n}${suffix ?? "th"}`;
 }
 
-/** Row, Tomer-index rank among countries and data-quality note, or null for an unknown id. */
+/** Row and Tomer-index rank among countries, or null for an unknown id. */
 export function entrySummary(leaderboard, iso) {
   const countries = leaderboard?.countries ?? [];
   const row = countries.find((item) => item.iso === iso);
@@ -23,7 +22,6 @@ export function entrySummary(leaderboard, iso) {
     row,
     rank: ranks.get(iso) ?? null,
     total,
-    quality: dataQualityForRow(row, null, leaderboard.qualityByIso),
   };
 }
 

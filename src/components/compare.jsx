@@ -7,7 +7,6 @@ import {
   DataStatus,
   YearControl,
   MetricCell,
-  QualityBadge,
   PillarBars,
 } from "./shared";
 import HistoryChart, { SERIES_COLORS } from "./history-chart";
@@ -22,7 +21,6 @@ import {
   tomerRanks,
 } from "../view-model.js";
 import { geographicRegionForRow } from "../regions.js";
-import { dataQualityForRow } from "../data-quality.js";
 import { metricDefs } from "../metric-defs.js";
 import { STALE_YEARS } from "../source-years.js";
 import { YEAR_MAX, YEAR_MIN } from "../site-years.js";
@@ -266,8 +264,6 @@ export default function Compare() {
     ...(pastYear ? [snapshot] : []),
     ...(isos.length ? [entries] : []),
   ];
-  const qualityFor = (row) =>
-    dataQualityForRow(row, null, leaderboard.data?.qualityByIso);
   const setYear = (value) =>
     update({ year: value === YEAR_MAX ? null : value });
   const setPicks = (next) => update({ picks: next.join(",") || null });
@@ -495,7 +491,6 @@ export default function Compare() {
                                     {kindLabel(row)}
                                   </span>
                                 )}
-                                <QualityBadge quality={qualityFor(row)} />
                               </th>
                             ))}
                           </tr>

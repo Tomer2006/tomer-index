@@ -17,7 +17,6 @@ import {
   YearControl,
   Weights,
   MetricCell,
-  QualityBadge,
 } from "./shared";
 import {
   readYear,
@@ -35,7 +34,6 @@ import {
   weightedIndexFromPillars,
 } from "../index-weights.js";
 import { formatTomer, formatTomerAxis } from "../index-scale.js";
-import { dataQualityForRow } from "../data-quality.js";
 import { metricDefs } from "../metric-defs.js";
 import { YEAR_MAX } from "../site-years.js";
 
@@ -125,7 +123,7 @@ function MapTooltip({ ref, describe }) {
     [],
   );
   if (!hover) return null;
-  const { name, scoreText, quality } = describe(hover.iso);
+  const { name, scoreText } = describe(hover.iso);
   return (
     <div
       className="map-tooltip"
@@ -134,7 +132,6 @@ function MapTooltip({ ref, describe }) {
     >
       <strong>{name}</strong>
       <span>{scoreText}</span>
-      {quality && <span className="map-tooltip-quality">{quality.label}</span>}
     </div>
   );
 }
@@ -199,7 +196,6 @@ function MapLegend({ paint, year, loadingYear, failedYear, custom, status }) {
       </div>
       <ul className="map-legend-keys">
         <li className="map-legend-key map-legend-key-empty">No data</li>
-        <li className="map-legend-key map-legend-key-incomplete">History gaps</li>
       </ul>
       {custom && (
         <p className="map-legend-custom">
@@ -421,8 +417,7 @@ function WorldMapView({ params, update, preview = false, description }) {
     setFullscreen(true);
   };
 
-  const countries = leaderboard.data?.countries,
-    qualityByIso = leaderboard.data?.qualityByIso;
+  const countries = leaderboard.data?.countries;
   const countryList = useMemo(
     () =>
       (countries ?? [])
@@ -505,18 +500,17 @@ function WorldMapView({ params, update, preview = false, description }) {
     () =>
       shapes.map((shape) => {
         const score = paint.scores.get(shape.iso);
-        const quality = dataQualityForRow(byIso.get(shape.iso), null, qualityByIso);
         return (
           <path
             key={shape.key}
             d={shape.d}
             data-iso={shape.iso}
             fill={paint.fill(score)}
-            className={`map-country${Number.isFinite(score) ? "" : " is-no-data"}${quality ? " is-incomplete" : ""}${shape.dotted ? " is-dotted" : ""}`}
+            className={`map-country${Number.isFinite(score) ? "" : " is-no-data"}${shape.dotted ? " is-dotted" : ""}`}
           />
         );
       }),
-    [shapes, byIso, paint, qualityByIso],
+    [shapes, paint],
   );
   // Dots sit under the country shapes, so they only show (and take clicks) over the
   // sea and never cover a neighbour. They grow with the map up to DOT_SIZE.
@@ -568,7 +562,6 @@ function WorldMapView({ params, update, preview = false, description }) {
         : known.has(code)
           ? `Not scored for ${shownYear}`
           : "Not scored",
-      quality: dataQualityForRow(row, null, qualityByIso),
     };
   };
   const select = (value, { focus = false } = {}) => {
@@ -635,7 +628,6 @@ function WorldMapView({ params, update, preview = false, description }) {
     return nearest;
   };
   const selectedScore = scoreOf(iso),
-    selectedQuality = dataQualityForRow(selected, null, qualityByIso),
     scoreLine = (
       <ScoreLine
         score={selectedScore}
@@ -851,7 +843,6 @@ function WorldMapView({ params, update, preview = false, description }) {
               <div className="map-fs-detail">
                 <p className="map-fs-detail-title">
                   <strong>{selectedName}</strong>
-                  <QualityBadge quality={selectedQuality} />
                   <span className="muted"> · {shownYear}</span>
                 </p>
                 {scoreLine}
@@ -890,7 +881,6 @@ function WorldMapView({ params, update, preview = false, description }) {
               <div className="map-detail-head">
                 <h2 className="map-detail-title">
                   {selectedName}
-                  <QualityBadge quality={selectedQuality} />
                 </h2>
                 <p className="map-detail-sub">
                   {[selected?.region?.name, shownYear].filter(Boolean).join(" · ")}

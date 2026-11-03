@@ -553,8 +553,7 @@ export default function Page() {
             <p>
               A country gets a score for a year only when all seven inputs
               (life expectancy, HALE, income, homicide, war and road death
-              rates, and freedom score) are available as of that year. Countries and groups missing a score
-              in some of their years are marked <strong>History gaps</strong>.
+              rates, and freedom score) are available as of that year.
             </p>
             <p>
               HALE is the exception to flat carry-forward: years after WHO’s

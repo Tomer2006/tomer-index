@@ -11,7 +11,6 @@ import HistoryChart, {
 import {
   DataStatus,
   PillarBars,
-  QualityBadge,
   SourceBadge,
   Weights,
   YearControl,
@@ -148,7 +147,6 @@ test("compact source badges stay out of the Tab order but keep their description
     <>
       <SourceBadge row={row} sources={["haleYear"]} year={2025} compact />
       <SourceBadge row={row} sources={["leYear", "haleYear"]} year={2025} />
-      <QualityBadge quality={{ label: "History gaps", description: "Some years are missing." }} />
     </>,
   );
   const [compact, full] = container.querySelectorAll(".source-year-badge");
@@ -162,13 +160,8 @@ test("compact source badges stay out of the Tab order but keep their description
   expect(full.textContent).toContain("Life exp. 2024, HALE est. from 2021");
   const description = document.getElementById(full.getAttribute("aria-describedby"));
   expect(description.textContent).toBe(full.dataset.tip);
-  const quality = container.querySelector(".data-quality-badge");
-  expect(quality.getAttribute("tabindex")).toBe("0");
-  expect(
-    document.getElementById(quality.getAttribute("aria-describedby")).textContent,
-  ).toBe("Some years are missing.");
-  quality.focus();
-  fireEvent.keyDown(quality, { key: "Escape" });
+  full.focus();
+  fireEvent.keyDown(full, { key: "Escape" });
 });
 
 test("weight sliders are named by pillar and speak the effective percentage", () => {

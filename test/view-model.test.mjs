@@ -11,7 +11,6 @@ import {
   readList,
   readIso,
   readPicks,
-  readQuality,
   readSort,
   isCustomWeights,
   matchesSearch,
@@ -129,14 +128,12 @@ test("shared links validate years and weights and round-trip custom weights", ()
 
 test("query readers trim, de-duplicate, upper-case and validate", () => {
   const params = new URLSearchParams(
-    "region=UN-154,%20UN-030,UN-154,&iso=%20jpn%20&picks=usa,%20jpn,usa&quality=foo&sort=bogus",
+    "region=UN-154,%20UN-030,UN-154,&iso=%20jpn%20&picks=usa,%20jpn,usa&sort=bogus",
   );
   assert.deepEqual(readList(params, "region"), ["UN-154", "UN-030"]);
   assert.deepEqual(readList(params, "missing"), []);
   assert.equal(readIso(params), "JPN");
   assert.deepEqual(readPicks(params), ["USA", "JPN", "USA"]);
-  assert.equal(readQuality(params), "all");
-  assert.equal(readQuality(new URLSearchParams("quality=incomplete")), "incomplete");
   assert.equal(readSort(params), "tomer");
   assert.equal(readSort(new URLSearchParams("sort=deaths")), "deaths");
   // The column it replaced falls back to the index.

@@ -30,11 +30,6 @@ export function readPicks(params) {
     .map((iso) => iso.trim().toUpperCase())
     .filter(Boolean);
 }
-export const QUALITY_FILTERS = ["all", "complete", "incomplete"];
-export function readQuality(params) {
-  const value = params.get("quality");
-  return QUALITY_FILTERS.includes(value) ? value : "all";
-}
 export function entryHref(iso) {
   return `/entry/${encodeURIComponent(iso)}`;
 }

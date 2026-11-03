@@ -246,8 +246,7 @@ export default function Page() {
           groups), with a <code>points</code> array of yearly values. Both use
           these fields.{" "}
           <code>leaderboard.json</code> also holds{" "}
-          <code>qualityByIso</code> (countries and groups with history gaps)
-          and <code>globalAverageSeries</code>, a population-weighted series
+          <code>globalAverageSeries</code>, a population-weighted series
           for a fixed set of countries that have a score in every year.
         </p>
         <dl className="downloads-fields">

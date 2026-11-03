@@ -16,13 +16,11 @@ import {
   YearControl,
   Weights,
   MetricCell,
-  QualityBadge,
 } from "./shared";
 import {
   readYear,
   readWeights,
   readList,
-  readQuality,
   readSort,
   weightQuery,
   isCustomWeights,
@@ -34,12 +32,10 @@ import {
   matchesIncome,
   matchesSearch,
   entryHref,
-  QUALITY_FILTERS,
   TYPE_FILTERS,
   columns,
   columnFor,
 } from "../view-model.js";
-import { dataQualityForRow } from "../data-quality.js";
 import {
   DEFAULT_WEIGHT_POINTS,
   WEIGHT_KEYS,
@@ -55,17 +51,11 @@ const PILLARS = WEIGHT_KEYS.map((key) => [
   key,
   `${key[0].toUpperCase()}${key.slice(1)}`,
 ]);
-const QUALITY_LABELS = {
-  all: "All",
-  complete: "Complete history",
-  incomplete: "History gaps",
-};
 const RESET_FILTERS = {
   q: null,
   type: null,
   region: null,
   income: null,
-  quality: null,
   aggregates: null,
 };
 // Phones get compact cards, paged so the first screen renders quickly.
@@ -153,7 +143,7 @@ function RankText({ row, rank }) {
 
 // Memoized rows and cards: a filter or rank change only touches rows it moves.
 // The page's prerendered snapshot renders these too, so the two views match.
-export const TableRow = memo(function TableRow({ row, rank, quality, year, weights }) {
+export const TableRow = memo(function TableRow({ row, rank, year, weights }) {
   return (
     <tr
       data-iso={row.iso}
@@ -170,7 +160,6 @@ export const TableRow = memo(function TableRow({ row, rank, quality, year, weigh
         >
           {row.name}
         </Link>
-        <QualityBadge quality={quality} />
         {row.derivedKind && (
           <span className="leaderboard-group-meta">{groupMeta(row)}</span>
         )}
@@ -193,7 +182,6 @@ export const TableRow = memo(function TableRow({ row, rank, quality, year, weigh
 export const LeaderboardCard = memo(function LeaderboardCard({
   row,
   rank,
-  quality,
   sort,
   weights,
   scoreLabel,
@@ -218,7 +206,6 @@ export const LeaderboardCard = memo(function LeaderboardCard({
           <Link href={entryHref(row.iso)} prefetch={false}>
             {row.name}
           </Link>
-          <QualityBadge quality={quality} />
         </h2>
         <p className="leaderboard-card-score">
           <span className="leaderboard-card-score-value">
@@ -302,8 +289,7 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
   const weights = useDeferredValue(draftWeights);
   const custom = isCustomWeights(weights);
   const scoreLabel = custom ? "Custom index" : columnFor("tomer").label;
-  const quality = readQuality(params),
-    sort = readSort(params);
+  const sort = readSort(params);
   const bestFirst = params.get("dir") !== "asc";
   const aggregates = params.get("aggregates") !== "0";
   const typeParam = params.get("type"),
@@ -320,8 +306,7 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
   const activeFilters =
     selected.type.length +
     selected.region.length +
-    selected.income.length +
-    (quality === "all" ? 0 : 1);
+    selected.income.length;
   const [filtersOpen, setFiltersOpen] = useState(activeFilters > 0);
   const [weightsOpen, setWeightsOpen] = useState(() =>
     isCustomWeights(draftWeights),
@@ -331,7 +316,6 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
   const leaderboard = useDataset("leaderboard", !preview);
   const snapshot = useDataset(`year:${year}`, !preview && year !== YEAR_MAX);
   const countries = leaderboard.data?.countries;
-  const qualityByIso = leaderboard.data?.qualityByIso;
   // While another year's snapshot loads, keep the last year on screen.
   const loaded =
     year === YEAR_MAX
@@ -360,12 +344,9 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
           (!selected.type.length || selected.type.includes(rowType(row))) &&
           matchesRegions(row, selected.region) &&
           matchesIncome(row, selected.income) &&
-          (quality === "all" ||
-            (quality === "incomplete") ===
-              Boolean(dataQualityForRow(row, null, qualityByIso))) &&
           matchesSearch(row, deferredSearch),
       ),
-    [yearRows, aggregates, selected, quality, qualityByIso, deferredSearch],
+    [yearRows, aggregates, selected, deferredSearch],
   );
   const rows = useMemo(
     () => sortedRows(filtered, sort, bestFirst, weights),
@@ -395,7 +376,6 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
   );
   const groupCount = rows.filter((row) => row.derivedKind).length;
   const countryCount = rows.length - groupCount;
-  const qualityFor = (row) => dataQualityForRow(row, null, qualityByIso);
 
   function changeYear(value) {
     setYear(value);
@@ -540,30 +520,6 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
                 . Select multiple regions to include countries from any of
                 them.
               </p>
-              <div className="control-row">
-                <fieldset className="filter-chips data-quality-filter">
-                  <legend className="control-label">Data quality</legend>
-                  <div className="chips">
-                    {QUALITY_FILTERS.map((value) => (
-                      <button
-                        key={value}
-                        className={`chip${quality === value ? " is-active" : ""}`}
-                        aria-pressed={quality === value}
-                        onClick={() =>
-                          update({ quality: value === "all" ? null : value })
-                        }
-                      >
-                        {QUALITY_LABELS[value]}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-                <p className="data-quality-note">
-                  <span className="data-quality-badge">History gaps</span>{" "}
-                  means at least one year is missing an index input. Hover or
-                  tap a badge for details.
-                </p>
-              </div>
             </div>
           </details>
           <details
@@ -654,7 +610,6 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
                   key={row.iso}
                   row={row}
                   rank={ranks.get(row.iso)}
-                  quality={qualityFor(row)}
                   sort={sort}
                   weights={weights}
                   scoreLabel={scoreLabel}
@@ -739,7 +694,6 @@ function LeaderboardView({ params, update, placeholder, preview = false }) {
                       key={row.iso}
                       row={row}
                       rank={ranks.get(row.iso)}
-                      quality={qualityFor(row)}
                       year={view.year}
                       weights={weights}
                     />

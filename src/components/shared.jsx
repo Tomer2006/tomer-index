@@ -217,13 +217,6 @@ function TipBadge({ className, tip, children }) {
     </span>
   );
 }
-export function QualityBadge({ quality }) {
-  return quality ? (
-    <TipBadge className="data-quality-badge" tip={quality.description}>
-      {quality.label}
-    </TipBadge>
-  ) : null;
-}
 /**
  * Source years for one value; the wording rules live in source-years.js. Compact
  * badges sit in every leaderboard cell, so they stay out of the Tab order: mouse

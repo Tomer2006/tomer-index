@@ -95,7 +95,6 @@ test("reversing the sort keeps each country's rank", async () => {
 });
 
 test("filters live in a collapsed panel that opens when a filter is active", async () => {
-  const user = userEvent.setup();
   const view = render(<Leaderboard />);
   await screen.findByRole("table");
   const filters = () => screen.getByText("Filters").closest("details");
@@ -104,20 +103,14 @@ test("filters live in a collapsed panel that opens when a filter is active", asy
     false,
   );
   view.unmount();
-  window.history.replaceState(null, "", "/?income=HIC&quality=incomplete");
+  window.history.replaceState(null, "", "/?income=HIC");
   render(<Leaderboard />);
   const table = await screen.findByRole("table");
   expect(filters().open).toBe(true);
   expect(filters().querySelector("summary").textContent).toBe(
-    "Filters2 active",
+    "Filters1 active",
   );
-  expect(
-    screen
-      .getByRole("button", { name: "History gaps" })
-      .getAttribute("aria-pressed"),
-  ).toBe("true");
   // The income chip keeps the matching income-group row, like region chips do.
-  await user.click(screen.getByRole("button", { name: "All", exact: true }));
   expect(rowFor(table, "High income")).toBeTruthy();
   expect(within(table).queryByRole("link", { name: "World" })).toBeNull();
 });
