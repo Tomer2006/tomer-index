@@ -31,8 +31,9 @@ export function compactNumber(n, digits = 1) {
 /**
  * Chart/table metric definitions shared by the entry and compare pages.
  * `axis(value, step)` prints a y tick with the precision its tick step needs;
- * `max` caps the axis for bounded scores (every metric is non-negative; the Tomer
- * index has none, since health and abundance keep rising past their goalposts).
+ * `min` and `max` bound the axis: every metric but the Tomer index is non-negative, so
+ * `min` defaults to 0; the Tomer index has no limit either way, and `max` caps the
+ * bounded freedom score.
  * `sourceYearKey` (or `sourceKeys`, for a metric built from several inputs) names the
  * source years shown with each value.
  */
@@ -41,6 +42,7 @@ export const metricDefs = [
     key: "customIndex",
     color: "#a78bfa",
     label: "Tomer index",
+    min: -Infinity,
     axis: (v, step = 0.001) => formatTomerAxis(v, stepDecimals(step * 100)),
     value: (v) => formatTomer(v),
   },

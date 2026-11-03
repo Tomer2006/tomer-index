@@ -67,11 +67,11 @@ test("income rows use GNI, extend it by GDP growth, and use plain GDP only befor
 const closeTo = (actual, expected, eps = 1e-9) =>
   assert.ok(Math.abs(actual - expected) < eps, `expected ${actual} ≈ ${expected}`);
 
-test("leiFromYears scores 20 years 0 and 85 years 1, with no cap above 85", () => {
+test("leiFromYears scores 20 years 0 and 85 years 1, with no cap either way", () => {
   assert.equal(leiFromYears(20), 0);
   assert.equal(leiFromYears(85), 1);
   closeTo(leiFromYears(52.5), 0.5);
-  assert.equal(leiFromYears(10), 0);
+  closeTo(leiFromYears(7), -0.2);
   // Each year past 85 adds as much as a year below it.
   closeTo(leiFromYears(150), 2);
 });
@@ -82,13 +82,12 @@ test("combinedHealthLei averages lifespan and healthspan LEIs", () => {
   closeTo(combinedHealthLei(52.5, 52.5), 0.5);
 });
 
-test("safety adds homicide, war and road deaths and inverts them with a 100/100k floor", () => {
+test("safety adds homicide, war and road deaths and inverts them, 0 at 100/100k and below past it", () => {
   assert.equal(safetyDeathsPer100k(0.5, 0, 2.3), 2.8);
   assert.equal(safetyIndexFromDeathsPer100k(0), 1);
   assert.equal(safetyIndexFromDeathsPer100k(100), 0);
   closeTo(safetyIndexFromDeathsPer100k(25), 0.75);
-  assert.equal(safetyIndexFromDeathsPer100k(300), 0);
-  assert.equal(safetyIndexFromDeathsPer100k(-5), 1);
+  assert.equal(safetyIndexFromDeathsPer100k(300), -2);
 });
 
 test("war deaths are battle deaths per 100k, 0 in peaceful years up to the source's last year", () => {
@@ -108,10 +107,10 @@ test("war deaths are battle deaths per 100k, 0 in peaceful years up to the sourc
   assert.equal(byYear.has("CCC"), false);
 });
 
-test("income index uses HDI log goalposts $100–$75,000, with no cap above $75,000", () => {
+test("income index uses HDI log goalposts $100–$75,000, with no cap either way", () => {
   assert.equal(incomeIndexFromGni(100), 0);
   closeTo(incomeIndexFromGni(75000), 1);
-  assert.equal(incomeIndexFromGni(50), 0);
+  closeTo(incomeIndexFromGni(50), -incomeIndexFromGni(200));
   // Log scaling: a doubling adds a constant amount, above the goalpost too.
   const step = incomeIndexFromGni(200) - incomeIndexFromGni(100);
   closeTo(incomeIndexFromGni(400) - incomeIndexFromGni(200), step);
@@ -120,11 +119,10 @@ test("income index uses HDI log goalposts $100–$75,000, with no cap above $75,
   closeTo(incomeIndexFromGni(75000 * 750), 2);
 });
 
-test("freedom index maps the 0-100 personal-freedom score to 0-1 and clamps", () => {
+test("freedom index maps the 0-100 personal-freedom score to 0-1", () => {
   assert.equal(freedomIndexFromScore(0), 0);
   assert.equal(freedomIndexFromScore(50), 0.5);
   assert.equal(freedomIndexFromScore(100), 1);
-  assert.equal(freedomIndexFromScore(120), 1);
 });
 
 test("index uses the declared 40/30/20/10 dimension weights", () => {
@@ -137,10 +135,10 @@ test("index uses the declared 40/30/20/10 dimension weights", () => {
   const safety = safetyIndexFromDeathsPer100k(deaths);
   const freedom = 0.8;
   const expected =
-    Math.pow(income, INDEX_WEIGHTS.abundance) *
-    Math.pow(safety, INDEX_WEIGHTS.safety) *
-    Math.pow(health, INDEX_WEIGHTS.health) *
-    Math.pow(freedom, INDEX_WEIGHTS.freedom);
+    INDEX_WEIGHTS.abundance * income +
+    INDEX_WEIGHTS.safety * safety +
+    INDEX_WEIGHTS.health * health +
+    INDEX_WEIGHTS.freedom * freedom;
   assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
   closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, deaths, hale, 80), expected);
 });
@@ -151,12 +149,17 @@ test("the index passes 1 once health or income goes past its goalpost", () => {
   const richer = customIndexAbundanceSafetyHealthFreedomFull(85, 150000, 0, 85, 100);
   assert.ok(longer > 1, `longer lives score ${longer}`);
   assert.ok(richer > 1, `higher income scores ${richer}`);
-  closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.3426, 1e-4);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.4084, 1e-4);
 });
 
-test("100 or more violent and road deaths per 100k collapse the index to 0", () => {
-  assert.equal(customIndexAbundanceSafetyHealthFreedomFull(80, 40000, 100, 70, 80), 0);
-  assert.equal(customIndexAbundanceSafetyHealthFreedom(80, 40000, 250, 70, 80), 0);
+test("the index keeps falling past 100 violent and road deaths per 100k, below 0", () => {
+  const at = (deaths) => customIndexAbundanceSafetyHealthFreedomFull(70, 3000, deaths, 60, 40);
+  // Each extra death per 100k costs the safety weight / 100, past 100 too.
+  closeTo(at(100) - at(200), INDEX_WEIGHTS.safety);
+  assert.ok(at(400) < 0, `400 deaths per 100k score ${at(400)}`);
+  assert.equal(customIndexAbundanceSafetyHealthFreedom(70, 3000, 400, 60, 40), -0.492);
+  // Every pillar at its lower goalpost scores 0.
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(20, 100, 100, 20, 0), 0);
 });
 
 test("four-pillar index rounds to 3 decimals, Full does not", () => {

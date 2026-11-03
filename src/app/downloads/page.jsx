@@ -45,15 +45,16 @@ const FIELDS = [
   [
     "customIndex",
     <>
-      Tomer index, where 1 means every goalpost is met; it can go higher. The
-      site shows it ×100.
+      Tomer index, where 1 means every goalpost is met and 0 every pillar at its
+      lowest; it can go above 1 or below 0. The site shows it ×100.
     </>,
   ],
   [
     "healthIndex, safetyIndex, freedomIndex, abundanceIndex",
     <>
-      Pillar scores from 0. Safety and freedom stop at 1; health and abundance
-      pass 1 above 85 years and $75,000.
+      Pillar scores, 0 at the lower goalpost and 1 at the upper one. Safety and
+      freedom stop at 1; health and abundance pass 1 above 85 years and $75,000.
+      Safety goes below 0 past 100 deaths per 100,000.
     </>,
   ],
   [

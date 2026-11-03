@@ -32,7 +32,7 @@ const TAP_SLOP = 10;
 
 /**
  * "Nice" y-axis ticks: a step of 1, 2, 2.5 or 5 × 10^n, about `count` intervals,
- * never below `min` (every metric is non-negative) or above `max`.
+ * never below `min` (0 by default: only the Tomer index goes negative) or above `max`.
  */
 export function niceTicks(low, high, { count = 4, min = 0, max = Infinity } = {}) {
   let lo = Math.max(min, low),
@@ -132,6 +132,7 @@ export default function HistoryChart({
     );
 
   const { ticks, step } = niceTicks(Math.min(...values), Math.max(...values), {
+    min: metric.min,
     max: metric.max,
   });
   const labels = ticks.map((value) => metric.axis(value, step));

@@ -128,7 +128,7 @@ function LeaderboardLede() {
   return (
     <p className="leaderboard-lede">
       A score against fixed goalposts, weighting {DEFAULT_MIX}. 100 means
-      every goalpost is met; it isn’t a ceiling.{" "}
+      every goalpost is met, but scores can go above 100 or below 0.{" "}
       <span className="leaderboard-lede-years">
         Small numbers under each value are the years its data comes from
         (“est.” = estimated from an earlier year’s value, “GDP” = GDP used

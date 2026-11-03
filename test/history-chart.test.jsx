@@ -27,13 +27,15 @@ const metric = (key) => metricDefs.find((item) => item.key === key);
 const japan = { iso: "JPN", name: "Japan", points: entrySeries.JPN.points };
 const usa = { iso: "USA", name: "United States", points: entrySeries.USA.points };
 
-test("y ticks use 1/2/2.5/5 steps, never repeat, and never go below zero", () => {
+test("y ticks use 1/2/2.5/5 steps, never repeat, and go below zero only for the Tomer index", () => {
   expect(niceTicks(71.1, 73.9)).toEqual({ ticks: [71, 72, 73, 74], step: 1 });
   expect(niceTicks(0.659, 0.96, { max: 1 }).ticks).toEqual([0.6, 0.7, 0.8, 0.9, 1]);
   expect(niceTicks(0.2, 33.6).ticks).toEqual([0, 10, 20, 30, 40]);
   expect(niceTicks(10, 19).step).toBe(2.5);
   expect(niceTicks(88, 99.9, { max: 100 }).ticks.at(-1)).toBe(100);
   expect(niceTicks(5, 5).ticks.length).toBeGreaterThan(1);
+  expect(niceTicks(-0.47, 0.72, { min: -Infinity }).ticks).toEqual([-0.5, 0, 0.5, 1]);
+  expect(metric("customIndex").min).toBe(-Infinity);
   for (const item of metricDefs) {
     for (const entry of Object.values(entrySeries)) {
       const values = entry.points
@@ -41,11 +43,12 @@ test("y ticks use 1/2/2.5/5 steps, never repeat, and never go below zero", () =>
         .filter(Number.isFinite);
       if (!values.length) continue;
       const { ticks, step } = niceTicks(Math.min(...values), Math.max(...values), {
+        min: item.min,
         max: item.max,
       });
       const labels = ticks.map((value) => item.axis(value, step));
       expect(new Set(labels).size).toBe(labels.length);
-      expect(ticks[0]).toBeGreaterThanOrEqual(0);
+      expect(ticks[0]).toBeGreaterThanOrEqual(item.min ?? 0);
       expect(ticks[0]).toBeLessThanOrEqual(Math.min(...values));
       expect(ticks.at(-1)).toBeGreaterThanOrEqual(Math.max(...values));
     }

@@ -1,20 +1,23 @@
 /** Shared HDI-style math + merging (used by the app and `scripts/build-data.mjs`). */
 
 /**
- * Safety deaths (homicide, war and road crashes) per 100,000 people a year: 0 = best
- * safety, 100 (1 in 1,000 people) = floor (worst) for the safety pillar.
+ * Safety deaths (homicide, war and road crashes) per 100,000 people a year: none scores
+ * 1, and 100 (1 in 1,000 people) scores 0. More deaths score below 0.
  */
-const SAFETY_DEATHS_MAX = 100;
+const SAFETY_DEATHS_ZERO = 100;
 
 /**
  * Life expectancy and HALE score 0 at 20 years and 1 at 85 years (UNDP's goalposts).
- * 85 is a mark, not a ceiling: every year beyond it adds the same amount.
+ * Neither is a limit: every year beyond 85, or short of 20, moves the score the same.
  */
-const LE_MIN = 20;
+const LE_ZERO = 20;
 const LE_MARK = 85;
 
-/** Income scores 0 at $100 and 1 at $75,000 (UNDP's goalposts), with no ceiling. */
-const INCOME_MIN = 100;
+/**
+ * Income scores 0 at $100 and 1 at $75,000 (UNDP's goalposts) on a log scale, and keeps
+ * going past either.
+ */
+const INCOME_ZERO = 100;
 const INCOME_MARK = 75000;
 
 /** User-defined importance weights; sum to 1. */
@@ -26,25 +29,25 @@ export const INDEX_WEIGHTS = Object.freeze({
 });
 
 /**
- * Weighted geometric mean of pillars normalized against fixed goalposts. Safety and
- * freedom top out at 1; health and abundance keep rising past it, so the index does too.
+ * Weighted average of pillars normalized against fixed goalposts: 1 when every goalpost
+ * is met, 0 when every pillar sits at its lowest. No pillar is capped or floored, so the
+ * index has no limit either way.
  */
 export function customIndexFromPillarsFull({ abundance, safety, health, freedom }) {
   return (
-    Math.pow(abundance, INDEX_WEIGHTS.abundance) *
-    Math.pow(safety, INDEX_WEIGHTS.safety) *
-    Math.pow(health, INDEX_WEIGHTS.health) *
-    Math.pow(freedom, INDEX_WEIGHTS.freedom)
+    INDEX_WEIGHTS.abundance * abundance +
+    INDEX_WEIGHTS.safety * safety +
+    INDEX_WEIGHTS.health * health +
+    INDEX_WEIGHTS.freedom * freedom
   );
 }
 
 /**
- * Life Expectancy Index from years at birth (UNDP's LEI formula without its upper cap).
+ * Life Expectancy Index from years at birth (UNDP's LEI formula without its caps).
  * @param {number} years — life expectancy or HALE
  */
 export function leiFromYears(years) {
-  const y = Math.max(LE_MIN, Number(years));
-  return (y - LE_MIN) / (LE_MARK - LE_MIN);
+  return (Number(years) - LE_ZERO) / (LE_MARK - LE_ZERO);
 }
 
 /**
@@ -63,23 +66,21 @@ export function safetyDeathsPer100k(homicides, war, road) {
 }
 
 /**
- * Safety index 0–1 from safety deaths per 100,000 (higher = safer).
- * Uses a linear inversion: SI = (max − d) / max with d clamped to [0, max].
+ * Safety index from safety deaths per 100,000 (higher = safer), inverted linearly:
+ * 1 with no deaths, 0 at 100, and below 0 beyond.
  */
 export function safetyIndexFromDeathsPer100k(deathsPer100k) {
-  const d = Math.max(0, Math.min(Number(deathsPer100k), SAFETY_DEATHS_MAX));
-  return (SAFETY_DEATHS_MAX - d) / SAFETY_DEATHS_MAX;
+  return (SAFETY_DEATHS_ZERO - Number(deathsPer100k)) / SAFETY_DEATHS_ZERO;
 }
 
-/** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its upper cap. */
+/** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its caps. */
 export function incomeIndexFromGni(gniPerCapita) {
-  const gni = Math.max(INCOME_MIN, Number(gniPerCapita));
-  return Math.log(gni / INCOME_MIN) / Math.log(INCOME_MARK / INCOME_MIN);
+  return Math.log(Number(gniPerCapita) / INCOME_ZERO) / Math.log(INCOME_MARK / INCOME_ZERO);
 }
 
 /** Freedom pillar 0-1 from the HFI-derived Personal Freedom score (0-100). */
 export function freedomIndexFromScore(score) {
-  return Math.max(0, Math.min(Number(score), 100)) / 100;
+  return Number(score) / 100;
 }
 
 /**
@@ -102,7 +103,7 @@ export function customIndexAbundanceSafetyHealthFreedomFull(
 }
 
 /**
- * Importance-weighted geometric index of abundance, safety, health, and freedom.
+ * Importance-weighted average of abundance, safety, health, and freedom, to 3 decimals.
  */
 export function customIndexAbundanceSafetyHealthFreedom(
   lifeExpectancy,

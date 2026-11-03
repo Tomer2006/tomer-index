@@ -35,7 +35,7 @@ test("custom slider points are normalized to 100 percent", () => {
   });
 });
 
-test("default and custom weights use the same geometric-mean formula", () => {
+test("default and custom weights use the same weighted-average formula", () => {
   const point = {
     healthIndex: 0.8,
     safetyIndex: 0.7,

@@ -45,11 +45,11 @@ function cachedNormalizedWeights(weightPoints) {
 /** Recalculate the index from the four stored absolute pillar indices. */
 export function weightedIndexFromPillars(point, weightPoints = DEFAULT_WEIGHT_POINTS) {
   const weights = cachedNormalizedWeights(weightPoints);
-  let score = 1;
+  let score = 0;
   for (const key of WEIGHT_KEYS) {
     const pillar = point?.[PILLAR_FIELDS[key]];
     if (!Number.isFinite(pillar)) return NaN;
-    score *= Math.pow(pillar, weights[key]);
+    score += weights[key] * pillar;
   }
   return score;
 }

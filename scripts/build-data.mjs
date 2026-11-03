@@ -1591,11 +1591,11 @@ async function main() {
     healthPillar:
       "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85.",
     safetyNote:
-      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, linearly from 0 (score 1) to 100 or more (score 0). Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
+      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, linearly: 0 scores 1, 100 scores 0, and more scores below 0. Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:
-      "Every base pillar is normalized against fixed goalposts, then combined directly. Scores are absolute and do not depend on other countries or the selected year. Safety and freedom top out at 1 (no safety deaths, a perfect freedom score); health (above 85 years) and abundance (above $75,000) keep rising, so the index has no ceiling.",
+      "Every base pillar is normalized against fixed goalposts, then combined as a weighted average. Scores are absolute and do not depend on other countries or the selected year. No pillar is capped or floored: safety and freedom top out at 1 only because deaths can't go below 0 and the freedom score has a maximum; health (above 85 years) and abundance (above $75,000) keep rising, and safety keeps falling past 100 deaths per 100k, so the index has no ceiling or floor.",
     indexWeights: INDEX_WEIGHTS,
     globalAverageSeries: {
       definition:

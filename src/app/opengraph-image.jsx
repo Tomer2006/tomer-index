@@ -84,7 +84,7 @@ export default function Image() {
             color: "#8b95a8",
           }}
         >
-          {`An index with no ceiling for ${countries.length} countries, ${YEAR_MIN}–${YEAR_MAX}`}
+          {`An index with no ceiling or floor for ${countries.length} countries, ${YEAR_MIN}–${YEAR_MAX}`}
         </div>
         <div
           style={{

@@ -8,7 +8,7 @@ import { YEAR_MAX, YEAR_MIN } from "../site-years.js";
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: SITE_NAME, template: `%s — ${SITE_NAME}` },
-  description: `An index of abundance, safety, health, and freedom for ${scoredCountries().length} countries, ${YEAR_MIN}–${YEAR_MAX}, where 100 is a mark, not a ceiling. Interactive leaderboard, world map, and country comparisons.`,
+  description: `An index of abundance, safety, health, and freedom for ${scoredCountries().length} countries, ${YEAR_MIN}–${YEAR_MAX}, where 100 means every goalpost is met and scores can go past 100 or below 0. Interactive leaderboard, world map, and country comparisons.`,
   icons: {
     icon: { url: "/favicon.svg", type: "image/svg+xml" },
     apple: { url: "/apple-icon", sizes: "180x180", type: "image/png" },

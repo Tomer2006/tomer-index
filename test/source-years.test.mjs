@@ -197,12 +197,7 @@ test("cached weight normalization gives the same scores as normalizing each time
   const custom = { health: 10, safety: 20, freedom: 30, abundance: 40 };
   const expected = (weights) => {
     const w = normalizedWeightPoints(weights);
-    return (
-      Math.pow(0.9, w.health) *
-      Math.pow(0.8, w.safety) *
-      Math.pow(0.7, w.freedom) *
-      Math.pow(0.6, w.abundance)
-    );
+    return w.health * 0.9 + w.safety * 0.8 + w.freedom * 0.7 + w.abundance * 0.6;
   };
   assert.equal(weightedIndexFromPillars(point, custom), expected(custom));
   assert.equal(weightedIndexFromPillars(point), expected());
