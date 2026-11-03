@@ -35,7 +35,7 @@ test("custom slider points are normalized to 100 percent", () => {
   });
 });
 
-test("default and custom weights use the same weighted-average formula", () => {
+test("default and custom weights use the same log geometric-mean formula", () => {
   const point = {
     healthIndex: 0.8,
     safetyIndex: 0.7,
@@ -48,6 +48,14 @@ test("default and custom weights use the same weighted-average formula", () => {
   );
   closeTo(
     weightedIndexFromPillars(point, { health: 100, safety: 0, freedom: 0, abundance: 0 }),
-    0.8
+    1 + Math.log(0.8)
+  );
+  // A pillar weighted 0 drops out, even one at its lower goalpost.
+  closeTo(
+    weightedIndexFromPillars(
+      { ...point, freedomIndex: 0 },
+      { health: 100, safety: 0, freedom: 0, abundance: 0 }
+    ),
+    1 + Math.log(0.8)
   );
 });

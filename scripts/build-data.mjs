@@ -24,6 +24,8 @@ import {
   byCountryYear,
   incomeRowsWithGdpFallback,
   haleHistoryByIso,
+  dropLifeExpectancyBelowHale,
+  LE_BELOW_HALE_MAX,
   adjustedHaleAsOfYear,
   customIndexAbundanceSafetyHealthFreedom,
   customIndexFromPillarsFull,
@@ -975,6 +977,10 @@ export function applyAbsolutePillars(point) {
     }),
     4
   );
+  // A pillar at its lower goalpost (20 years, $100, no freedom) would score −Infinity,
+  // which JSON can't hold. No real country-year is there, so it means bad input data.
+  if (!Number.isFinite(point.customIndex))
+    throw new Error(`Pillar at or below its lower goalpost: ${JSON.stringify(raw)}`);
   return true;
 }
 
@@ -1427,7 +1433,6 @@ async function main() {
   const committedSeries = await readCommittedJson(SERIES_OUT);
   const { data: worldBankData, countryMeta, summary: worldBankAudit } =
     await fetchAllWorldBankInputs();
-  const leRows = worldBankData.lifeExpectancy.rows;
   const gniRows = worldBankData.gniPerCapita.rows;
   const gdpRows = worldBankData.gdpPerCapita.rows;
   const incomeRows = incomeRowsWithGdpFallback(gniRows, gdpRows);
@@ -1448,6 +1453,13 @@ async function main() {
     const y = typeof r.TimeDim === "number" ? r.TimeDim : parseInt(String(r.TimeDim), 10);
     return Number.isFinite(y) && y <= SERIES_YEAR_MAX;
   });
+  const haleHistory = haleHistoryByIso(haleRows);
+  const leCheck = dropLifeExpectancyBelowHale(worldBankData.lifeExpectancy.rows, haleHistory);
+  const leRows = leCheck.rows;
+  for (const row of leCheck.dropped)
+    console.warn(
+      `Dropped ${row.iso} ${row.year} life expectancy ${row.lifeExpectancy}: below WHO HALE ${row.hale} (${row.haleYear}).`
+    );
   const countryRows = mergeRows({
     le: latestByCountry(leRows),
     gni: latestByCountry(incomeRows),
@@ -1481,7 +1493,6 @@ async function main() {
     freedom: byCountryYear(freedomRows),
     pop: byCountryYear(popRows),
   };
-  const haleHistory = haleHistoryByIso(haleRows);
   const seriesYearMin = Math.max(yearMin, SERIES_YEAR_MIN);
   const seriesYearMax = Math.min(yearMax, SERIES_YEAR_MAX);
   let worldSeries = [];
@@ -1563,6 +1574,10 @@ async function main() {
         events: warDeaths.eventCount,
         latestObservationYear: warDeaths.latestYear,
       },
+      lifeExpectancyCheck: {
+        maxYearsBelowHale: LE_BELOW_HALE_MAX,
+        dropped: leCheck.dropped,
+      },
     },
     indicators: {
       lifeExpectancy: WB_LE,
@@ -1589,13 +1604,13 @@ async function main() {
     derivedRows:
       "Derived rows are population-weighted aggregates computed from the country rows in this file using World Bank data for abundance, homicide and road deaths, life expectancy, and population; UCDP for war deaths; WHO GHO for HALE; and the Human Freedom Index for personal freedom. GNI per capita (PPP) is used for abundance; a year without GNI moves the latest GNI by the change in GDP per capita (PPP) since then, and plain GDP per capita stands in only before a country's first GNI year.",
     healthPillar:
-      "LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85.",
+      `LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85. A World Bank life expectancy more than ${LE_BELOW_HALE_MAX} years below the latest WHO HALE on or before its year is treated as a source error and dropped (sourceRefresh.lifeExpectancyCheck lists them); that year uses the latest earlier value.`,
     safetyNote:
-      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, linearly: 0 scores 1, 100 scores 0, and more scores below 0. Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
+      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, as 1 / (1 + deaths / 100): 0 scores 1, 100 scores 0.5, 200 scores 1/3, and no number scores 0. Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:
-      "Every base pillar is normalized against fixed goalposts, then combined as a weighted average. Scores are absolute and do not depend on other countries or the selected year. No pillar is capped or floored: safety and freedom top out at 1 only because deaths can't go below 0 and the freedom score has a maximum; health (above 85 years) and abundance (above $75,000) keep rising, and safety keeps falling past 100 deaths per 100k, so the index has no ceiling or floor.",
+      "Every base pillar is normalized against fixed goalposts, and the index is 1 + the natural log of the pillars' weighted geometric mean: 1 + Σ weight·ln(pillar). 1 means every goalpost is met. Scores are absolute and do not depend on other countries or the selected year. The ranking is the geometric mean's, so weakness in one pillar drags the index down, and every halving of a pillar costs its weight × ln 2 however low it already is, so the index has no floor. Health (above 85 years) and abundance (above $75,000) keep rising past 1, so it has no ceiling either.",
     indexWeights: INDEX_WEIGHTS,
     globalAverageSeries: {
       definition:

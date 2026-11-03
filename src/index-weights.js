@@ -1,4 +1,4 @@
-import { INDEX_WEIGHTS } from "./hdi-core.js";
+import { INDEX_WEIGHTS, pillarLog } from "./hdi-core.js";
 
 export const WEIGHT_KEYS = Object.freeze(["health", "safety", "freedom", "abundance"]);
 
@@ -42,14 +42,17 @@ function cachedNormalizedWeights(weightPoints) {
   return cachedWeights;
 }
 
-/** Recalculate the index from the four stored absolute pillar indices. */
+/**
+ * Recalculate the index from the four stored absolute pillar indices, as
+ * `customIndexFromPillarsFull` does. A pillar weighted 0 drops out entirely.
+ */
 export function weightedIndexFromPillars(point, weightPoints = DEFAULT_WEIGHT_POINTS) {
   const weights = cachedNormalizedWeights(weightPoints);
   let score = 0;
   for (const key of WEIGHT_KEYS) {
     const pillar = point?.[PILLAR_FIELDS[key]];
     if (!Number.isFinite(pillar)) return NaN;
-    score += weights[key] * pillar;
+    if (weights[key] > 0) score += weights[key] * pillarLog(pillar);
   }
-  return score;
+  return 1 + score;
 }

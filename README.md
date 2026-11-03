@@ -39,13 +39,13 @@ or side-by-side comparisons.
 ## How the score works
 
 ```text
-Raw observations → fixed goalpost normalization → weighted average
+Raw observations → fixed goalpost normalization → log of the weighted geometric mean
 ```
 
 | Pillar | Weight | Input | Fixed normalization |
 | --- | ---: | --- | --- |
 | **Health** | 40% | Life expectancy + healthy life expectancy (HALE) | Mean of two life-expectancy indices, each scoring 0 at 20 years and 1 at 85, with no cap above 85 |
-| **Safety** | 30% | Deaths per 100k from intentional homicide, war (counted for the country whose people died) and road crashes | Linear inversion: 0 deaths scores 1, 100 scores 0, and more scores below 0 |
+| **Safety** | 30% | Deaths per 100k from intentional homicide, war (counted for the country whose people died) and road crashes | 1 / (1 + deaths / 100): 0 deaths scores 1, 100 scores ½, never 0 |
 | **Freedom** | 20% | Personal freedom: HFI Personal Freedom categories, excluding Security and Safety | Rescaled from 0–100 to 0–1 |
 | **Abundance** | 10% | Income per person (PPP $): GNI per capita, extended by GDP per capita growth where GNI isn't published | Log scale scoring 0 at $100 and 1 at $75,000, with no cap above $75,000 |
 
@@ -53,22 +53,25 @@ Raw observations → fixed goalpost normalization → weighted average
 LEI(years) = (years − 20) / (85 − 20)
 Health    = ½·LEI(life expectancy) + ½·LEI(HALE)
 Deaths    = homicides + war deaths + road deaths (per 100,000)
-Safety    = (100 − deaths) / 100
+Safety    = 1 / (1 + deaths / 100)
 Freedom   = personal freedom score / 100
 Abundance = ln(income / 100) / ln(75000 / 100)
 
-Tomer = 0.40·Health + 0.30·Safety + 0.20·Freedom + 0.10·Abundance
+Tomer = 100 + 40·ln(Health) + 30·ln(Safety) + 20·ln(Freedom) + 10·ln(Abundance)
 ```
 
-The site shows scores ×100; the data files store them unscaled.
+That is 100 + 100 × ln of the pillars' weighted geometric mean, as shown on the
+site; the data files store it unscaled (÷100).
 
-The scale has no limit either way. A score of 100 means every goalpost is met, and 0
-means every pillar sits at its lower goalpost. Safety and freedom stop at 1 (no
-violent or road deaths, a perfect freedom score), but health keeps rising past 85
-years and abundance past $75,000, so a country that lives longer or earns more
-scores above 100. Safety keeps falling past 100 deaths per 100k, so a country at
-war can score below 0. Pillars are averaged, not multiplied, because a geometric
-mean can't go below 0; strength in one pillar can make up for weakness in another. Read the complete assumptions,
+The scale has no limit either way. A score of 100 means every goalpost is met.
+Safety and freedom stop at 1 (no violent or road deaths, a perfect freedom score),
+but health keeps rising past 85 years and abundance past $75,000, so a country that
+lives longer or earns more scores above 100. Every halving of a pillar costs the
+same points however low it already is (28 for health, 21 safety, 14 freedom, 7
+abundance), so there is no floor either, and a pillar that is already low moves
+the index the most, so strength in one pillar can't make up for weakness in
+another. Safety never reaches 0, so
+deaths never stop counting, and a country at war can score below 0. Read the complete assumptions,
 data-freshness caveats, and rationale in
 [the methodology](https://tomer-index.netlify.app/methodology)
 ([source](./src/app/methodology/page.jsx)).

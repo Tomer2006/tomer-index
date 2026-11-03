@@ -45,8 +45,9 @@ const FIELDS = [
   [
     "customIndex",
     <>
-      Tomer index, where 1 means every goalpost is met and 0 every pillar at its
-      lowest; it can go above 1 or below 0. The site shows it ×100.
+      Tomer index: 1 + Σ weight × ln(pillar), the log of the pillars’ weighted
+      geometric mean. 1 means every goalpost is met; it can go above 1 or below
+      0. The site shows it ×100.
     </>,
   ],
   [
@@ -54,7 +55,7 @@ const FIELDS = [
     <>
       Pillar scores, 0 at the lower goalpost and 1 at the upper one. Safety and
       freedom stop at 1; health and abundance pass 1 above 85 years and $75,000.
-      Safety goes below 0 past 100 deaths per 100,000.
+      Safety is 1 / (1 + deaths / 100), so it never reaches 0.
     </>,
   ],
   [

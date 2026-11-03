@@ -19,6 +19,7 @@ import {
   adjustedHaleAsOfYear,
   mergeRows,
   warDeathRows,
+  dropLifeExpectancyBelowHale,
 } from "../src/hdi-core.js";
 
 function wbRow(iso, year, value, name = iso) {
@@ -82,12 +83,13 @@ test("combinedHealthLei averages lifespan and healthspan LEIs", () => {
   closeTo(combinedHealthLei(52.5, 52.5), 0.5);
 });
 
-test("safety adds homicide, war and road deaths and inverts them, 0 at 100/100k and below past it", () => {
+test("safety adds homicide, war and road deaths and scores them 1 / (1 + deaths/100), never 0", () => {
   assert.equal(safetyDeathsPer100k(0.5, 0, 2.3), 2.8);
   assert.equal(safetyIndexFromDeathsPer100k(0), 1);
-  assert.equal(safetyIndexFromDeathsPer100k(100), 0);
-  closeTo(safetyIndexFromDeathsPer100k(25), 0.75);
-  assert.equal(safetyIndexFromDeathsPer100k(300), -2);
+  assert.equal(safetyIndexFromDeathsPer100k(100), 0.5);
+  closeTo(safetyIndexFromDeathsPer100k(25), 0.8);
+  assert.equal(safetyIndexFromDeathsPer100k(300), 0.25);
+  assert.ok(safetyIndexFromDeathsPer100k(1e6) > 0);
 });
 
 test("war deaths are battle deaths per 100k, 0 in peaceful years up to the source's last year", () => {
@@ -125,7 +127,7 @@ test("freedom index maps the 0-100 personal-freedom score to 0-1", () => {
   assert.equal(freedomIndexFromScore(100), 1);
 });
 
-test("index uses the declared 40/30/20/10 dimension weights", () => {
+test("index is 1 + ln of the 40/30/20/10 weighted geometric mean", () => {
   const le = 80;
   const hale = 70;
   const gni = 40000;
@@ -135,10 +137,13 @@ test("index uses the declared 40/30/20/10 dimension weights", () => {
   const safety = safetyIndexFromDeathsPer100k(deaths);
   const freedom = 0.8;
   const expected =
-    INDEX_WEIGHTS.abundance * income +
-    INDEX_WEIGHTS.safety * safety +
-    INDEX_WEIGHTS.health * health +
-    INDEX_WEIGHTS.freedom * freedom;
+    1 +
+    Math.log(
+      Math.pow(income, INDEX_WEIGHTS.abundance) *
+        Math.pow(safety, INDEX_WEIGHTS.safety) *
+        Math.pow(health, INDEX_WEIGHTS.health) *
+        Math.pow(freedom, INDEX_WEIGHTS.freedom)
+    );
   assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
   closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, deaths, hale, 80), expected);
 });
@@ -149,17 +154,18 @@ test("the index passes 1 once health or income goes past its goalpost", () => {
   const richer = customIndexAbundanceSafetyHealthFreedomFull(85, 150000, 0, 85, 100);
   assert.ok(longer > 1, `longer lives score ${longer}`);
   assert.ok(richer > 1, `higher income scores ${richer}`);
-  closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.4084, 1e-4);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(150, 1e6, 0, 140, 100), 1.2946, 1e-4);
 });
 
-test("the index keeps falling past 100 violent and road deaths per 100k, below 0", () => {
+test("every halving of a pillar costs the same, so the index keeps falling below 0", () => {
   const at = (deaths) => customIndexAbundanceSafetyHealthFreedomFull(70, 3000, deaths, 60, 40);
-  // Each extra death per 100k costs the safety weight / 100, past 100 too.
-  closeTo(at(100) - at(200), INDEX_WEIGHTS.safety);
-  assert.ok(at(400) < 0, `400 deaths per 100k score ${at(400)}`);
-  assert.equal(customIndexAbundanceSafetyHealthFreedom(70, 3000, 400, 60, 40), -0.492);
-  // Every pillar at its lower goalpost scores 0.
-  closeTo(customIndexAbundanceSafetyHealthFreedomFull(20, 100, 100, 20, 0), 0);
+  // 0 → 100 → 300 deaths per 100k halves safety twice: each halving costs weight × ln 2.
+  closeTo(at(0) - at(100), INDEX_WEIGHTS.safety * Math.LN2);
+  closeTo(at(100) - at(300), INDEX_WEIGHTS.safety * Math.LN2);
+  assert.ok(at(1000) < 0, `1,000 deaths per 100k score ${at(1000)}`);
+  assert.equal(customIndexAbundanceSafetyHealthFreedom(70, 3000, 3000, 60, 40), -0.427);
+  // A pillar at its lower goalpost is infinitely far down.
+  assert.equal(customIndexAbundanceSafetyHealthFreedomFull(20, 3000, 0, 20, 40), -Infinity);
 });
 
 test("four-pillar index rounds to 3 decimals, Full does not", () => {
@@ -202,6 +208,36 @@ test("haleAsOfYear returns the latest observation on or before the year", () => 
   assert.deepEqual(haleAsOfYear(history, "JPN", 2021), { year: 2021, value: 73.8 });
   assert.equal(haleAsOfYear(history, "JPN", 1999), null);
   assert.equal(haleAsOfYear(history, "EUR", 2021), null);
+});
+
+test("life expectancy far below WHO HALE is dropped as a source error, a small shortfall kept", () => {
+  const hale = (iso, year, value) => ({
+    SpatialDimType: "COUNTRY",
+    SpatialDim: iso,
+    Dim1: "SEX_BTSX",
+    TimeDim: year,
+    NumericValue: value,
+  });
+  const history = haleHistoryByIso([hale("CAF", 2021, 45.43), hale("NGA", 2021, 54.95)]);
+  const rows = [
+    wbRow("CAF", 2020, 50.6),
+    wbRow("CAF", 2021, 40.28),
+    // No HALE that year: checked against the latest earlier one.
+    wbRow("CAF", 2022, 18.82),
+    wbRow("CAF", 2023, 57.41),
+    wbRow("NGA", 2021, 53.46),
+    // No HALE on or before 2020, so nothing to check against.
+    wbRow("NGA", 2020, 10),
+  ];
+  const { rows: kept, dropped } = dropLifeExpectancyBelowHale(rows, history);
+  assert.deepEqual(
+    kept.map((row) => `${row.countryiso3code} ${row.date}`),
+    ["CAF 2020", "CAF 2023", "NGA 2021", "NGA 2020"]
+  );
+  assert.deepEqual(dropped, [
+    { iso: "CAF", year: 2021, lifeExpectancy: 40.28, hale: 45.43, haleYear: 2021 },
+    { iso: "CAF", year: 2022, lifeExpectancy: 18.82, hale: 45.43, haleYear: 2021 },
+  ]);
 });
 
 test("adjustedHaleAsOfYear preserves the latest reported unhealthy-life gap", () => {

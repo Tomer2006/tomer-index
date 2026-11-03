@@ -261,8 +261,7 @@ export function MetricCell({ row, column, year, weights, compact = false }) {
     </span>
   );
 }
-// A pillar past its goalpost (income above $75,000, say) scores over 100 and its bar stays
-// full; one below its lowest goalpost (over 100 deaths per 100k) scores under 0, bar empty.
+// A pillar past its goalpost (income above $75,000, say) scores over 100; its bar stays full.
 export function PillarBars({ row }) {
   return (
     <div className="pillar-bars">
@@ -276,7 +275,7 @@ export function PillarBars({ row }) {
               <span
                 className="pillar-bar-fill"
                 style={{
-                  width: `${known ? Math.max(0, Math.min(value, 1)) * 100 : 0}%`,
+                  width: `${known ? Math.min(value, 1) * 100 : 0}%`,
                   background: TOPIC_COLORS[key],
                 }}
               />

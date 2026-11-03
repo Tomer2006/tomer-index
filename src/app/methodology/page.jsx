@@ -5,6 +5,7 @@ import { Header } from "../../components/shared";
 import {
   customIndexAbundanceSafetyHealthFreedomFull,
   INDEX_WEIGHTS,
+  LE_BELOW_HALE_MAX,
 } from "../../hdi-core.js";
 import {
   readLeaderboardFile,
@@ -32,9 +33,11 @@ const SECTIONS = {
   philosophy: "Philosophy",
 };
 
-/** Weight as a percentage and as the formula factor (0.4 → "40%", "0.40"). */
+/** Weight as a percentage and as points on the site (0.4 → "40%", "40"). */
 const percent = (key) => `${Math.round(INDEX_WEIGHTS[key] * 100)}%`;
-const factor = (key) => INDEX_WEIGHTS[key].toFixed(2);
+const points = (key) => String(Math.round(INDEX_WEIGHTS[key] * 100));
+/** What halving a pillar costs on the site, in points. */
+const halvingCost = (key) => Math.round(INDEX_WEIGHTS[key] * Math.LN2 * 100);
 
 /** A future country with no violent or road deaths and full freedom, for the "no ceiling" example. */
 const futureScore = (lifeExpectancy, hale, income) =>
@@ -60,7 +63,7 @@ const PILLARS = [
     key: "safety",
     name: "Safety",
     input: "Deaths per 100k from homicide, war and road crashes",
-    goalposts: "100 → 0 deaths, below 0 past 100",
+    goalposts: "∞ → 0 deaths (½ at 100)",
   },
   {
     key: "freedom",
@@ -112,7 +115,33 @@ function dataFacts() {
     worldFirst: world[0],
     worldLast: world.at(-1),
     cohortSize: readLeaderboardFile().globalAverageSeries?.cohortSize,
+    droppedLifeExpectancy: droppedLifeExpectancy(countries),
   };
+}
+
+/**
+ * The life-expectancy values the HALE check left out, one sentence part per country:
+ * "Central African Republic: 14.7 years in 2009 and 31.5 in 2019, against HALE of 42.4–46.0".
+ */
+function droppedLifeExpectancy(countries) {
+  const dropped = readLeaderboardFile().sourceRefresh?.lifeExpectancyCheck?.dropped ?? [];
+  const byIso = new Map();
+  for (const row of [...dropped].sort((a, b) => a.year - b.year)) {
+    if (!byIso.has(row.iso)) byIso.set(row.iso, []);
+    byIso.get(row.iso).push(row);
+  }
+  return [...byIso].map(([iso, rows]) => {
+    const name = countries.find((country) => country.iso === iso)?.name ?? iso;
+    const values = rows.map(
+      (row, i) => `${row.lifeExpectancy.toFixed(1)}${i ? "" : " years"} in ${row.year}`,
+    );
+    const listed =
+      values.length > 1 ? `${values.slice(0, -1).join(", ")} and ${values.at(-1)}` : values[0];
+    const hale = rows.map((row) => row.hale);
+    const low = Math.min(...hale).toFixed(1);
+    const high = Math.max(...hale).toFixed(1);
+    return `${name}: ${listed}, against HALE of ${low === high ? low : `${low}–${high}`}`;
+  });
 }
 
 /** Each line wraps with a hanging indent instead of clipping on narrow screens. */
@@ -148,13 +177,13 @@ function PillarHeading({ pillar, children }) {
   );
 }
 
-// Non-breaking spaces keep each "+ weight·Pillar" term together when the line wraps.
+// Non-breaking spaces keep each "+ weight·ln Pillar" term together when the line wraps.
 const tomerFormula = (
   <>
-    Tomer = {factor("health")}·Health +{"\u00a0"}
-    {factor("safety")}·Safety +{"\u00a0"}
-    {factor("freedom")}·Freedom +{"\u00a0"}
-    {factor("abundance")}·Abundance
+    Tomer = 100 +{"\u00a0"}{points("health")}·ln{"\u00a0"}Health +{"\u00a0"}
+    {points("safety")}·ln{"\u00a0"}Safety +{"\u00a0"}
+    {points("freedom")}·ln{"\u00a0"}Freedom +{"\u00a0"}
+    {points("abundance")}·ln{"\u00a0"}Abundance
   </>
 );
 
@@ -179,18 +208,18 @@ export default function Page() {
             <p>
               The Tomer index scores countries, and groups of countries, on four
               pillars: health, safety, freedom, and abundance. Each pillar is
-              scaled against fixed goalposts, 0 at the lower one and 1 at the
-              upper one, and the four are combined into a weighted average for
-              every year from {YEAR_MIN} to {YEAR_MAX}. The site shows the result ×100;
-              the downloadable files keep the unscaled values.
+              scaled against fixed goalposts, 1 at the upper one, and the four
+              are combined on a log scale (the log of their weighted geometric
+              mean) for every year from {YEAR_MIN} to {YEAR_MAX}. The site shows
+              the result ×100; the downloadable files keep the unscaled values.
             </p>
             <p>
               <strong>The scale has no limit either way.</strong> A country
-              scores 100 when it meets every upper goalpost and 0 when every
-              pillar sits at its lower one, but neither is a limit: a country
-              that lives longer than 85 years or earns more than $75,000 a
-              person can score above 100, and one with more than 100 violent
-              and road deaths per 100,000 people can score below 0 (see{" "}
+              scores 100 when it meets every upper goalpost, but 100 isn’t a
+              limit: a country that lives longer than 85 years or earns more
+              than $75,000 a person scores above it. Nor is 0: every halving of
+              a pillar costs the same number of points however low it already
+              is, so a country can keep falling below 0 (see{" "}
               <a href="#combining">Combining the pillars</a>).
             </p>
             <div className="methodology-table-wrap">
@@ -285,8 +314,9 @@ export default function Page() {
                 score.
               </li>
               <li>
-                Pillars are averaged, so strength in one makes up for weakness
-                in another (see <a href="#combining">Combining the pillars</a>).
+                On the log scale, 0 has no special meaning: it is where the
+                pillars’ weighted geometric mean falls to about 37% of the
+                goalposts (see <a href="#combining">Combining the pillars</a>).
               </li>
               <li>
                 Group averages change membership over time as more countries
@@ -340,6 +370,19 @@ export default function Page() {
               labeled <strong>est.</strong> with the latest WHO source year, for
               example “HALE est. from {facts.haleYear}”.
             </p>
+            <p>
+              Healthy years can’t outnumber years lived, so a World Bank life
+              expectancy more than {LE_BELOW_HALE_MAX} years below WHO’s latest
+              HALE is treated as an error and left out; that year uses the
+              latest earlier value instead.
+              {facts.droppedLifeExpectancy.length ? (
+                <>
+                  {" "}
+                  In the current data it leaves out{" "}
+                  {facts.droppedLifeExpectancy.join("; ")}.
+                </>
+              ) : null}
+            </p>
 
             <PillarHeading pillar="safety">
               Safety: deaths from violence and road crashes
@@ -347,17 +390,17 @@ export default function Page() {
             <p>
               Safety adds up three kinds of death per 100,000 people a year:
               intentional homicides, war deaths, and road deaths. A death counts
-              the same whatever its cause. The total is inverted linearly: no
-              deaths scores 1, 100 per 100,000 (one person in a thousand a
-              year) scores 0, and every death past that keeps lowering the
-              score, so 200 scores −1. Since {YEAR_MIN}, only countries at war
-              and El Salvador, at the height of its gang violence, have passed
-              100.
+              the same whatever its cause. No deaths scores 1, 100 per 100,000
+              (one person in a thousand a year) scores ½, 200 scores ⅓, and the
+              score gets closer to 0 with every death without reaching it, so
+              deaths never stop counting. Since {YEAR_MIN}, only countries at
+              war and El Salvador, at the height of its gang violence, have
+              passed 100.
             </p>
             <Formula
               lines={[
                 "Deaths = homicides + war deaths + road deaths   (per 100,000)",
-                "Safety = (100 − deaths) / 100",
+                "Safety = 1 / (1 + deaths / 100)",
               ]}
             />
             <p>
@@ -434,8 +477,8 @@ export default function Page() {
           <Section id="combining">
             <p>
               Each pillar is normalized against the fixed goalposts above, and
-              the normalized values go straight into a weighted average. There
-              is no yearly ranking or rescaling step, so scores are absolute and
+              the normalized values go straight into the formula below. There is
+              no yearly ranking or rescaling step, so scores are absolute and
               comparable across countries and years.
             </p>
             <p>
@@ -447,18 +490,26 @@ export default function Page() {
             </p>
             <Formula lines={[tomerFormula]} />
             <p>
-              Each pillar point counts at its weight: a pillar rising by 0.1
-              (10 points on the site) raises the index by its weight times 10,
-              whatever the other pillars score. Strength in one pillar can make
-              up for weakness in another. A geometric mean would penalize that
-              imbalance, but it can’t fall below 0, so it would stop counting
-              deaths once a pillar hit its lower goalpost.
+              This is 100 + 100 × ln of the pillars’ weighted geometric mean, so
+              it ranks countries exactly as that mean does, and one point is
+              about a 1% change in the mean at any level. What counts is a
+              pillar’s relative change: halving one costs{" "}
+              <strong>
+                {halvingCost("health")} points for health,{" "}
+                {halvingCost("safety")} for safety, {halvingCost("freedom")} for
+                freedom, and {halvingCost("abundance")} for abundance
+              </strong>
+              , whatever the other pillars score. A pillar that is already low
+              moves the index the most, so strength in one pillar can’t make up
+              for weakness in another.
             </p>
             <p>
-              <strong>The index has no floor.</strong> No pillar stops at its
-              lower goalpost, so a country keeps losing points as deaths rise
-              past 100 per 100,000: every 10 more cost{" "}
-              {Math.round(INDEX_WEIGHTS.safety * 10)} points.
+              <strong>The index has no floor.</strong> Every halving costs the
+              same however low a pillar already is, so the index keeps falling
+              without limit. Safety never reaches 0, so the 101st death per
+              100,000 counts, and so does the 1,000th. A pillar at its lower
+              goalpost (20 years of life, $100 a person, no freedom) would be
+              infinitely far down.
               {facts.lowestScore ? (
                 <>
                   {" "}

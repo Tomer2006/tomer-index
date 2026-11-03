@@ -1,10 +1,10 @@
 /** Shared HDI-style math + merging (used by the app and `scripts/build-data.mjs`). */
 
 /**
- * Safety deaths (homicide, war and road crashes) per 100,000 people a year: none scores
- * 1, and 100 (1 in 1,000 people) scores 0. More deaths score below 0.
+ * Safety deaths (homicide, war and road crashes) per 100,000 people a year that halve the
+ * safety pillar: none scores 1, 100 (1 in 1,000 people) scores ½, and no number scores 0.
  */
-const SAFETY_DEATHS_ZERO = 100;
+const SAFETY_DEATHS_HALF = 100;
 
 /**
  * Life expectancy and HALE score 0 at 20 years and 1 at 85 years (UNDP's goalposts).
@@ -29,16 +29,26 @@ export const INDEX_WEIGHTS = Object.freeze({
 });
 
 /**
- * Weighted average of pillars normalized against fixed goalposts: 1 when every goalpost
- * is met, 0 when every pillar sits at its lowest. No pillar is capped or floored, so the
- * index has no limit either way.
+ * Natural log of a pillar score. A pillar at or below its lower goalpost has no finite
+ * log, so it gives −Infinity (and a missing one NaN); no country-year in the data is there.
+ */
+export function pillarLog(value) {
+  return Math.log(Math.max(Number(value), 0));
+}
+
+/**
+ * 1 + the log of the pillars' weighted geometric mean: 1 when every goalpost is met, and
+ * every halving of a pillar costs its weight × ln 2, however low it already is. The
+ * ranking is the geometric mean's, so weakness in one pillar drags the index down, and
+ * the log gives it no limit either way.
  */
 export function customIndexFromPillarsFull({ abundance, safety, health, freedom }) {
   return (
-    INDEX_WEIGHTS.abundance * abundance +
-    INDEX_WEIGHTS.safety * safety +
-    INDEX_WEIGHTS.health * health +
-    INDEX_WEIGHTS.freedom * freedom
+    1 +
+    INDEX_WEIGHTS.abundance * pillarLog(abundance) +
+    INDEX_WEIGHTS.safety * pillarLog(safety) +
+    INDEX_WEIGHTS.health * pillarLog(health) +
+    INDEX_WEIGHTS.freedom * pillarLog(freedom)
   );
 }
 
@@ -66,11 +76,11 @@ export function safetyDeathsPer100k(homicides, war, road) {
 }
 
 /**
- * Safety index from safety deaths per 100,000 (higher = safer), inverted linearly:
- * 1 with no deaths, 0 at 100, and below 0 beyond.
+ * Safety index from safety deaths per 100,000 (higher = safer): 1 with no deaths, ½ at
+ * 100, ⅓ at 200, and closer to 0 with every death, so deaths never stop counting.
  */
 export function safetyIndexFromDeathsPer100k(deathsPer100k) {
-  return (SAFETY_DEATHS_ZERO - Number(deathsPer100k)) / SAFETY_DEATHS_ZERO;
+  return 1 / (1 + Number(deathsPer100k) / SAFETY_DEATHS_HALF);
 }
 
 /** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its caps. */
@@ -103,7 +113,7 @@ export function customIndexAbundanceSafetyHealthFreedomFull(
 }
 
 /**
- * Importance-weighted average of abundance, safety, health, and freedom, to 3 decimals.
+ * Four-pillar index (`customIndexFromPillarsFull`), to 3 decimals.
  */
 export function customIndexAbundanceSafetyHealthFreedom(
   lifeExpectancy,
@@ -311,6 +321,44 @@ export function haleAsOfYear(haleHistory, iso, year, minSourceYear = -Infinity) 
     }
   }
   return best;
+}
+
+/**
+ * Years by which life expectancy may fall short of WHO's HALE before it counts as a source
+ * error. Healthy years can't outnumber years lived, but the two come from different
+ * sources, so a small shortfall is normal (Nigeria's reaches 1.8 years).
+ */
+export const LE_BELOW_HALE_MAX = 5;
+
+/**
+ * Splits World Bank life-expectancy rows into kept and dropped: a value more than
+ * `LE_BELOW_HALE_MAX` years below the latest WHO HALE on or before its year is an error
+ * (the Central African Republic's 18.8 years in 2022, against HALE of 45). A dropped year
+ * then uses the latest earlier value, like any missing observation.
+ * @returns {{ rows: object[], dropped: { iso: string, year: number, lifeExpectancy: number, hale: number, haleYear: number }[] }}
+ */
+export function dropLifeExpectancyBelowHale(leRows, haleHistory) {
+  const rows = [];
+  const dropped = [];
+  for (const row of leRows) {
+    const year = parseInt(String(row.date), 10);
+    const hale =
+      isCountryRow(row) && row.value != null
+        ? haleAsOfYear(haleHistory, row.countryiso3code, year)
+        : null;
+    if (hale && hale.value - Number(row.value) > LE_BELOW_HALE_MAX) {
+      dropped.push({
+        iso: row.countryiso3code,
+        year,
+        lifeExpectancy: Number(row.value),
+        hale: hale.value,
+        haleYear: hale.year,
+      });
+    } else {
+      rows.push(row);
+    }
+  }
+  return { rows, dropped };
 }
 
 /**
