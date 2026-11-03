@@ -9,7 +9,7 @@ import {
   SourceBadge,
 } from "./shared";
 import HistoryChart from "./history-chart";
-import { columnFor, columns } from "../view-model.js";
+import { columnFor, columns, contextColumns } from "../view-model.js";
 import { metricDefs } from "../metric-defs.js";
 import { YEAR_MAX, YEAR_MIN } from "../site-years.js";
 import {
@@ -19,7 +19,10 @@ import {
 } from "../entry-summary.js";
 
 const tomerColumn = columnFor("tomer"),
-  statColumns = columns.filter((column) => column !== tomerColumn);
+  statColumns = [
+    ...columns.filter((column) => column !== tomerColumn),
+    ...contextColumns,
+  ];
 const tomerColor = metricDefs.find((metric) => metric.key === "customIndex").color;
 
 /**
@@ -107,7 +110,12 @@ function EntrySummary({ summary }) {
       <dl className="entry-stats">
         {statColumns.map((column) => (
           <div className="entry-stat" key={column.key} data-metric={column.key}>
-            <dt className="entry-stat-label">{column.long}</dt>
+            <dt className="entry-stat-label">
+              {column.long}
+              {column.context && (
+                <span className="entry-stat-note"> · not in the index</span>
+              )}
+            </dt>
             <dd>
               <MetricCell row={row} column={column} year={YEAR_MAX} />
             </dd>

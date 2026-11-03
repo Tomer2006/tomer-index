@@ -2,17 +2,8 @@ import { formatInt, formatTick, stepDecimals } from "./format.js";
 import { formatTomer, formatTomerAxis } from "./index-scale.js";
 import { TOPIC_COLORS } from "./topic-colors.js";
 
-/** Source-year keys of the three death rates the safety pillar adds up. */
-export const SAFETY_SOURCE_KEYS = ["homicideYear", "warYear", "roadYear"];
-
 /** Source-year keys that feed the Tomer index itself. */
-export const TOMER_SOURCE_KEYS = [
-  "leYear",
-  "haleYear",
-  "gniYear",
-  ...SAFETY_SOURCE_KEYS,
-  "freedomYear",
-];
+export const TOMER_SOURCE_KEYS = ["leYear", "haleYear", "gniYear", "homicideYear", "freedomYear"];
 
 const compactFormats = new Map();
 /** en-US compact notation ("52.5K"); `digits` fraction digits at most. */
@@ -34,8 +25,8 @@ export function compactNumber(n, digits = 1) {
  * `min` and `max` bound the axis: every metric but the Tomer index is non-negative, so
  * `min` defaults to 0; the Tomer index has no limit either way, and `max` caps the
  * bounded freedom score.
- * `sourceYearKey` (or `sourceKeys`, for a metric built from several inputs) names the
- * source years shown with each value.
+ * `sourceYearKey` names the source year shown with each value, and `context: true` marks
+ * a metric shown for context that the index doesn't use (war and road deaths).
  */
 export const metricDefs = [
   {
@@ -63,15 +54,6 @@ export const metricDefs = [
     value: (v) => `${v.toFixed(1)} years`,
   },
   {
-    key: "safetyDeathsPer100k",
-    color: TOPIC_COLORS.safety,
-    sourceKeys: SAFETY_SOURCE_KEYS,
-    label: "Violent & road deaths per 100k",
-    lowerIsBetter: true,
-    axis: (v, step = 0.1) => formatTick(v, step),
-    value: (v) => v.toFixed(2),
-  },
-  {
     key: "homicidesPer100k",
     color: TOPIC_COLORS.safety,
     sourceYearKey: "homicideYear",
@@ -85,6 +67,7 @@ export const metricDefs = [
     color: TOPIC_COLORS.safety,
     sourceYearKey: "warYear",
     label: "War deaths per 100k",
+    context: true,
     lowerIsBetter: true,
     axis: (v, step = 0.1) => formatTick(v, step),
     value: (v) => v.toFixed(2),
@@ -94,6 +77,7 @@ export const metricDefs = [
     color: TOPIC_COLORS.safety,
     sourceYearKey: "roadYear",
     label: "Road deaths per 100k",
+    context: true,
     lowerIsBetter: true,
     axis: (v, step = 0.1) => formatTick(v, step),
     value: (v) => v.toFixed(2),
@@ -121,7 +105,6 @@ export const metricDefs = [
 /** Source-year keys relevant to one metric (the index uses every listed input). */
 export function metricSourceKeys(metric) {
   if (metric.key === "customIndex") return TOMER_SOURCE_KEYS;
-  if (metric.sourceKeys) return metric.sourceKeys;
   return metric.sourceYearKey ? [metric.sourceYearKey] : [];
 }
 

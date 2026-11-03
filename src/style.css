@@ -1930,7 +1930,7 @@ a {
   --col-le: 6rem;
   --col-hale: 5.5rem;
   --col-health: 7.5rem;
-  --col-deaths: 10rem;
+  --col-homicides: 10rem;
   --col-freedom: 7rem;
   --col-gni: 9.375rem;
   table-layout: fixed;
@@ -1944,7 +1944,7 @@ a {
     --col-le: 4.375rem;
     --col-hale: 4.625rem;
     --col-health: 5.625rem;
-    --col-deaths: 7.5rem;
+    --col-homicides: 7.5rem;
     --col-freedom: 6.125rem;
     --col-gni: 6.5rem;
   }
@@ -1957,8 +1957,7 @@ a {
     --col-le: 3.375rem;
     --col-hale: 3.625rem;
     --col-health: 4.5rem;
-    /* Keeps "Violent & road deaths per 100k" to three lines, like the other headers. */
-    --col-deaths: 6rem;
+    --col-homicides: 5.625rem;
     --col-freedom: 4.625rem;
     --col-gni: 5.125rem;
   }
@@ -1969,7 +1968,7 @@ a {
 .leaderboard-table thead th[data-metric="le"] { width: var(--col-le); }
 .leaderboard-table thead th[data-metric="hale"] { width: var(--col-hale); }
 .leaderboard-table thead th[data-metric="health"] { width: var(--col-health); }
-.leaderboard-table thead th[data-metric="deaths"] { width: var(--col-deaths); }
+.leaderboard-table thead th[data-metric="homicides"] { width: var(--col-homicides); }
 .leaderboard-table thead th[data-metric="freedom"] { width: var(--col-freedom); }
 .leaderboard-table thead th[data-metric="gni"] { width: var(--col-gni); }
 

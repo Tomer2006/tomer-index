@@ -1,10 +1,11 @@
 /** Shared HDI-style math + merging (used by the app and `scripts/build-data.mjs`). */
 
 /**
- * Safety deaths (homicide, war and road crashes) per 100,000 people a year that halve the
- * safety pillar: none scores 1, 100 (1 in 1,000 people) scores ½, and no number scores 0.
+ * Intentional homicides per 100,000 people a year that halve the safety pillar: none
+ * scores 1, 100 (1 in 1,000 people) scores ½, and no number scores 0. War and road deaths
+ * are published alongside for context but not scored.
  */
-const SAFETY_DEATHS_HALF = 100;
+const HOMICIDES_HALF = 100;
 
 /**
  * Life expectancy and HALE score 0 at 20 years and 1 at 85 years (UNDP's goalposts).
@@ -70,17 +71,12 @@ export function combinedHealthLei(lifeExpectancyYears, haleYears) {
   );
 }
 
-/** Safety deaths per 100,000: homicides, war deaths and road deaths. */
-export function safetyDeathsPer100k(homicides, war, road) {
-  return Number(homicides) + Number(war) + Number(road);
-}
-
 /**
- * Safety index from safety deaths per 100,000 (higher = safer): 1 with no deaths, ½ at
+ * Safety index from intentional homicides per 100,000 (higher = safer): 1 with none, ½ at
  * 100, ⅓ at 200, and closer to 0 with every death, so deaths never stop counting.
  */
-export function safetyIndexFromDeathsPer100k(deathsPer100k) {
-  return 1 / (1 + Number(deathsPer100k) / SAFETY_DEATHS_HALF);
+export function safetyIndexFromHomicidesPer100k(homicidesPer100k) {
+  return 1 / (1 + Number(homicidesPer100k) / HOMICIDES_HALF);
 }
 
 /** Abundance pillar from GNI per capita (PPP) on HDI's log scale, without its caps. */
@@ -100,13 +96,13 @@ export function freedomIndexFromScore(score) {
 export function customIndexAbundanceSafetyHealthFreedomFull(
   lifeExpectancy,
   gniPerCapita,
-  deathsPer100k,
+  homicidesPer100k,
   healthyLifeExpectancy,
   freedomScore
 ) {
   return customIndexFromPillarsFull({
     abundance: incomeIndexFromGni(gniPerCapita),
-    safety: safetyIndexFromDeathsPer100k(deathsPer100k),
+    safety: safetyIndexFromHomicidesPer100k(homicidesPer100k),
     health: combinedHealthLei(lifeExpectancy, healthyLifeExpectancy),
     freedom: freedomIndexFromScore(freedomScore),
   });
@@ -118,7 +114,7 @@ export function customIndexAbundanceSafetyHealthFreedomFull(
 export function customIndexAbundanceSafetyHealthFreedom(
   lifeExpectancy,
   gniPerCapita,
-  deathsPer100k,
+  homicidesPer100k,
   healthyLifeExpectancy,
   freedomScore
 ) {
@@ -127,7 +123,7 @@ export function customIndexAbundanceSafetyHealthFreedom(
       customIndexAbundanceSafetyHealthFreedomFull(
         lifeExpectancy,
         gniPerCapita,
-        deathsPer100k,
+        homicidesPer100k,
         healthyLifeExpectancy,
         freedomScore
       ) * 1000
@@ -411,7 +407,8 @@ export function adjustedHaleAsOfYear(
 
 /**
  * Each country's latest value of every input, scored together; health = ½ LE + ½ HALE.
- * Every argument maps ISO3 → `{ year, value, name }` (`latestByCountry`).
+ * War and road deaths ride along for context: a row doesn't need them and they don't
+ * change its score. Every argument maps ISO3 → `{ year, value, name }` (`latestByCountry`).
  * @param {{ le: Map, gni: Map, homicide: Map, war: Map, road: Map, hale: Map, freedom: Map }} latest
  */
 export function mergeRows({ le: leMap, gni: gniMap, homicide, war, road, hale: haleMap, freedom: freedomMap }) {
@@ -423,12 +420,11 @@ export function mergeRows({ le: leMap, gni: gniMap, homicide, war, road, hale: h
     const roadDeaths = road.get(iso);
     const hale = haleMap.get(iso);
     const freedom = freedomMap.get(iso);
-    if (!gni || !hom || !warDeaths || !roadDeaths || !hale || !freedom) continue;
-    const deaths = safetyDeathsPer100k(hom.value, warDeaths.value, roadDeaths.value);
+    if (!gni || !hom || !hale || !freedom) continue;
     const score = customIndexAbundanceSafetyHealthFreedom(
       le.value,
       gni.value,
-      deaths,
+      hom.value,
       hale.value,
       freedom.value
     );
@@ -446,11 +442,8 @@ export function mergeRows({ le: leMap, gni: gniMap, homicide, war, road, hale: h
       ...(gni.incomeBaseYear && { incomeEstimated: true }),
       homicideYear: hom.year,
       homicidesPer100k: hom.value,
-      warYear: warDeaths.year,
-      warDeathsPer100k: warDeaths.value,
-      roadYear: roadDeaths.year,
-      roadDeathsPer100k: roadDeaths.value,
-      safetyDeathsPer100k: deaths,
+      ...(warDeaths && { warYear: warDeaths.year, warDeathsPer100k: warDeaths.value }),
+      ...(roadDeaths && { roadYear: roadDeaths.year, roadDeathsPer100k: roadDeaths.value }),
       freedomYear: freedom.year,
       freedom: freedom.value,
       customIndex: score,

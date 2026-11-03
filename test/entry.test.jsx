@@ -99,7 +99,18 @@ test("country page leads with the Tomer index, its country rank and onward links
   expect(href("Compare with others")).toBe("/compare?picks=JPN");
   expect(href("View on map")).toBe("/map?iso=JPN");
   expect(href(/leaderboard/)).toBe("/");
-  expect(await screen.findAllByRole("img")).toHaveLength(9);
+  expect(await screen.findAllByRole("img")).toHaveLength(8);
+  // War and road deaths are shown, in the stats and as charts, but marked as context.
+  const stat = (key) =>
+    main.querySelector(`.entry-stat[data-metric="${key}"] dt`).textContent;
+  expect(stat("homicides")).toBe("Intentional homicides per 100,000 people");
+  expect(stat("war")).toBe("War deaths per 100,000 people · not in the index");
+  expect(stat("road")).toBe("Road deaths per 100,000 people · not in the index");
+  expect(
+    [...main.querySelectorAll(".metric-title")]
+      .filter((title) => title.textContent.includes("Not in the index"))
+      .map((title) => title.firstChild.textContent),
+  ).toEqual(["War deaths per 100k", "Road deaths per 100k"]);
   expect(loadSeriesData).not.toHaveBeenCalled();
 });
 

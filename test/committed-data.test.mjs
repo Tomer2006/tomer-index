@@ -9,8 +9,7 @@ import {
   customIndexFromPillarsFull,
   freedomIndexFromScore,
   incomeIndexFromGni,
-  safetyDeathsPer100k,
-  safetyIndexFromDeathsPer100k,
+  safetyIndexFromHomicidesPer100k,
 } from "../src/hdi-core.js";
 import { YEAR_MIN, YEAR_MAX } from "../src/site-years.js";
 
@@ -104,15 +103,9 @@ test("stored pillars and Tomer index recompute from the stored inputs", () => {
     for (const point of entry.points) {
       if (!Number.isFinite(point.customIndex)) continue;
       const where = `${iso}/${point.year}`;
-      const deaths = safetyDeathsPer100k(
-        point.homicidesPer100k,
-        point.warDeathsPer100k,
-        point.roadDeathsPer100k,
-      );
-      assert.equal(point.safetyDeathsPer100k, rounded(deaths, 3), `${where} deaths`);
       const pillars = {
         abundance: rounded(incomeIndexFromGni(point.gni), 6),
-        safety: rounded(safetyIndexFromDeathsPer100k(point.safetyDeathsPer100k), 6),
+        safety: rounded(safetyIndexFromHomicidesPer100k(point.homicidesPer100k), 6),
         health: rounded(combinedHealthLei(point.le, point.hale), 6),
         freedom: rounded(freedomIndexFromScore(point.freedom), 6),
       };

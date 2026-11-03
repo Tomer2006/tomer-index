@@ -67,11 +67,11 @@ const FIELDS = [
     </>,
   ],
   [
-    "homicidesPer100k, warDeathsPer100k, roadDeathsPer100k, safetyDeathsPer100k",
+    "homicidesPer100k, warDeathsPer100k, roadDeathsPer100k",
     <>
-      Deaths per 100,000 people from intentional homicide, war (counted for the
-      country whose people died, 0 in years without any), and road crashes, and
-      their total, which the safety pillar scores.
+      Deaths per 100,000 people from intentional homicide, which the safety
+      pillar scores, and, for context only, war (counted for the country whose
+      people died, 0 in years without any) and road crashes.
     </>,
   ],
   ["freedom", <>Personal freedom score, 0–100.</>],

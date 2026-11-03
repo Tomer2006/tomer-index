@@ -12,6 +12,7 @@ import {
 import HistoryChart, { SERIES_COLORS } from "./history-chart";
 import {
   columns,
+  contextColumns,
   entryHref,
   kindLabel,
   matchesSearch,
@@ -520,7 +521,7 @@ export default function Compare() {
                               </td>
                             ))}
                           </tr>
-                          {columns.map((column) => {
+                          {[...columns, ...contextColumns].map((column) => {
                             const values = shown
                               .map((row) => column.value(row))
                               .filter(Number.isFinite);
@@ -542,6 +543,11 @@ export default function Compare() {
                               >
                                 <th scope="row" title={column.long}>
                                   {column.label}
+                                  {column.context && (
+                                    <span className="compare-row-note">
+                                      Not in the index
+                                    </span>
+                                  )}
                                   {column.lower && (
                                     <span className="compare-row-note">
                                       Lower is better

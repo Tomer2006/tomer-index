@@ -31,8 +31,7 @@ import {
   customIndexFromPillarsFull,
   combinedHealthLei,
   incomeIndexFromGni,
-  safetyDeathsPer100k,
-  safetyIndexFromDeathsPer100k,
+  safetyIndexFromHomicidesPer100k,
   freedomIndexFromScore,
   warDeathRows,
   INDEX_WEIGHTS,
@@ -828,8 +827,8 @@ export function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
         hale: 0,
         gni: 0,
         hom: 0,
-        war: 0,
-        road: 0,
+        war: weightedSum(),
+        road: weightedSum(),
         freedom: 0,
         members: 0,
         gniMembers: 0,
@@ -842,8 +841,8 @@ export function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
     bucket.hale += row.hale * pop;
     bucket.gni += row.gni * pop;
     bucket.hom += row.homicidesPer100k * pop;
-    bucket.war += row.warDeathsPer100k * pop;
-    bucket.road += row.roadDeathsPer100k * pop;
+    bucket.war.add(row.warDeathsPer100k, pop);
+    bucket.road.add(row.roadDeathsPer100k, pop);
     bucket.freedom += row.freedom * pop;
     bucket.members += 1;
     if (row.incomeSource === "GDP") bucket.gdpMembers += 1;
@@ -864,9 +863,8 @@ export function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
     const hale = bucket.hale / bucket.pop;
     const gni = bucket.gni / bucket.pop;
     const homicidesPer100k = bucket.hom / bucket.pop;
-    const warDeathsPer100k = bucket.war / bucket.pop;
-    const roadDeathsPer100k = bucket.road / bucket.pop;
-    const deaths = safetyDeathsPer100k(homicidesPer100k, warDeathsPer100k, roadDeathsPer100k);
+    const warDeathsPer100k = bucket.war.mean();
+    const roadDeathsPer100k = bucket.road.mean();
     const freedom = bucket.freedom / bucket.pop;
     out.push({
       iso: bucket.iso,
@@ -885,16 +883,13 @@ export function buildDerivedGroupRows(countryRows, popMap, countryMeta) {
             : "GNI",
       homicideYear: "mixed",
       homicidesPer100k,
-      warYear: "mixed",
-      warDeathsPer100k,
-      roadYear: "mixed",
-      roadDeathsPer100k,
-      safetyDeathsPer100k: deaths,
+      ...(Number.isFinite(warDeathsPer100k) && { warYear: "mixed", warDeathsPer100k }),
+      ...(Number.isFinite(roadDeathsPer100k) && { roadYear: "mixed", roadDeathsPer100k }),
       freedomYear: "mixed",
       freedom,
       derivedKind: bucket.kind,
       memberCount: bucket.members,
-      customIndex: customIndexAbundanceSafetyHealthFreedom(le, gni, deaths, hale, freedom),
+      customIndex: customIndexAbundanceSafetyHealthFreedom(le, gni, homicidesPer100k, hale, freedom),
     });
   }
   out.sort((a, b) => b.customIndex - a.customIndex);
@@ -928,18 +923,30 @@ function annualRange(yearMin, yearMax) {
 }
 
 /**
- * Stores the three safety death rates on a point (rounded as published) and, once all
- * three are known, their total, which is what the safety pillar scores.
+ * Stores the three death rates on a point, rounded as published. Only homicides feed the
+ * safety pillar; war and road deaths are context.
  */
-export function setSafetyDeaths(point, homicides, war, road) {
+export function setDeathRates(point, homicides, war, road) {
   if (Number.isFinite(homicides)) point.homicidesPer100k = rounded(homicides, 3);
   if (Number.isFinite(war)) point.warDeathsPer100k = rounded(war, 3);
   if (Number.isFinite(road)) point.roadDeathsPer100k = rounded(road, 3);
-  if ([homicides, war, road].every(Number.isFinite))
-    point.safetyDeathsPer100k = rounded(
-      safetyDeathsPer100k(point.homicidesPer100k, point.warDeathsPer100k, point.roadDeathsPer100k),
-      3
-    );
+}
+
+/**
+ * A population-weighted mean over the members that have a value, for the context rates
+ * (war and road deaths) a member can lack and still be scored. NaN when none has one.
+ */
+function weightedSum() {
+  let total = 0;
+  let weight = 0;
+  return {
+    add(value, pop) {
+      if (!Number.isFinite(value)) return;
+      total += value * pop;
+      weight += pop;
+    },
+    mean: () => (weight ? total / weight : NaN),
+  };
 }
 
 function rawPillarValues(point) {
@@ -947,14 +954,14 @@ function rawPillarValues(point) {
     !Number.isFinite(point?.le) ||
     !Number.isFinite(point?.hale) ||
     !Number.isFinite(point?.gni) ||
-    !Number.isFinite(point?.safetyDeathsPer100k) ||
+    !Number.isFinite(point?.homicidesPer100k) ||
     !Number.isFinite(point?.freedom)
   ) {
     return null;
   }
   return {
     abundance: incomeIndexFromGni(point.gni),
-    safety: safetyIndexFromDeathsPer100k(point.safetyDeathsPer100k),
+    safety: safetyIndexFromHomicidesPer100k(point.homicidesPer100k),
     health: combinedHealthLei(point.le, point.hale),
     freedom: freedomIndexFromScore(point.freedom),
   };
@@ -1004,7 +1011,16 @@ export function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMa
     });
 
   const points = years.map((year) => {
-    const totals = { pop: 0, le: 0, hale: 0, gni: 0, hom: 0, war: 0, road: 0, freedom: 0 };
+    const totals = {
+      pop: 0,
+      le: 0,
+      hale: 0,
+      gni: 0,
+      hom: 0,
+      war: weightedSum(),
+      road: weightedSum(),
+      freedom: 0,
+    };
     for (const iso of cohort) {
       const point = pointByIsoYear.get(iso).get(year);
       const pop = point.population;
@@ -1013,8 +1029,8 @@ export function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMa
       totals.hale += point.hale * pop;
       totals.gni += point.gni * pop;
       totals.hom += point.homicidesPer100k * pop;
-      totals.war += point.warDeathsPer100k * pop;
-      totals.road += point.roadDeathsPer100k * pop;
+      totals.war.add(point.warDeathsPer100k, pop);
+      totals.road.add(point.roadDeathsPer100k, pop);
       totals.freedom += point.freedom * pop;
     }
     const point = {
@@ -1023,12 +1039,7 @@ export function buildFixedCohortSeries(entrySeries, countryRows, yearMin, yearMa
       hale: rounded(totals.hale / totals.pop, 2),
       gni: rounded(totals.gni / totals.pop, 2),
     };
-    setSafetyDeaths(
-      point,
-      totals.hom / totals.pop,
-      totals.war / totals.pop,
-      totals.road / totals.pop
-    );
+    setDeathRates(point, totals.hom / totals.pop, totals.war.mean(), totals.road.mean());
     point.freedom = rounded(totals.freedom / totals.pop, 2);
     point.population = Math.round(totals.pop);
     point.n = cohort.length;
@@ -1081,7 +1092,7 @@ export function buildCountrySeries(iso, inputs, haleHistory, yearMin, yearMax) {
       point.incomeSource = gniY.incomeSource;
       if (gniY.incomeBaseYear) point.incomeEstimated = true;
     }
-    setSafetyDeaths(point, homY?.value, warY?.value, roadY?.value);
+    setDeathRates(point, homY?.value, warY?.value, roadY?.value);
     if (homY) point.homicideYear = homY.year;
     if (warY) point.warYear = warY.year;
     if (roadY) point.roadYear = roadY.year;
@@ -1094,7 +1105,7 @@ export function buildCountrySeries(iso, inputs, haleHistory, yearMin, yearMax) {
       point.population = Math.round(pop);
     }
 
-    if (leY && gniY && homY && warY && roadY && freedomY && hale) applyAbsolutePillars(point);
+    if (leY && gniY && homY && freedomY && hale) applyAbsolutePillars(point);
 
     const hasMetric =
       Number.isFinite(point.le) ||
@@ -1123,8 +1134,8 @@ function addWeightedYearBucket(buckets, def, values, pop) {
       hale: 0,
       gni: 0,
       hom: 0,
-      war: 0,
-      road: 0,
+      war: weightedSum(),
+      road: weightedSum(),
       freedom: 0,
       members: 0,
       gniMembers: 0,
@@ -1139,8 +1150,8 @@ function addWeightedYearBucket(buckets, def, values, pop) {
   bucket.hale += values.hale * pop;
   bucket.gni += values.gni * pop;
   bucket.hom += values.hom * pop;
-  bucket.war += values.war * pop;
-  bucket.road += values.road * pop;
+  bucket.war.add(values.war, pop);
+  bucket.road.add(values.road, pop);
   bucket.freedom += values.freedom * pop;
   bucket.members += 1;
   if (values.incomeSource === "GDP") bucket.gdpMembers += 1;
@@ -1172,7 +1183,7 @@ export function buildDerivedGroupSeries(inputs, haleHistory, countryMeta, yearMi
         yearMin
       );
       const pop = popY?.value;
-      if (!leY || !gniY || !homY || !warY || !roadY || !freedomY || !hale) continue;
+      if (!leY || !gniY || !homY || !freedomY || !hale) continue;
       if (typeof pop !== "number" || !Number.isFinite(pop) || pop <= 0) continue;
 
       const values = {
@@ -1183,8 +1194,8 @@ export function buildDerivedGroupSeries(inputs, haleHistory, countryMeta, yearMi
         incomeSource: gniY.incomeSource,
         incomeEstimated: Boolean(gniY.incomeBaseYear),
         hom: homY.value,
-        war: warY.value,
-        road: roadY.value,
+        war: warY?.value,
+        road: roadY?.value,
         freedom: freedomY.value,
       };
       for (const def of groupDefsForCountry(meta)) {
@@ -1219,12 +1230,7 @@ export function buildDerivedGroupSeries(inputs, haleHistory, countryMeta, yearMi
               : "GNI",
         incomeEstimated: bucket.estimatedIncomeMembers > 0 || undefined,
       };
-      setSafetyDeaths(
-        point,
-        bucket.hom / bucket.pop,
-        bucket.war / bucket.pop,
-        bucket.road / bucket.pop
-      );
+      setDeathRates(point, bucket.hom / bucket.pop, bucket.war.mean(), bucket.road.mean());
       point.freedom = rounded(freedom, 2);
       point.population = Math.round(bucket.pop);
       point.n = bucket.members;
@@ -1276,7 +1282,6 @@ export function rowsForDisplayYear(rows, entrySeries, displayYear) {
         warYear: point.warYear ?? row.warYear,
         roadDeathsPer100k: point.roadDeathsPer100k,
         roadYear: point.roadYear ?? row.roadYear,
-        safetyDeathsPer100k: point.safetyDeathsPer100k,
         freedom: point.freedom,
         freedomYear: point.freedomYear ?? row.freedomYear,
         abundanceIndex: point.abundanceIndex,
@@ -1507,7 +1512,7 @@ async function main() {
     if (points.length) {
       entrySeries[row.iso] = {
         definition:
-          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, extended by GDP per capita growth), safety (intentional homicides and road traffic deaths per 100k), life expectancy, and population; UCDP supplies war deaths, counted for the country whose people died (years without any count as 0); WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then (incomeEstimated); plain GDP is used only before a country's first GNI year. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
+          `Country annual timeline for ${SERIES_RANGE_LABEL}. World Bank supplies abundance (GNI per capita PPP, extended by GDP per capita growth), safety (intentional homicides per 100k), road traffic deaths per 100k (context only, not scored), life expectancy, and population; UCDP supplies war deaths (context only, not scored), counted for the country whose people died (years without any count as 0); WHO GHO supplies HALE; the Cato/Fraser Human Freedom Index supplies Personal Freedom. Exact annual HALE is preferred; missing HALE years preserve the latest reported life-expectancy-minus-HALE gap, keeping its sign, and apply it to current life expectancy. Missing GNI years move the latest GNI by the change in GDP per capita since then (incomeEstimated); plain GDP is used only before a country's first GNI year. Other inputs use exact same-year values when present, otherwise the latest prior value from ${SERIES_YEAR_MIN} onward. The Tomer index is stored only when all four pillars are available as of that year. Future observations are not pulled backward.`,
         points,
       };
     }
@@ -1605,7 +1610,7 @@ async function main() {
     healthPillar:
       `LEI = ½·LEI(life expectancy) + ½·LEI(HALE); both score 0 at 20 years and 1 at 85 years, and keep rising past 85. A World Bank life expectancy more than ${LE_BELOW_HALE_MAX} years below the latest WHO HALE on or before its year is treated as a source error and dropped (sourceRefresh.lifeExpectancyCheck lists them); that year uses the latest earlier value.`,
     safetyNote:
-      "Safety scores deaths per 100k from intentional homicide, war (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population), and road crashes, as 1 / (1 + deaths / 100): 0 scores 1, 100 scores 0.5, 200 scores 1/3, and no number scores 0. Country-years with no recorded war deaths count as 0. Suicide, other accidents, and non-fatal crime are not included.",
+      "Safety scores intentional homicides per 100k as 1 / (1 + homicides / 100): 0 scores 1, 100 scores 0.5, 200 scores 1/3, and no number scores 0. War deaths (UCDP state-based and one-sided violence, counted for the country whose people died and divided by its population; years with none recorded count as 0) and road deaths per 100k are published alongside for context but are not part of the index, and a country-year doesn't need them to be scored. Suicide, other accidents, and non-fatal crime are not included.",
     freedomNote:
       "Freedom averages the Personal Freedom categories for rule of law, movement, religion, association, expression, and relationships from the Cato/Fraser Human Freedom Index 2025, then rescales the result from 0-10 to 0-100. The Security and Safety category is excluded to keep the pillar distinct from Safety.",
     pillarNormalization:

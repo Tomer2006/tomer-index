@@ -166,7 +166,7 @@ test("presets replace the selection, Clear empties it, and the chart count follo
   expect(screen.getByRole("group", { name: /Presets/ }).textContent).toContain(
     "replace the selection",
   );
-  expect(await screen.findAllByRole("img")).toHaveLength(9);
+  expect(await screen.findAllByRole("img")).toHaveLength(8);
   expect(screen.getByRole("slider", { name: "Year" }).value).toBe("2010");
   await user.click(screen.getByRole("button", { name: "Nordics" }));
   expect(picksParam()).toBe("NOR,SWE,FIN,DNK,ISL");

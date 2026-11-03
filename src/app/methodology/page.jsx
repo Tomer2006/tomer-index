@@ -39,7 +39,7 @@ const points = (key) => String(Math.round(INDEX_WEIGHTS[key] * 100));
 /** What halving a pillar costs on the site, in points. */
 const halvingCost = (key) => Math.round(INDEX_WEIGHTS[key] * Math.LN2 * 100);
 
-/** A future country with no violent or road deaths and full freedom, for the "no ceiling" example. */
+/** A future country with no homicides and full freedom, for the "no ceiling" example. */
 const futureScore = (lifeExpectancy, hale, income) =>
   Math.round(
     100 *
@@ -62,8 +62,8 @@ const PILLARS = [
   {
     key: "safety",
     name: "Safety",
-    input: "Deaths per 100k from homicide, war and road crashes",
-    goalposts: "∞ → 0 deaths (½ at 100)",
+    input: "Intentional homicides per 100k",
+    goalposts: "∞ → 0 homicides (½ at 100)",
   },
   {
     key: "freedom",
@@ -267,8 +267,8 @@ export default function Page() {
                 <strong>Recent years lean on older data.</strong> Sources
                 publish with a lag, so the {YEAR_MAX} scores use life expectancy
                 from {facts.leYear} at the latest, freedom scores from{" "}
-                {facts.freedomYear}, road deaths from {facts.roadYear}, and,
-                for a few countries, homicide rates from as early as{" "}
+                {facts.freedomYear}, and, for a few countries, homicide rates
+                from as early as{" "}
                 {facts.oldestHomicideYear}. Every value on the site shows its
                 source year.
               </li>
@@ -290,23 +290,16 @@ export default function Page() {
                 can remain in the year its GNI starts.
               </li>
               <li>
-                <strong>Road deaths stop in {facts.roadYear}.</strong> The
-                World Bank’s road death rates, WHO estimates, end in{" "}
-                {facts.roadYear}, so later years use each country’s{" "}
-                {facts.roadYear} rate. For countries that don’t register every
-                death, the rate is modeled rather than counted.
+                <strong>War and road deaths are context, not score.</strong>{" "}
+                Country and compare pages show them next to homicides, but the
+                index doesn’t count them: a country at war or with deadly roads
+                scores the same as one without (see{" "}
+                <a href="#pillars">Safety</a>).
               </li>
               <li>
-                <strong>War deaths are split by who died.</strong> UCDP records
-                a government’s soldiers separately, but not which country an
-                armed group’s fighters came from, so they count where they
-                died. Its counts are conservative: deaths it can’t confirm
-                aren’t included.
-              </li>
-              <li>
-                Safety leaves out suicide, other accidents such as falls,
-                drowning and fires, natural disasters, and crime that doesn’t
-                kill.
+                Safety counts only intentional homicides. It leaves out war and
+                road deaths, suicide, other accidents such as falls, drowning
+                and fires, natural disasters, and crime that doesn’t kill.
               </li>
               <li>
                 Freedom is a custom recombination of Human Freedom Index
@@ -385,24 +378,22 @@ export default function Page() {
             </p>
 
             <PillarHeading pillar="safety">
-              Safety: deaths from violence and road crashes
+              Safety: intentional homicides
             </PillarHeading>
             <p>
-              Safety adds up three kinds of death per 100,000 people a year:
-              intentional homicides, war deaths, and road deaths. A death counts
-              the same whatever its cause. No deaths scores 1, 100 per 100,000
-              (one person in a thousand a year) scores ½, 200 scores ⅓, and the
-              score gets closer to 0 with every death without reaching it, so
-              deaths never stop counting. Since {YEAR_MIN}, only countries at
-              war and El Salvador, at the height of its gang violence, have
-              passed 100.
+              Safety scores intentional homicides per 100,000 people a year. No
+              homicides scores 1, 100 per 100,000 (one person in a thousand a
+              year) scores ½, 200 scores ⅓, and the score gets closer to 0 with
+              every death without reaching it, so homicides never stop
+              counting.
             </p>
-            <Formula
-              lines={[
-                "Deaths = homicides + war deaths + road deaths   (per 100,000)",
-                "Safety = 1 / (1 + deaths / 100)",
-              ]}
-            />
+            <Formula lines={["Safety = 1 / (1 + homicides / 100)"]} />
+            <p>
+              <strong>War and road deaths are shown for context only.</strong>{" "}
+              Country and compare pages chart them beside homicides, marked{" "}
+              <strong>Not in the index</strong>, but they don’t change any
+              score, and a country-year doesn’t need them to be scored.
+            </p>
             <p>
               War deaths come from the Uppsala Conflict Data Program’s event
               data (UCDP GED, through {facts.warYear}): people killed in fighting
@@ -415,9 +406,10 @@ export default function Page() {
               the index doesn’t score, not Israel. Fighting between gangs or
               militias is left out, as
               homicide figures already include most of it, and years without
-              recorded deaths count as 0. Road deaths are WHO estimates and end
-              in {facts.roadYear}; later years use that year’s rate.
-              Crime that doesn’t kill isn’t used, because property crime,
+              recorded deaths count as 0. UCDP’s counts are conservative:
+              deaths it can’t confirm aren’t included. Road deaths are WHO
+              estimates and end in {facts.roadYear}; later years use that
+              year’s rate. Crime that doesn’t kill isn’t used, because property crime,
               assault, and sexual-violence statistics aren’t comparable across
               countries: definitions, reporting culture, and survey methods
               differ too much.
@@ -506,7 +498,7 @@ export default function Page() {
             <p>
               <strong>The index has no floor.</strong> Every halving costs the
               same however low a pillar already is, so the index keeps falling
-              without limit. Safety never reaches 0, so the 101st death per
+              without limit. Safety never reaches 0, so the 101st homicide per
               100,000 counts, and so does the 1,000th. A pillar at its lower
               goalpost (20 years of life, $100 a person, no freedom) would be
               infinitely far down.
@@ -522,11 +514,11 @@ export default function Page() {
             </p>
             <p>
               <strong>Nor does it have a ceiling.</strong> Safety and freedom
-              stop at 1: a country can’t have fewer than zero violent and road
-              deaths or more than a perfect freedom score. Health and abundance have no upper
+              stop at 1: a country can’t have fewer than zero homicides or more
+              than a perfect freedom score. Health and abundance have no upper
               limit, so a country that meets every goalpost scores 100 and one
-              that goes further scores more. With no violent or road deaths
-              and full freedom, life expectancy of 100 years, HALE of 90, and $150,000 a
+              that goes further scores more. With no homicides and full
+              freedom, life expectancy of 100 years, HALE of 90, and $150,000 a
               person would score about {futureScore(100, 90, 150000)}; 150
               years, HALE of 140, and $1,000,000 a person would score about{" "}
               {futureScore(150, 140, 1e6)}.
@@ -551,9 +543,10 @@ export default function Page() {
               data point and shown next to each value on the site.
             </p>
             <p>
-              A country gets a score for a year only when all seven inputs
-              (life expectancy, HALE, income, homicide, war and road death
-              rates, and freedom score) are available as of that year.
+              A country gets a score for a year only when all five inputs
+              (life expectancy, HALE, income, homicide rate, and freedom score)
+              are available as of that year. War and road deaths are shown
+              when available but aren’t needed.
             </p>
             <p>
               HALE is the exception to flat carry-forward: years after WHO’s
@@ -631,14 +624,14 @@ export default function Page() {
                 originally from UNODC.
               </li>
               <li>
-                <strong>War deaths</strong> (state-based and one-sided
-                violence, by the country whose people died, divided by its
-                population): Uppsala Conflict Data Program Georeferenced Event
+                <strong>War deaths</strong>, context only (state-based and
+                one-sided violence, by the country whose people died, divided
+                by its population): Uppsala Conflict Data Program Georeferenced Event
                 Dataset (UCDP GED) 26.1.
               </li>
               <li>
-                <strong>Road deaths</strong> (road traffic deaths per 100,000
-                people): World Bank <code>SH.STA.TRAF.P5</code>, originally WHO
+                <strong>Road deaths</strong>, context only (road traffic deaths
+                per 100,000 people): World Bank <code>SH.STA.TRAF.P5</code>, originally WHO
                 estimates.
               </li>
               <li>

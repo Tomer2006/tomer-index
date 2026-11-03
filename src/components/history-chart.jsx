@@ -208,6 +208,9 @@ export default function HistoryChart({
       <div className="metric-card-head">
         <h2 className="metric-title">
           {metric.label}
+          {metric.context && (
+            <span className="metric-direction">Not in the index</span>
+          )}
           {metric.lowerIsBetter && (
             <span className="metric-direction">↓ Lower is better</span>
           )}

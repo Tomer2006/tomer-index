@@ -197,14 +197,14 @@ test("carry-forward uses the latest earlier observation and never a later one", 
   assert.equal(byPointYear.get(2001).hale, undefined, "HALE from 2002 must not reach 2001");
   assert.ok(Number.isFinite(byPointYear.get(2002).customIndex));
   assert.equal(byPointYear.get(2005).roadYear, 2003);
-  assert.equal(byPointYear.get(2005).safetyDeathsPer100k, 6);
+  assert.equal(byPointYear.get(2005).roadDeathsPer100k, 4);
   const sourceKeys = ["leYear", "haleYear", "gniYear", "homicideYear", "warYear", "roadYear", "freedomYear"];
   for (const point of points) {
     for (const key of sourceKeys) {
       if (point[key] != null) assert.ok(point[key] <= point.year, `${point.year} ${key}`);
     }
   }
-  const inputKeys = ["le", "hale", "gni", "homicidesPer100k", "warDeathsPer100k", "roadDeathsPer100k", "freedom"];
+  const inputKeys = ["le", "hale", "gni", "homicidesPer100k", "freedom"];
   for (const point of points.filter((p) => Number.isFinite(p.customIndex))) {
     for (const key of inputKeys) {
       assert.ok(Number.isFinite(point[key]), `${point.year} index without ${key}`);
@@ -235,37 +235,37 @@ const META = {
   },
 };
 
-test("group series are population-weighted and skip members missing any input", () => {
+test("group series are population-weighted and skip members missing a scored input", () => {
   const countryMeta = new Map(Object.entries(META));
   const series = buildDerivedGroupSeries(
     ...inputs([
       { iso: "AAA", years: [2020], le: 60, hale: 50, gni: 10000, hom: 4, war: 40, road: 20, freedom: 60, pop: 1e6 },
       { iso: "BBB", years: [2020], le: 80, hale: 70, gni: 30000, hom: 0, road: 4, freedom: 100, pop: 3e6 },
-      // CCC lacks freedom and DDD road deaths, so neither counts towards any group.
+      // CCC lacks freedom, so it counts towards no group. DDD lacks road deaths, which
+      // aren't scored: it counts everywhere but the road death average.
       { iso: "CCC", years: [2020], le: 40, hale: 30, gni: 1000, hom: 40, pop: 9e6 },
-      { iso: "DDD", years: [2020], le: 40, hale: 30, gni: 1000, hom: 40, road: null, freedom: 50, pop: 9e6 },
+      { iso: "DDD", years: [2020], le: 40, hale: 30, gni: 1000, hom: 40, road: null, freedom: 50, pop: 4e6 },
     ]),
     countryMeta,
     2020,
     2020
   );
   const [world] = series.get("WLD").points;
-  assert.equal(world.n, 2);
-  assert.equal(world.population, 4e6);
-  assert.equal(world.le, 75);
-  assert.equal(world.hale, 65);
-  assert.equal(world.gni, 25000);
-  assert.equal(world.homicidesPer100k, 1);
-  assert.equal(world.warDeathsPer100k, 10);
+  assert.equal(world.n, 3);
+  assert.equal(world.population, 8e6);
+  assert.equal(world.le, 57.5);
+  assert.equal(world.hale, 47.5);
+  assert.equal(world.gni, 13000);
+  assert.equal(world.homicidesPer100k, 20.5);
+  assert.equal(world.warDeathsPer100k, 5);
   assert.equal(world.roadDeathsPer100k, 8);
-  assert.equal(world.safetyDeathsPer100k, 19);
-  assert.equal(world.freedom, 90);
+  assert.equal(world.freedom, 70);
   assert.ok(Number.isFinite(world.customIndex));
-  assert.equal(series.get("ECS").points[0].n, 2);
+  assert.equal(series.get("ECS").points[0].n, 3);
   assert.equal(series.get("HIC").points[0].n, 1);
-  assert.equal(series.get("LMC").points[0].le, 80);
-  assert.equal(series.get("IDA_TOTAL").points[0].n, 1);
-  assert.equal(series.get("LMY").points[0].n, 1);
+  assert.equal(series.get("LMC").points[0].le, 57.14);
+  assert.equal(series.get("IDA_TOTAL").points[0].n, 2);
+  assert.equal(series.get("LMY").points[0].n, 2);
   assert.ok(!series.has("LNX"), "LNX is not a group");
 });
 

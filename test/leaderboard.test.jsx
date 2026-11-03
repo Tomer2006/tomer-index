@@ -168,7 +168,7 @@ test("phones get compact, fully tappable cards instead of the table", async () =
     "/entry/CHE",
   );
   expect(cards[0].querySelector(".leaderboard-card-pillars").textContent).toBe(
-    "Health 89 · Safety 97 · Freedom 98 · Abundance 101",
+    "Health 89 · Safety 99 · Freedom 98 · Abundance 101",
   );
   const world = within(document.body)
     .getByRole("link", { name: "World" })
@@ -193,7 +193,7 @@ test("the prerendered snapshot's rows and cards are the live view's first 25, ma
   expect(snapshotCards).toHaveLength(25);
   expect(
     [...snapshot.querySelectorAll(".leaderboard-table thead th")].map((th) => th.textContent),
-  ).toEqual(["Rank", "Place", "Tomer index↓", "Life exp.", "HALE", "Health score", "Violent & road deaths per 100k", "Freedom", "Income per person"]);
+  ).toEqual(["Rank", "Place", "Tomer index↓", "Life exp.", "HALE", "Health score", "Homicides per 100k", "Freedom", "Income per person"]);
 
   const table = render(<Leaderboard />);
   await screen.findByRole("table");

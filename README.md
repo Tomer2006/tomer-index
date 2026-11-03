@@ -45,15 +45,14 @@ Raw observations → fixed goalpost normalization → log of the weighted geomet
 | Pillar | Weight | Input | Fixed normalization |
 | --- | ---: | --- | --- |
 | **Health** | 40% | Life expectancy + healthy life expectancy (HALE) | Mean of two life-expectancy indices, each scoring 0 at 20 years and 1 at 85, with no cap above 85 |
-| **Safety** | 30% | Deaths per 100k from intentional homicide, war (counted for the country whose people died) and road crashes | 1 / (1 + deaths / 100): 0 deaths scores 1, 100 scores ½, never 0 |
+| **Safety** | 30% | Intentional homicides per 100k (war and road deaths are shown for context, not scored) | 1 / (1 + homicides / 100): none scores 1, 100 scores ½, never 0 |
 | **Freedom** | 20% | Personal freedom: HFI Personal Freedom categories, excluding Security and Safety | Rescaled from 0–100 to 0–1 |
 | **Abundance** | 10% | Income per person (PPP $): GNI per capita, extended by GDP per capita growth where GNI isn't published | Log scale scoring 0 at $100 and 1 at $75,000, with no cap above $75,000 |
 
 ```text
 LEI(years) = (years − 20) / (85 − 20)
 Health    = ½·LEI(life expectancy) + ½·LEI(HALE)
-Deaths    = homicides + war deaths + road deaths (per 100,000)
-Safety    = 1 / (1 + deaths / 100)
+Safety    = 1 / (1 + homicides per 100,000 / 100)
 Freedom   = personal freedom score / 100
 Abundance = ln(income / 100) / ln(75000 / 100)
 
@@ -64,14 +63,13 @@ That is 100 + 100 × ln of the pillars' weighted geometric mean, as shown on the
 site; the data files store it unscaled (÷100).
 
 The scale has no limit either way. A score of 100 means every goalpost is met.
-Safety and freedom stop at 1 (no violent or road deaths, a perfect freedom score),
+Safety and freedom stop at 1 (no homicides, a perfect freedom score),
 but health keeps rising past 85 years and abundance past $75,000, so a country that
 lives longer or earns more scores above 100. Every halving of a pillar costs the
 same points however low it already is (28 for health, 21 safety, 14 freedom, 7
 abundance), so there is no floor either, and a pillar that is already low moves
 the index the most, so strength in one pillar can't make up for weakness in
-another. Safety never reaches 0, so
-deaths never stop counting, and a country at war can score below 0. Read the complete assumptions,
+another. Safety never reaches 0, so homicides never stop counting. Read the complete assumptions,
 data-freshness caveats, and rationale in
 [the methodology](https://tomer-index.netlify.app/methodology)
 ([source](./src/app/methodology/page.jsx)).
@@ -82,16 +80,17 @@ The tracker uses observations from **2000–2025** and stores the actual source 
 beside every metric. For a displayed year, the pipeline uses the latest observation
 available on or before that year; it never pulls future observations backward.
 Sources lag, so recent years lean on older observations: in the 2025 view, life
-expectancy is from 2024, freedom scores from 2023, road deaths from 2019, and HALE is
+expectancy is from 2024, freedom scores from 2023, and HALE is
 estimated from WHO's 2021 values.
 
 Primary sources:
 
 - [World Bank Open Data](https://data.worldbank.org/) — life expectancy, GNI and GDP
   per capita (constant 2021 PPP), intentional homicides (UNODC), road traffic deaths
-  (WHO estimates), population, and country metadata.
+  (WHO estimates, context only), population, and country metadata.
 - [UCDP Georeferenced Event Dataset](https://ucdp.uu.se/downloads/) — war deaths
-  (state-based conflict and one-sided violence), split by the side that died.
+  (state-based conflict and one-sided violence), split by the side that died; context
+  only.
 - [WHO Global Health Observatory](https://www.who.int/data/gho) — healthy life
   expectancy at birth (`WHOSIS_000002`).
 - [Human Freedom Index 2025](https://www.cato.org/human-freedom-index/2025) — rule of
@@ -232,9 +231,11 @@ it changes.
 - Recent years lean on older observations, and HALE after WHO's latest release is
   estimated from life expectancy; the interface shows every source year and labels
   estimates.
-- Safety counts deaths from homicide, war and road crashes only: not suicide, other
-  accidents, natural disasters, or crime that doesn't kill. Road deaths end in 2019 and
-  carry forward, and an armed group's fighters count for the country where they died.
+- Safety counts intentional homicides only: not war or road deaths, suicide, other
+  accidents, natural disasters, or crime that doesn't kill. War and road deaths are
+  shown on country and compare pages for context but don't change any score; road
+  deaths end in 2019 and carry forward, and an armed group's fighters count for the
+  country where they died.
 - Freedom is a custom combination of HFI categories, not the published HFI headline
   Personal Freedom score.
 - Before a country's GNI series starts, income is plain GDP per capita, so a break can

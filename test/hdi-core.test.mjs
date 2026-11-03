@@ -4,8 +4,7 @@ import assert from "node:assert/strict";
 import {
   leiFromYears,
   combinedHealthLei,
-  safetyDeathsPer100k,
-  safetyIndexFromDeathsPer100k,
+  safetyIndexFromHomicidesPer100k,
   incomeIndexFromGni,
   freedomIndexFromScore,
   customIndexAbundanceSafetyHealthFreedom,
@@ -83,13 +82,12 @@ test("combinedHealthLei averages lifespan and healthspan LEIs", () => {
   closeTo(combinedHealthLei(52.5, 52.5), 0.5);
 });
 
-test("safety adds homicide, war and road deaths and scores them 1 / (1 + deaths/100), never 0", () => {
-  assert.equal(safetyDeathsPer100k(0.5, 0, 2.3), 2.8);
-  assert.equal(safetyIndexFromDeathsPer100k(0), 1);
-  assert.equal(safetyIndexFromDeathsPer100k(100), 0.5);
-  closeTo(safetyIndexFromDeathsPer100k(25), 0.8);
-  assert.equal(safetyIndexFromDeathsPer100k(300), 0.25);
-  assert.ok(safetyIndexFromDeathsPer100k(1e6) > 0);
+test("safety scores homicides as 1 / (1 + homicides/100), never 0", () => {
+  assert.equal(safetyIndexFromHomicidesPer100k(0), 1);
+  assert.equal(safetyIndexFromHomicidesPer100k(100), 0.5);
+  closeTo(safetyIndexFromHomicidesPer100k(25), 0.8);
+  assert.equal(safetyIndexFromHomicidesPer100k(300), 0.25);
+  assert.ok(safetyIndexFromHomicidesPer100k(1e6) > 0);
 });
 
 test("war deaths are battle deaths per 100k, 0 in peaceful years up to the source's last year", () => {
@@ -131,10 +129,10 @@ test("index is 1 + ln of the 40/30/20/10 weighted geometric mean", () => {
   const le = 80;
   const hale = 70;
   const gni = 40000;
-  const deaths = 12;
+  const homicides = 12;
   const health = combinedHealthLei(le, hale);
   const income = incomeIndexFromGni(gni);
-  const safety = safetyIndexFromDeathsPer100k(deaths);
+  const safety = safetyIndexFromHomicidesPer100k(homicides);
   const freedom = 0.8;
   const expected =
     1 +
@@ -145,7 +143,7 @@ test("index is 1 + ln of the 40/30/20/10 weighted geometric mean", () => {
         Math.pow(freedom, INDEX_WEIGHTS.freedom)
     );
   assert.equal(Object.values(INDEX_WEIGHTS).reduce((sum, weight) => sum + weight, 0), 1);
-  closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, deaths, hale, 80), expected);
+  closeTo(customIndexAbundanceSafetyHealthFreedomFull(le, gni, homicides, hale, 80), expected);
 });
 
 test("the index passes 1 once health or income goes past its goalpost", () => {
@@ -279,7 +277,7 @@ test("adjustedHaleAsOfYear keeps a negative gap instead of dropping HALE to life
   assert.equal(adjustedHaleAsOfYear(history, "NGA", 2023, lifeExpectancy, 2000).value, 20);
 });
 
-test("mergeRows requires every metric and sorts by index descending", () => {
+test("mergeRows requires every scored input, carries war and road deaths, and sorts by index", () => {
   const le = new Map([
     ["AAA", { year: 2023, value: 84, name: "Alpha" }],
     ["BBB", { year: 2023, value: 60, name: "Beta" }],
@@ -323,11 +321,14 @@ test("mergeRows requires every metric and sorts by index descending", () => {
   assert.ok(merged[0].customIndex > merged[1].customIndex);
   assert.equal(merged[0].haleYear, 2021);
   assert.equal(merged[0].roadYear, 2019);
-  assert.equal(merged[1].safetyDeathsPer100k, 54);
-  // A country without a road death rate isn't scored.
+  assert.equal(merged[1].roadDeathsPer100k, 20);
+  // War and road deaths are context: without them a country is still scored the same.
+  const score = merged[0].customIndex;
   road.delete("AAA");
-  assert.deepEqual(
-    mergeRows({ le, gni, homicide: hom, war, road, hale, freedom }).map((r) => r.iso),
-    ["BBB"]
-  );
+  war.delete("AAA");
+  const [alpha] = mergeRows({ le, gni, homicide: hom, war, road, hale, freedom });
+  assert.equal(alpha.iso, "AAA");
+  assert.equal(alpha.customIndex, score);
+  assert.equal(alpha.roadDeathsPer100k, undefined);
+  assert.equal(alpha.warYear, undefined);
 });
